@@ -1,13 +1,20 @@
 CFLAGS = -std=c99 -Wall
 INCLUDE_DIRS = -Iinclude/
+OUT = server
 
-SUBDIRS = init/
+SUBDIRS = init core
 
-OBJECTS =
+OBJECTS :=
 
-include $(addsuffix makefile.mk, $(SUBDIRS))
+include $(addsuffix /makefile.mk, $(SUBDIRS))
 
-all: server
+all: $(OUT)
 
-server: $(OBJECTS)
-	gcc -o $@ $<
+$(OUT): $(OBJECTS)
+	gcc -o $@ $^
+
+%.o: %.c
+	gcc -c $(CFLAGS) $(INCLUDE_DIRS) -o $@ $^
+
+clean:
+	rm $(OBJECTS)
