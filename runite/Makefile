@@ -1,11 +1,9 @@
-CFLAGS = -std=c99 -Wall
+CFLAGS = -g -std=c99 -Wall
 INCLUDE_DIRS = -Iinclude/
 OUT = librunite.a
 
-SUBDIRS =
-
+SUBDIRS := runite runite/util
 OBJECTS :=
-
 include $(addsuffix /makefile.mk, $(SUBDIRS))
 
 all: $(OUT)

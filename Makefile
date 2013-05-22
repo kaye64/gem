@@ -1,5 +1,5 @@
-CFLAGS = -std=c99 -Wall -Lrunite/
-INCLUDE_DIRS = -Iinclude/
+CFLAGS = -g -std=c99 -Wall -Lrunite/
+INCLUDE_DIRS = -Iinclude/ -Irunite/include/
 OUT = server
 LIBS = -lrunite
 SUBDIRS = init core
@@ -10,8 +10,8 @@ include $(addsuffix /makefile.mk, $(SUBDIRS))
 
 all: $(OUT)
 
-$(OUT): $(OBJECTS) runite/librunite.a
-	gcc $(CFLAGS) $(LIBS) -o $@ $^
+$(OUT): runite/librunite.a $(OBJECTS)
+	gcc $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
 runite/librunite.a:
 	make -C runite/
