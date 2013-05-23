@@ -3,7 +3,12 @@
 
 #include <ev.h>
 
-struct server_io;
+struct server;
+
+struct server_io {
+	ev_io io;
+	struct server* server;
+};
 typedef struct server_io server_io_t;
 
 struct server {
@@ -13,14 +18,11 @@ struct server {
 	int socket_fd;
 	/* libev stuff */
 	struct ev_loop* io_loop;
-	server_io io_accept;
+	server_io_t io_accept;
+	/* misc stuff */
+	int must_free;
 };
 typedef struct server server_t;
-
-struct server_io {
-	ev_io io;
-	server_t* server;
-};
 
 // void* client_accept()
 typedef void*(*client_accept_t)();
@@ -29,9 +31,9 @@ typedef int(*client_handshake_t)(void*);
 // void client_quit(void* attrib);
 typedef void(*client_quit_t)(void*);
 
-server_t* server_create(const char* addr, int port);
+server_t* server_create(server_t* server, const char* addr, int port);
 int server_start(server_t* server);
 void server_stop(server_t* server);
-void server_poll(server_t* server);
+void server_poll(server_t* server, int block);
 
 #endif /* _SERVER_H_ */

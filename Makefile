@@ -1,8 +1,8 @@
 CFLAGS = -g -std=c99 -Wall -Lrunite/
 INCLUDE_DIRS = -Iinclude/ -Irunite/include/
 OUT = server
-LIBS = -lrunite
-SUBDIRS = init core
+LIBS = -lrunite -lev
+SUBDIRS = init core net
 
 OBJECTS :=
 
