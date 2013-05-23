@@ -11,7 +11,7 @@ int strcmp_wrap(void* a, void* b) {
 	return strcmp((const char*)a, (const char*)b);
 }
 
-cache_t* cache_open_dir(const char* directory)
+cache_t* cache_open_dir(cache_t* cache, const char* directory)
 {
 	DIR *dir = opendir(directory);
 	struct dirent *entry;
@@ -45,7 +45,7 @@ cache_t* cache_open_dir(const char* directory)
 		sprintf(index_files[i++], "%s/%s", directory, (char*)index->data);
 	}
 
-	cache_t* cache = cache_open(num_indices, (const char**)index_files, data_file);
+	cache = cache_open(cache, num_indices, (const char**)index_files, data_file);
 
 	for (i = 0; i < num_indices; i++) {
 		free(index_files[i]);
@@ -55,9 +55,14 @@ cache_t* cache_open_dir(const char* directory)
 	return cache;
 }
 
-cache_t* cache_open(int num_indices, const char** indexFiles, const char* dataFile)
+cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, const char* dataFile)
 {
-	cache_t* cache = (cache_t*)malloc(sizeof(cache_t));
+	if (cache == NULL) { // Caller wants us to allocate and manage one
+		cache = (cache_t*)malloc(sizeof(cache_t));
+		cache->must_free = 1;
+	} else {
+		cache->must_free = 0;
+	}
 	cache->num_indices = num_indices;
 
 	/* Read the data file into memory */
@@ -97,6 +102,9 @@ void cache_free(cache_t* cache)
 	}
 	free(cache->indices);
 	free(cache->data);
+	if (cache->must_free) {
+		free(cache);
+	}
 }
 
 uint32_t cache_query_size(cache_t* cache, int index, int file)

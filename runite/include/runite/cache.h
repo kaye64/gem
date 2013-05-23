@@ -24,11 +24,12 @@ struct cache {
 	int num_blocks;
 	cache_index_t** indices;
 	cache_block_t* data;
+	int must_free;
 };
 typedef struct cache cache_t;
 
-cache_t* cache_open_dir(const char* directory);
-cache_t* cache_open(int num_indices, const char** indexFiles, const char* dataFile);
+cache_t* cache_open_dir(cache_t* cache, const char* directory);
+cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, const char* dataFile);
 void cache_free(cache_t* cache);
 
 uint32_t cache_query_size(cache_t* cache, int index, int file);
