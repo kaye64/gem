@@ -2,38 +2,66 @@
 #define _SERVER_H_
 
 #include <ev.h>
+#include <netinet/in.h>
 
+#include <util/io_buffer.h>
+
+#define SERVER_DEFAULT_BUFFER_SIZE 4096 // todo: make cvar
+
+// forward declarations
 struct server;
+struct client;
 
-struct server_io {
-	ev_io io;
+// client_t* client_accept(int fd, struct in_addr addr, struct server* server)
+typedef struct client*(*client_accept_t)(int, struct in_addr, struct server*);
+// int client_handshake(client_t* client)
+typedef int(*client_handshake_t)(struct client*);
+// void client_drop(client_t* client);
+typedef void(*client_drop_t)(struct client*);
+
+struct accept_io {
+	ev_io read_io;
 	struct server* server;
 };
-typedef struct server_io server_io_t;
+typedef struct accept_io accept_io_t;
 
 struct server {
 	/* net stuff */
 	char addr[16];
 	int port;
-	int socket_fd;
+	int fd;
+	int buf_size;
 	/* libev stuff */
 	struct ev_loop* io_loop;
-	server_io_t io_accept;
+	accept_io_t io_accept;
+	/* callbacks */
+	client_accept_t accept_cb;
+	client_handshake_t handshake_cb;
+	client_drop_t drop_cb;
 	/* misc stuff */
 	int must_free;
 };
 typedef struct server server_t;
 
-// void* client_accept()
-typedef void*(*client_accept_t)();
-// int client_handshake(void* attrib)
-typedef int(*client_handshake_t)(void*);
-// void client_quit(void* attrib);
-typedef void(*client_quit_t)(void*);
+struct client {
+	/* net stuff */
+	ev_io io_read;
+	int fd;
+	struct in_addr addr;
+	io_buffer_t read_buffer;
+	io_buffer_t write_buffer;
+	/* misc stuff */
+	server_t* server;
+};
+typedef struct client client_t;
 
 server_t* server_create(server_t* server, const char* addr, int port);
+void server_free(server_t* server);
 int server_start(server_t* server);
 void server_stop(server_t* server);
+client_t* server_client_init(server_t* server, int fd, struct in_addr addr);
+void server_client_drop(server_t* server, client_t* client);
+void server_client_cleanup(server_t* server, client_t* client);
 void server_poll(server_t* server, int block);
 
 #endif /* _SERVER_H_ */

@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix core/,config.o log.o)
+OBJECTS += $(addprefix core/,args.o log.o)
