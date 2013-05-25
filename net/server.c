@@ -137,7 +137,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			return;
 		}
 
-		int buffered = io_buf_write(&client->read_buffer, buffer, read_avail);
+		int buffered = buffer_write(&client->read_buffer, buffer, read_avail);
 		if (buffered != read_avail) {
 			WARN("client_io_avail: buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
@@ -146,7 +146,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 	}
 
 	if (revents & EV_WRITE) { // flush write buffer if necessary
-		size_t write_avail = io_buf_read(&client->write_buffer, buffer, server->buf_size);
+		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
 		int write_caret = 0;
 		while (write_avail > write_caret) {
 			size_t sent = send(client->fd, buffer+write_caret, write_avail, 0);
@@ -179,15 +179,15 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 	client->fd = fd;
 	client->addr = addr;
 	client->server = server;
-	io_buf_create(&client->read_buffer, server->buf_size);
-	io_buf_create(&client->write_buffer, server->buf_size);
+	buffer_create(&client->read_buffer, server->buf_size);
+	buffer_create(&client->write_buffer, server->buf_size);
 	return client;
 }
 
 void server_client_cleanup(server_t* server, client_t* client)
 {
-	io_buf_free(&client->read_buffer);
-	io_buf_free(&client->write_buffer);
+	buffer_free(&client->read_buffer);
+	buffer_free(&client->write_buffer);
 	server->drop_cb(client);
 }
 

@@ -1,14 +1,14 @@
-#include <util/io_buffer.h>
+#include <net/buffer.h>
 
 #include <string.h>
 #include <stdlib.h>
 
 #define min(a, b) ((a) > (b) ? (b) : (a))
 
-io_buffer_t* io_buf_create(io_buffer_t* buffer, size_t size)
+buffer_t* buffer_create(buffer_t* buffer, size_t size)
 {
 	if (buffer == NULL) {
-		buffer = (io_buffer_t*)malloc(sizeof(io_buffer_t));
+		buffer = (buffer_t*)malloc(sizeof(buffer_t));
 		buffer->must_free = 1;
 	} else {
 		buffer->must_free = 0;
@@ -20,7 +20,7 @@ io_buffer_t* io_buf_create(io_buffer_t* buffer, size_t size)
 	return buffer;
 }
 
-void io_buf_free(io_buffer_t* buffer)
+void buffer_free(buffer_t* buffer)
 {
 	free(buffer->buffer);
 	if (buffer->must_free) {
@@ -28,7 +28,7 @@ void io_buf_free(io_buffer_t* buffer)
 	}
 }
 
-size_t io_buf_read_avail(io_buffer_t* buffer)
+size_t buffer_read_avail(buffer_t* buffer)
 {
 	if (buffer->read_ptr > buffer->write_ptr) {
 		return buffer->real_size - (buffer->read_ptr - buffer->write_ptr);
@@ -36,7 +36,7 @@ size_t io_buf_read_avail(io_buffer_t* buffer)
 	return buffer->write_ptr - buffer->read_ptr;
 }
 
-size_t io_buf_write_avail(io_buffer_t* buffer)
+size_t buffer_write_avail(buffer_t* buffer)
 {
 	if (buffer->write_ptr >= buffer->read_ptr) {
 		return buffer->real_size - (buffer->write_ptr - buffer->read_ptr);
@@ -44,9 +44,9 @@ size_t io_buf_write_avail(io_buffer_t* buffer)
 	return buffer->read_ptr - buffer->write_ptr;
 }
 
-size_t io_buf_read(io_buffer_t* buffer, char* buf, size_t len)
+size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
 {
-	size_t read_total = min(len, io_buf_read_avail(buffer));
+	size_t read_total = min(len, buffer_read_avail(buffer));
 	size_t amount_end_of_buffer = buffer->real_size - buffer->read_ptr;
 	size_t amount_read = 0;
 	if (read_total > amount_end_of_buffer) {
@@ -59,9 +59,9 @@ size_t io_buf_read(io_buffer_t* buffer, char* buf, size_t len)
 	return read_total;
 }
 
-size_t io_buf_write(io_buffer_t* buffer, const char* buf, size_t len)
+size_t buffer_write(buffer_t* buffer, const char* buf, size_t len)
 {
-	size_t write_total = min(len, io_buf_write_avail(buffer));
+	size_t write_total = min(len, buffer_write_avail(buffer));
 	size_t amount_end_of_buffer = buffer->real_size - buffer->write_ptr;
 	size_t amount_written = 0;
 	if (write_total > amount_end_of_buffer) {
@@ -74,22 +74,22 @@ size_t io_buf_write(io_buffer_t* buffer, const char* buf, size_t len)
 	return write_total;
 }
 
-void io_buf_pushw(io_buffer_t* buffer)
+void buffer_pushw(buffer_t* buffer)
 {
 	buffer->prev_write_ptr = buffer->write_ptr;
 }
 
-void io_buf_pushr(io_buffer_t* buffer)
+void buffer_pushr(buffer_t* buffer)
 {
 	buffer->prev_read_ptr = buffer->read_ptr;
 }
 
-void io_buf_popw(io_buffer_t* buffer)
+void buffer_popw(buffer_t* buffer)
 {
 	buffer->write_ptr = buffer->prev_write_ptr;
 }
 
-void io_buf_popr(io_buffer_t* buffer)
+void buffer_popr(buffer_t* buffer)
 {
 	buffer->read_ptr = buffer->prev_read_ptr;
 }

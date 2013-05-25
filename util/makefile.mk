@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix util/,stack.o io_buffer.o)
+OBJECTS += $(addprefix util/,stack.o)

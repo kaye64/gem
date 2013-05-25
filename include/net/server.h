@@ -4,7 +4,7 @@
 #include <ev.h>
 #include <netinet/in.h>
 
-#include <util/io_buffer.h>
+#include <net/buffer.h>
 
 #define SERVER_DEFAULT_BUFFER_SIZE 4096 // todo: make cvar
 
@@ -48,8 +48,8 @@ struct client {
 	ev_io io_read;
 	int fd;
 	struct in_addr addr;
-	io_buffer_t read_buffer;
-	io_buffer_t write_buffer;
+	buffer_t read_buffer;
+	buffer_t write_buffer;
 	/* misc stuff */
 	server_t* server;
 };

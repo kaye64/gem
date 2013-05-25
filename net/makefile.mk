@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix net/,server.o)
+OBJECTS += $(addprefix net/,server.o buffer.o)
