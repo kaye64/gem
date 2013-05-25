@@ -1,4 +1,4 @@
-#include <core/config.h>
+#include <core/args.h>
 #include <core/log.h>
 #include <runite/cache.h>
 

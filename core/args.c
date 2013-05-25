@@ -1,4 +1,4 @@
-#include <core/config.h>
+#include <core/args.h>
 
 #include <getopt.h>
 #include <stdio.h>
@@ -6,7 +6,7 @@
 #include <core/version.h>
 
 static struct option program_options[] = {
-	{"verbose", no_argument, &inst_config.verbose_on, 1},
+	{"verbose", no_argument, &inst_args.verbose_on, 1},
 	{"version", no_argument, 0, 'v'},
 	{"help", no_argument, 0, 'h'},
 };
