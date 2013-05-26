@@ -1,9 +1,9 @@
-#include <core/args.h>
+#include <util/args.h>
 
 #include <getopt.h>
 #include <stdio.h>
 
-#include <core/version.h>
+#include <version.h>
 
 static struct option program_options[] = {
 	{"verbose", no_argument, &inst_args.verbose_on, 1},

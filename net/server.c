@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include <core/log.h>
+#include <util/log.h>
 
 #define LOG_TAG "server"
 

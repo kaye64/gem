@@ -1,5 +1,5 @@
-#include <core/args.h>
-#include <core/log.h>
+#include <util/args.h>
+#include <util/log.h>
 #include <runite/cache.h>
 
 #include <stdio.h>
