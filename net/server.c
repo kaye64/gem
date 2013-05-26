@@ -45,6 +45,9 @@ int server_start(server_t* server)
 		return 0;
 	}
 
+	int temp = 1;
+	setsockopt(server->fd, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(temp));
+
 	struct sockaddr_in address;
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
@@ -142,7 +145,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			WARN("client_io_avail: buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
 
-		INFO("read %i", buffered);
+		server->read_cb(client);
 	}
 
 	if (revents & EV_WRITE) { // flush write buffer if necessary

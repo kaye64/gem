@@ -12,10 +12,12 @@
 struct server;
 struct client;
 
-// client_t* client_accept(int fd, struct in_addr addr, struct server* server)
+// client_t* client_accept(int fd, struct in_addr addr, struct server* server);
 typedef struct client*(*client_accept_t)(int, struct in_addr, struct server*);
-// int client_handshake(client_t* client)
+// int client_handshake(client_t* client);
 typedef int(*client_handshake_t)(struct client*);
+// void client_read(client_t* client);
+typedef void(*client_read_t)(struct client*);
 // void client_drop(client_t* client);
 typedef void(*client_drop_t)(struct client*);
 
@@ -37,6 +39,7 @@ struct server {
 	/* callbacks */
 	client_accept_t accept_cb;
 	client_handshake_t handshake_cb;
+	client_read_t read_cb;
 	client_drop_t drop_cb;
 	/* misc stuff */
 	int must_free;
