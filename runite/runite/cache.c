@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <netinet/in.h>
 
 #include <runite/util/sorted_list.h>
 
@@ -73,9 +74,15 @@ cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, co
 	cache->num_blocks = data_size / data_block_size;
 	fseek(data_fd, 0, SEEK_SET);
 	cache->data = (cache_block_t*)calloc(cache->num_blocks, data_block_size);
-
 	fread(cache->data, data_block_size, cache->num_blocks, data_fd);
 	fclose(data_fd);
+
+	/* Convert to local byte order */
+	for (int i = 0; i < cache->num_blocks; i++) {
+		cache->data[i].file_id = ntohs(cache->data[i].file_id);
+		cache->data[i].file_pos = ntohs(cache->data[i].file_pos);
+		cache->data[i].next_block = ntohl(cache->data[i].next_block) >> 8;
+	}
 
 	/* Read the indices into memory */
 	cache->indices = (cache_index_t**)calloc(num_indices, sizeof(cache_index_t*));
@@ -90,6 +97,13 @@ cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, co
 		fseek(index_fd, 0, SEEK_SET);
 		fread(cache->indices[i], index_entry_size, cache->num_files[i], index_fd);
 		fclose(index_fd);
+
+		/* convert to local byte order */
+		for (int x = 0; x < cache->num_files[i]; x++)
+		{
+			cache->indices[i][x].file_size = ntohl(cache->indices[i][x].file_size) >> 8;
+			cache->indices[i][x].start_block = ntohl(cache->indices[i][x].start_block) >> 8;
+		}
 	}
 
 	return cache;
@@ -132,12 +146,14 @@ int cache_get(cache_t* cache, int index, int file, char* buffer)
 		if (read_this_block > 512) {
 			read_this_block = 512;
 		}
-		if (block.file_id != file || block.file_pos != file_part || block.cache_id != index) {
+		if (block.file_id != file || block.file_pos != file_part || block.cache_id-1 != index) {
 			return 0;
 		}
 		memcpy(&buffer[write_caret], block.data, read_this_block);
 		write_caret += read_this_block;
+		to_read -= read_this_block;
 		current_block = block.next_block;
+		file_part++;
 	}
 	return 1;
 }
