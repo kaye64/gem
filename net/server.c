@@ -11,7 +11,6 @@
 
 #define LOG_TAG "server"
 
-
 void accept_cb(struct ev_loop* loop, accept_io_t* watcher, int revents);
 void client_io_avail(struct ev_loop *loop, client_t* client, int revents);
 

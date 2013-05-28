@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define min(a, b) ((a) > (b) ? (b) : (a))
+#include <util/math.h>
 
 buffer_t* buffer_create(buffer_t* buffer, size_t size)
 {

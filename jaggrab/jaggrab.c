@@ -4,10 +4,10 @@
 #include <stdlib.h>
 
 #include <util/log.h>
+#include <util/math.h>
 
 #define LOG_TAG "jaggrab"
-
-#define min(a, b) ((a) > (b) ? (b) : (a))
+#define REQUEST_EXPR "JAGGRAB /([a-z]+)[0-9\\-]+\n\n"
 
 archive_client_t* client_accept(int fd, struct in_addr addr, archive_server_t* server);
 int client_handshake(archive_client_t* client);
@@ -29,7 +29,7 @@ archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 	base_server->write_cb = (client_write_t)&client_write;
 	base_server->drop_cb = (client_drop_t)&client_drop;
 	cache_gen_crc(cache, 0, server->crc_table);
-	int regexp_res = regcomp(&server->request_regexp, "JAGGRAB /([a-z]+)[0-9\\-]+\n\n", REG_EXTENDED|REG_NEWLINE);
+	int regexp_res = regcomp(&server->request_regexp, REQUEST_EXPR, REG_EXTENDED|REG_NEWLINE);
 	if (regexp_res != 0) {
 		char error_message[1024 * 4];
 		regerror(regexp_res, &server->request_regexp, error_message, 1024 * 4);
@@ -64,6 +64,7 @@ void client_read(archive_client_t* client)
 {
 	client_t* base_client = &client->client;
 	archive_server_t* server = (archive_server_t*)base_client->server;
+
 	/* read in the request */
 	char request_buffer[128];
 	buffer_pushp(&base_client->read_buffer);
