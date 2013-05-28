@@ -32,15 +32,14 @@ server_t* server_create(server_t* server, const char* addr, int port)
 
 void server_free(server_t* server)
 {
-
 	if (server->must_free) {
 		free(server);
 	}
 }
 
-int server_start(server_t* server)
+int server_start(server_t* server, struct ev_loop* loop)
 {
-	server->io_loop = ev_loop_new(EVBACKEND_EPOLL | EVFLAG_NOENV);
+	server->io_loop = loop;
 	server->fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (server->fd < 0) {
 		ERROR("server_start: socket open failed");
@@ -218,11 +217,5 @@ void server_client_cleanup(server_t* server, client_t* client)
 void server_stop(server_t* server)
 {
 	ev_io_stop(server->io_loop, (struct ev_io*)&server->io_accept);
-	ev_break(server->io_loop, EVBREAK_ALL);
 	close(server->fd);
-}
-
-void server_poll(server_t* server, int block)
-{
-	ev_loop(server->io_loop, (block ? 0 : EVRUN_NOWAIT));
 }

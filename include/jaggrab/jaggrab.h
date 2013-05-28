@@ -24,6 +24,6 @@ typedef struct archive_client archive_client_t;
 
 archive_server_t* jaggrab_create(cache_t* cache, const char* addr);
 void jaggrab_free(archive_server_t* server);
-void jaggrab_start(archive_server_t* server);
+void jaggrab_start(archive_server_t* server, struct ev_loop* loop);
 
 #endif /* _JAGGRAB_H_ */

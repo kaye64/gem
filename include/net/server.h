@@ -63,11 +63,10 @@ typedef struct client client_t;
 
 server_t* server_create(server_t* server, const char* addr, int port);
 void server_free(server_t* server);
-int server_start(server_t* server);
+int server_start(server_t* server, struct ev_loop* loop);
 void server_stop(server_t* server);
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr);
 void server_client_drop(server_t* server, client_t* client);
 void server_client_cleanup(server_t* server, client_t* client);
-void server_poll(server_t* server, int block);
 
 #endif /* _SERVER_H_ */
