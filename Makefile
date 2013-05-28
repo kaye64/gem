@@ -1,8 +1,8 @@
 CFLAGS = -g -std=c99 -Wall -Lrunite/
 INCLUDE_DIRS = -Iinclude/ -Irunite/include/
 OUT = server
-LIBS = -lrunite -lev
-SUBDIRS = init util net
+LIBS = -lrunite -lev -lz
+SUBDIRS = init util net jaggrab
 
 OBJECTS :=
 
