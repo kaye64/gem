@@ -130,7 +130,16 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 
 		// Check for read error
 		if (read_avail < 0) {
-			ERROR("client_io_avail: recv error: %s", strerror(errno));
+			WARN("client_io_avail: %s", strerror(errno));
+			switch (errno) {
+			case ECONNRESET:
+			case ETIMEDOUT:
+				read_avail = 0; // drop the client later on
+				break;
+			default:
+				ERROR("client_io_avail: unable to handle error: %s", strerror(errno));
+				break;
+			}
 			return;
 		}
 
@@ -159,7 +168,16 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 
 			// Check for write error
 			if (sent < 0) {
-				ERROR("client_io_avail: send error");
+				WARN("client_io_avail: %s", strerror(errno));
+				switch (errno) {
+				case ECONNRESET:
+				case ETIMEDOUT:
+					sent = 0; // drop the client later on
+					break;
+				default:
+					ERROR("client_io_avail: unable to handle error: %s", strerror(errno));
+					break;
+				}
 				return;
 			}
 
