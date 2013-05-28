@@ -32,6 +32,7 @@ cache_t* cache_open_dir(cache_t* cache, const char* directory);
 cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, const char* dataFile);
 void cache_free(cache_t* cache);
 
+void cache_gen_crc(cache_t* cache, int index, char* buffer);
 uint32_t cache_query_size(cache_t* cache, int index, int file);
 int cache_get(cache_t* cache, int index, int file, char* buffer);
 

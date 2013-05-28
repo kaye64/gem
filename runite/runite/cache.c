@@ -5,6 +5,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <netinet/in.h>
+#include <zlib.h>
 
 #include <runite/util/sorted_list.h>
 
@@ -119,6 +120,27 @@ void cache_free(cache_t* cache)
 	if (cache->must_free) {
 		free(cache);
 	}
+}
+
+void cache_gen_crc(cache_t* cache, int index, char* buffer)
+{
+	int num_files = cache->num_files[index];
+	size_t num_crcs = (num_files+1);
+	size_t buf_len = num_crcs*4;
+	uint32_t crc_buf[num_crcs];
+	/* calculate the crc table */
+	crc_buf[num_files] = 1234;
+	for (int i = 0; i < num_files; i++) {
+		size_t file_len = cache_query_size(cache, index, i);
+		char file_buffer[file_len];
+		cache_get(cache, index, i, file_buffer);
+		crc_buf[i] = crc32(0L, Z_NULL, 0);
+		crc_buf[i] = crc32(crc_buf[i], file_buffer, file_len);
+		crc_buf[i] = htonl(crc_buf[i]);
+		crc_buf[num_files] = (crc_buf[num_files] << 1) + crc_buf[i];
+	}
+	crc_buf[num_files] = htonl(crc_buf[num_files]);
+	memcpy(buffer, (char*)&crc_buf, buf_len);
 }
 
 uint32_t cache_query_size(cache_t* cache, int index, int file)
