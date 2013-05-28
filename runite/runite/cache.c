@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <zlib.h>
 
+#include <runite/util/byte_order.h>
 #include <runite/util/sorted_list.h>
 
 int strcmp_wrap(void* a, void* b) {
@@ -80,9 +81,9 @@ cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, co
 
 	/* Convert to local byte order */
 	for (int i = 0; i < cache->num_blocks; i++) {
-		cache->data[i].file_id = ntohs(cache->data[i].file_id);
-		cache->data[i].file_pos = ntohs(cache->data[i].file_pos);
-		cache->data[i].next_block = ntohl(cache->data[i].next_block) >> 8;
+		cache->data[i].file_id = to_host_order_s(cache->data[i].file_id);
+		cache->data[i].file_pos = to_host_order_s(cache->data[i].file_pos);
+		cache->data[i].next_block = to_host_order_tri(cache->data[i].next_block);
 	}
 
 	/* Read the indices into memory */
@@ -102,8 +103,8 @@ cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, co
 		/* convert to local byte order */
 		for (int x = 0; x < cache->num_files[i]; x++)
 		{
-			cache->indices[i][x].file_size = ntohl(cache->indices[i][x].file_size) >> 8;
-			cache->indices[i][x].start_block = ntohl(cache->indices[i][x].start_block) >> 8;
+			cache->indices[i][x].file_size = to_host_order_tri(cache->indices[i][x].file_size);
+			cache->indices[i][x].start_block = to_host_order_tri(cache->indices[i][x].start_block);
 		}
 	}
 
@@ -135,7 +136,7 @@ void cache_gen_crc(cache_t* cache, int index, char* buffer)
 		char file_buffer[file_len];
 		cache_get(cache, index, i, file_buffer);
 		crc_buf[i] = crc32(0L, Z_NULL, 0);
-		crc_buf[i] = crc32(crc_buf[i], file_buffer, file_len);
+		crc_buf[i] = crc32(crc_buf[i], (const unsigned char*)file_buffer, file_len);
 		crc_buf[i] = htonl(crc_buf[i]);
 		crc_buf[num_files] = (crc_buf[num_files] << 1) + crc_buf[i];
 	}
