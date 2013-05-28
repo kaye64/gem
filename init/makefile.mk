@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix init/,init.o)
+OBJECTS += $(addprefix init/,init.o signal.o)

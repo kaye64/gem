@@ -39,6 +39,13 @@ archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 	return server;
 }
 
+void jaggrab_start(archive_server_t* server)
+{
+	server_t* base_server = (server_t*)server;
+	server_start(base_server);
+	INFO("Listening on %s:%d", base_server->addr, base_server->port);
+}
+
 void jaggrab_free(archive_server_t* server)
 {
 	server_free(&server->server);

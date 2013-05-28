@@ -26,11 +26,13 @@ server_t* server_create(server_t* server, const char* addr, int port)
 	server->port = port;
 	server->fd = -1;
 	server->buf_size = SERVER_DEFAULT_BUFFER_SIZE;
+	server->io_loop = 0;
 	return server;
 }
 
 void server_free(server_t* server)
 {
+
 	if (server->must_free) {
 		free(server);
 	}
@@ -216,6 +218,7 @@ void server_client_cleanup(server_t* server, client_t* client)
 void server_stop(server_t* server)
 {
 	ev_io_stop(server->io_loop, (struct ev_io*)&server->io_accept);
+	ev_break(server->io_loop, EVBREAK_ALL);
 	close(server->fd);
 }
 
