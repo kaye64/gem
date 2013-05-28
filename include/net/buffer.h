@@ -6,11 +6,11 @@
 
 /* A circular buffer designed for use in network IO. */
 struct buffer {
-	char* buffer;
+	char* data;
 	int read_ptr;
-	int write_ptr;
+	int read_avail;
 	int prev_read_ptr;
-	int prev_write_ptr;
+	int prev_read_avail;
 	size_t real_size;
 	int must_free;
 };
@@ -24,9 +24,7 @@ size_t buffer_write_avail(buffer_t* buffer);
 size_t buffer_read(buffer_t* buffer, char* buf, size_t len);
 size_t buffer_write(buffer_t* buffer, const char* buf, size_t len);
 
-void buffer_pushw(buffer_t* buffer);
-void buffer_pushr(buffer_t* buffer);
-void buffer_popw(buffer_t* buffer);
-void buffer_popr(buffer_t* buffer);
+void buffer_pushp(buffer_t* buffer);
+void buffer_popp(buffer_t* buffer);
 
 #endif /* _IO_BUFFER_H_ */

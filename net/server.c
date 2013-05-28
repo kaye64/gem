@@ -1,5 +1,6 @@
 #include <net/server.h>
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -125,11 +126,11 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 	char buffer[server->buf_size];	// todo: work out a better place to put this buffer
 
 	if (revents & EV_READ) {
-		size_t read_avail = recv(client->fd, buffer, server->buf_size, 0);
+		int read_avail = recv(client->fd, buffer, server->buf_size, 0);
 
 		// Check for read error
 		if (read_avail < 0) {
-			ERROR("client_io_avail: recv error");
+			ERROR("client_io_avail: recv error: %s", strerror(errno));
 			return;
 		}
 
@@ -149,6 +150,8 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 	}
 
 	if (revents & EV_WRITE) { // flush write buffer if necessary
+		server->write_cb(client);
+
 		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
 		int write_caret = 0;
 		while (write_avail > write_caret) {
@@ -168,7 +171,6 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			}
 
 			write_caret += sent;
-			INFO("wrote %i", sent);
 		}
 	}
 }
