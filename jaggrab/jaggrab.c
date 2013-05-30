@@ -64,7 +64,7 @@ archive_client_t* client_accept(int fd, struct in_addr addr, archive_server_t* s
 
 int client_handshake(archive_client_t* client)
 {
-	return 1; // no handshake
+	return HANDSHAKE_ACCEPTED; // no handshake
 }
 
 void client_read(archive_client_t* client)

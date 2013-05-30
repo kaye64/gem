@@ -4,6 +4,7 @@
 #include <jaggrab/jaggrab.h>
 #include <runite/cache.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -53,6 +54,7 @@ void io_thread()
 
 	/* create the archive server */
 	instance.jag_server = jaggrab_create(instance.cache, inst_args.bind_addr);
+	assert(instance.jag_server != 0);
 	jaggrab_start(instance.jag_server, instance.io_loop);
 
 	ev_loop(instance.io_loop, 0);

@@ -99,12 +99,6 @@ void accept_cb(struct ev_loop* loop, accept_io_t* accept_io, int revents)
 
 	ev_io_init((struct ev_io*)client, client_io_avail, client->fd, EV_READ|EV_WRITE);
 	ev_io_start(loop, (struct ev_io*)client);
-
-	if (!server->handshake_cb(client)) {
-		server_client_drop(server, client);
-		INFO("accept_cb: handshake failed. dropping");
-		return;
-	}
 }
 
 void server_client_drop(server_t* server, client_t* client)
@@ -155,11 +149,15 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			WARN("client_io_avail: buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
 
-		server->read_cb(client);
+		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
+			server->read_cb(client);
+		}
 	}
 
 	if (revents & EV_WRITE) { // flush write buffer if necessary
-		server->write_cb(client);
+		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
+			server->write_cb(client);
+		}
 
 		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
 		int write_caret = 0;
@@ -191,6 +189,16 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			write_caret += sent;
 		}
 	}
+
+	if (client->handshake_stage == HANDSHAKE_PENDING) {
+		client->handshake_stage = server->handshake_cb(client);
+	}
+
+	if (client->handshake_stage == HANDSHAKE_DENIED) {
+		server_client_drop(server, client);
+		INFO("accept_cb: handshake failed. dropping");
+		return;
+	}
 }
 
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
@@ -202,6 +210,7 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 	client->fd = fd;
 	client->addr = addr;
 	client->server = server;
+	client->handshake_stage = HANDSHAKE_PENDING;
 	buffer_create(&client->read_buffer, server->buf_size);
 	buffer_create(&client->write_buffer, server->buf_size);
 	return client;

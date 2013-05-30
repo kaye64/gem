@@ -8,6 +8,10 @@
 
 #define SERVER_DEFAULT_BUFFER_SIZE 4096 // todo: make cvar
 
+#define HANDSHAKE_PENDING 0
+#define HANDSHAKE_DENIED 1
+#define HANDSHAKE_ACCEPTED 2
+
 // forward declarations
 struct server;
 struct client;
@@ -58,6 +62,7 @@ struct client {
 	buffer_t write_buffer;
 	/* misc stuff */
 	server_t* server;
+	int handshake_stage;
 };
 typedef struct client client_t;
 
