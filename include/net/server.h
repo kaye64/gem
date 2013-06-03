@@ -16,22 +16,16 @@
 struct server;
 struct client;
 
-// client_t* client_accept(int fd, struct in_addr addr, struct server* server);
+// client_t* client_accept(int fd, struct in_addr addr, server_t* server);
 typedef struct client*(*client_accept_t)(int, struct in_addr, struct server*);
-// int client_handshake(client_t* client);
-typedef int(*client_handshake_t)(struct client*);
-// void client_read(client_t* client);
-typedef void(*client_read_t)(struct client*);
-// void client_write(client_t* client);
-typedef void(*client_write_t)(struct client*);
-// void client_drop(client_t* client);
-typedef void(*client_drop_t)(struct client*);
-
-struct accept_io {
-	ev_io read_io;
-	struct server* server;
-};
-typedef struct accept_io accept_io_t;
+// int client_handshake(client_t* client, server_t* server);
+typedef int(*client_handshake_t)(struct client*, struct server*);
+// void client_read(client_t* client, server_t* server);
+typedef void(*client_read_t)(struct client*, struct server*);
+// void client_write(client_t* client, server_t* server);
+typedef void(*client_write_t)(struct client*, struct server*);
+// void client_drop(client_t* client, server_t* server);
+typedef void(*client_drop_t)(struct client*, struct server*);
 
 struct server {
 	/* net stuff */
@@ -41,7 +35,7 @@ struct server {
 	int buf_size;
 	/* libev stuff */
 	struct ev_loop* io_loop;
-	accept_io_t io_accept;
+	struct ev_io io_accept;
 	/* callbacks */
 	client_accept_t accept_cb;
 	client_handshake_t handshake_cb;
@@ -54,15 +48,14 @@ struct server {
 typedef struct server server_t;
 
 struct client {
+	server_t* server;
+	int handshake_stage;
 	/* net stuff */
-	ev_io io_read;
+	struct ev_io io_read;
 	int fd;
 	struct in_addr addr;
 	buffer_t read_buffer;
 	buffer_t write_buffer;
-	/* misc stuff */
-	server_t* server;
-	int handshake_stage;
 };
 typedef struct client client_t;
 

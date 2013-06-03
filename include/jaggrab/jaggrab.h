@@ -7,7 +7,7 @@
 #include <runite/cache.h>
 
 struct archive_server {
-	server_t server;
+	server_t io_server;
 	cache_t* cache;
 	regex_t request_regexp;
 	char crc_table[80];
@@ -15,7 +15,7 @@ struct archive_server {
 typedef struct archive_server archive_server_t;
 
 struct archive_client {
-	client_t client;
+	client_t io_client;
 	char* file_buffer;
 	int file_caret;
 	int file_size;

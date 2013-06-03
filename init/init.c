@@ -3,6 +3,9 @@
 #include <util/log.h>
 #include <jaggrab/jaggrab.h>
 #include <runite/cache.h>
+#include <world/dispatcher.h>
+#include <world/game_service.h>
+#include <world/update_service.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -15,6 +18,9 @@
 struct {
 	cache_t* cache;
 	archive_server_t* jag_server;
+	dispatcher_t* world_dispatcher;
+	game_service_t* game_service;
+	update_service_t* update_service;
 	pthread_t engine_thread;
 	pthread_t io_thread;
 	struct ev_loop* engine_loop;
@@ -58,6 +64,15 @@ void io_thread()
 	assert(instance.jag_server != 0);
 	jaggrab_start(instance.jag_server, instance.io_loop);
 
+	/* create the world dispatcher */
+	instance.game_service = game_create(NULL);
+	instance.update_service = update_create(NULL);
+	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
+	assert(instance.game_service != 0);
+	assert(instance.update_service != 0);
+	assert(instance.world_dispatcher != 0);
+	dispatcher_start(instance.world_dispatcher, instance.io_loop);
+
 	ev_loop(instance.io_loop, 0);
 }
 
@@ -80,6 +95,9 @@ void tick()
 void cleanup(int forceful) {
 	INFO("Cleaning up for shutdown");
 	ev_timer_stop(instance.engine_loop, &instance.engine_tick);
+	dispatcher_free(instance.world_dispatcher);
+	game_free(instance.game_service);
+	update_free(instance.update_service);
 	server_stop((server_t*)instance.jag_server);
 	jaggrab_free(instance.jag_server);
 	cache_free(instance.cache);

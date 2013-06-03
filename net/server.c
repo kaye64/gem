@@ -8,11 +8,12 @@
 #include <unistd.h>
 
 #include <util/log.h>
+#include <util/container_of.h>
 
 #define LOG_TAG "server"
 
-void accept_cb(struct ev_loop* loop, accept_io_t* watcher, int revents);
-void client_io_avail(struct ev_loop *loop, client_t* client, int revents);
+void accept_cb(struct ev_loop* loop, struct ev_io* watcher, int revents);
+void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents);
 
 server_t* server_create(server_t* server, const char* addr, int port)
 {
@@ -65,17 +66,16 @@ int server_start(server_t* server, struct ev_loop* loop)
 		return 0;
 	}
 
-	ev_io_init((struct ev_io*)&server->io_accept, accept_cb, server->fd, EV_READ);
-	server->io_accept.server = server;
-	ev_io_start(server->io_loop, (struct ev_io*)&server->io_accept);
+	ev_io_init(&server->io_accept, accept_cb, server->fd, EV_READ);
+	ev_io_start(server->io_loop, &server->io_accept);
 	return 1;
 }
 
-void accept_cb(struct ev_loop* loop, accept_io_t* accept_io, int revents)
+void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 {
 	struct sockaddr_in client_addr;
 	socklen_t client_len = sizeof(client_addr);
-	server_t* server = accept_io->server;
+	server_t* server = container_of(accept_io, server_t, io_accept);
 
 	if (EV_ERROR & revents) {
 		ERROR("accept_cb: invalid event");
@@ -97,19 +97,20 @@ void accept_cb(struct ev_loop* loop, accept_io_t* accept_io, int revents)
 
 	INFO("accept_cb: accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
 
-	ev_io_init((struct ev_io*)client, client_io_avail, client->fd, EV_READ|EV_WRITE);
-	ev_io_start(loop, (struct ev_io*)client);
+	ev_io_init(&client->io_read, client_io_avail, client->fd, EV_READ|EV_WRITE);
+	ev_io_start(loop, &client->io_read);
 }
 
 void server_client_drop(server_t* server, client_t* client)
 {
-	ev_io_stop(server->io_loop, (struct ev_io*)client);
+	ev_io_stop(server->io_loop, &client->io_read);
 	close(client->fd);
 	server_client_cleanup(server, client);
 }
 
-void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
+void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 {
+	client_t* client = container_of(io_read, client_t, io_read);
 	// Check for errors
 	if (EV_ERROR & revents) {
 		ERROR("client_io_avail: invalid event");
@@ -151,13 +152,13 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 
 
 		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
-			server->read_cb(client);
+			server->read_cb(client, server);
 		}
 	}
 
 	if (revents & EV_WRITE) { // flush write buffer if necessary
 		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
-			server->write_cb(client);
+			server->write_cb(client, server);
 		}
 
 		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
@@ -193,7 +194,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 
 
 	if (client->handshake_stage == HANDSHAKE_PENDING) {
-		client->handshake_stage = server->handshake_cb(client);
+		client->handshake_stage = server->handshake_cb(client, server);
 		switch (client->handshake_stage) {
 		case HANDSHAKE_DENIED:
 			server_client_drop(server, client);
@@ -202,7 +203,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 		case HANDSHAKE_ACCEPTED:
 			// Notify client of any buffered data
 			if (buffer_read_avail(&client->read_buffer) > 0) {
-				server->read_cb(client);
+				server->read_cb(client, server);
 			}
 			break;
 		}
@@ -228,11 +229,11 @@ void server_client_cleanup(server_t* server, client_t* client)
 {
 	buffer_free(&client->read_buffer);
 	buffer_free(&client->write_buffer);
-	server->drop_cb(client);
+	server->drop_cb(client, server);
 }
 
 void server_stop(server_t* server)
 {
-	ev_io_stop(server->io_loop, (struct ev_io*)&server->io_accept);
+	ev_io_stop(server->io_loop, &server->io_accept);
 	close(server->fd);
 }

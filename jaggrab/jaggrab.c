@@ -5,22 +5,23 @@
 
 #include <util/log.h>
 #include <util/math.h>
+#include <util/container_of.h>
 
 #define LOG_TAG "jaggrab"
 #define REQUEST_EXPR "JAGGRAB /([a-z]+)[0-9\\-]+\n\n"
 #define JAG_BUFFER_SIZE 1024 * 4 // 4k buffer
 
-archive_client_t* client_accept(int fd, struct in_addr addr, archive_server_t* server);
-int client_handshake(archive_client_t* client);
-void client_read(archive_client_t* client);
-void client_write(archive_client_t* client);
-void client_drop(archive_client_t* client);
+client_t* client_accept(int fd, struct in_addr addr, server_t* server);
+int client_handshake(client_t* client, server_t* server);
+void client_read(client_t* client, server_t* server);
+void client_write(client_t* client, server_t* server);
+void client_drop(client_t* client, server_t* server);
 int resolve_archive(const char* archive);
 
 archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 {
 	archive_server_t* server = (archive_server_t*)malloc(sizeof(archive_server_t));
-	server_t* base_server = &server->server;
+	server_t* base_server = &server->io_server;
 	server->cache = cache;
 	server_create(base_server, addr, 43595);
 	base_server->buf_size = JAG_BUFFER_SIZE;
@@ -42,49 +43,49 @@ archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 
 void jaggrab_start(archive_server_t* server, struct ev_loop* loop)
 {
-	server_t* base_server = (server_t*)server;
+	server_t* base_server = &server->io_server;
 	server_start(base_server, loop);
 	INFO("Listening on %s:%d", base_server->addr, base_server->port);
 }
 
 void jaggrab_free(archive_server_t* server)
 {
-	server_free(&server->server);
+	server_free(&server->io_server);
 	regfree(&server->request_regexp);
 	free(server);
 }
 
-archive_client_t* client_accept(int fd, struct in_addr addr, archive_server_t* server)
+client_t* client_accept(int fd, struct in_addr addr, server_t* server)
 {
 	archive_client_t* client = (archive_client_t*)malloc(sizeof(archive_client_t));
 	client->file_buffer = 0;
 	client->file_caret = 0;
 	client->file_size = 0;
-	return client;
+	return &client->io_client;
 }
 
-int client_handshake(archive_client_t* client)
+int client_handshake(client_t* client, server_t* server)
 {
 	return HANDSHAKE_ACCEPTED; // no handshake
 }
 
-void client_read(archive_client_t* client)
+void client_read(client_t* client, server_t* server)
 {
-	client_t* base_client = &client->client;
-	archive_server_t* server = (archive_server_t*)base_client->server;
+	archive_server_t* archive_server = container_of(client->server, archive_server_t, io_server);
+	archive_client_t* archive_client = container_of(client, archive_client_t, io_client);
 
 	/* read in the request */
 	char request_buffer[128];
-	buffer_pushp(&base_client->read_buffer);
-	size_t read = buffer_read(&base_client->read_buffer, request_buffer, 128);
+	buffer_pushp(&client->read_buffer);
+	size_t read = buffer_read(&client->read_buffer, request_buffer, 128);
 	request_buffer[read] = '\0';
 
 	/* extract the archive name */
 	const int max_matches = 2;
 	regmatch_t matches[max_matches];
-	if (regexec(&server->request_regexp, request_buffer, max_matches, matches, 0)) {
+	if (regexec(&archive_server->request_regexp, request_buffer, max_matches, matches, 0)) {
 		WARN("client_read: no matches in request string");
-		buffer_popp(&base_client->read_buffer);
+		buffer_popp(&client->read_buffer);
 		return;
 	}
 	int start = matches[1].rm_so;
@@ -97,18 +98,18 @@ void client_read(archive_client_t* client)
 	/* buffer the file to be written */
 	int archive_id = resolve_archive(request);
 	if (archive_id > 0) {
-		client->file_size = cache_query_size(server->cache, 0, archive_id);
-		client->file_buffer = (char*)malloc(sizeof(char)*client->file_size);
+		archive_client->file_size = cache_query_size(archive_server->cache, 0, archive_id);
+		archive_client->file_buffer = (char*)malloc(sizeof(char)*archive_client->file_size);
 
-		int cache_res = cache_get(server->cache, 0, archive_id, client->file_buffer);
+		int cache_res = cache_get(archive_server->cache, 0, archive_id, archive_client->file_buffer);
 		if (cache_res == 0) {
 			ERROR("client_read: unable to retrieve archive %s from cache", request);
 			return;
 		}
 	} else {
-		client->file_size = 80;
-		client->file_buffer = (char*)malloc(sizeof(char)*80);
-		memcpy(client->file_buffer, server->crc_table, 80);
+		archive_client->file_size = 80;
+		archive_client->file_buffer = (char*)malloc(sizeof(char)*archive_client->file_size);
+		memcpy(archive_client->file_buffer, archive_server->crc_table, archive_client->file_size);
 	}
 }
 
@@ -145,21 +146,24 @@ int resolve_archive(const char* archive)
 	return 0;
 }
 
-void client_write(archive_client_t* client)
+void client_write(client_t* client, server_t* server)
 {
-	if (client->file_buffer == 0 || client->file_caret > client->file_size) {
+	archive_client_t* archive_client = container_of(client, archive_client_t, io_client);
+	if (archive_client->file_buffer == 0 || archive_client->file_caret > archive_client->file_size) {
 		return;
 	}
-	client_t* base_client = &client->client;
-	size_t to_write = min(client->file_size-client->file_caret, buffer_write_avail(&base_client->write_buffer));
-	size_t written = buffer_write(&base_client->write_buffer, client->file_buffer+client->file_caret, to_write);
-	client->file_caret += written;
+
+	size_t to_write = archive_client->file_size - archive_client->file_caret;
+	to_write = min(to_write, buffer_write_avail(&client->write_buffer));
+	size_t written = buffer_write(&client->write_buffer, archive_client->file_buffer+archive_client->file_caret, to_write);
+	archive_client->file_caret += written;
 }
 
-void client_drop(archive_client_t* client)
+void client_drop(client_t* client, server_t* server)
 {
-	if (client->file_buffer != 0) {
-		free(client->file_buffer);
+	archive_client_t* archive_client = container_of(client, archive_client_t, io_client);
+	if (archive_client->file_buffer != 0) {
+		free(archive_client->file_buffer);
 	}
-	free(client);
+	free(archive_client);
 }
