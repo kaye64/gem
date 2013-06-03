@@ -8,6 +8,7 @@
 
 #define LOG_TAG "jaggrab"
 #define REQUEST_EXPR "JAGGRAB /([a-z]+)[0-9\\-]+\n\n"
+#define JAG_BUFFER_SIZE 1024 * 4 // 4k buffer
 
 archive_client_t* client_accept(int fd, struct in_addr addr, archive_server_t* server);
 int client_handshake(archive_client_t* client);
@@ -22,7 +23,7 @@ archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 	server_t* base_server = &server->server;
 	server->cache = cache;
 	server_create(base_server, addr, 43595);
-	base_server->buf_size = 1024 * 10; // 10k buffer. need to make sure this is okay..
+	base_server->buf_size = JAG_BUFFER_SIZE;
 	base_server->accept_cb = (client_accept_t)&client_accept;
 	base_server->handshake_cb = (client_handshake_t)&client_handshake;
 	base_server->read_cb = (client_read_t)&client_read;
@@ -90,8 +91,8 @@ void client_read(archive_client_t* client)
 	int end = matches[1].rm_eo;
 	int len = end-start;
 	char request[len+1];
-	strncpy(request, request_buffer+start, len);
-	request[len+1] = '\0';
+	request[0] = '\0';
+	strncat(request, request_buffer+start, len);
 
 	/* buffer the file to be written */
 	int archive_id = resolve_archive(request);
@@ -146,11 +147,11 @@ int resolve_archive(const char* archive)
 
 void client_write(archive_client_t* client)
 {
-	if (client->file_buffer == 0 || client->file_caret >= client->file_size) {
+	if (client->file_buffer == 0 || client->file_caret > client->file_size) {
 		return;
 	}
 	client_t* base_client = &client->client;
-	size_t to_write = min(client->file_size, buffer_write_avail(&base_client->write_buffer));
+	size_t to_write = min(client->file_size-client->file_caret, buffer_write_avail(&base_client->write_buffer));
 	size_t written = buffer_write(&base_client->write_buffer, client->file_buffer+client->file_caret, to_write);
 	client->file_caret += written;
 }

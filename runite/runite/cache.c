@@ -137,8 +137,8 @@ void cache_gen_crc(cache_t* cache, int index, char* buffer)
 		cache_get(cache, index, i, file_buffer);
 		crc_buf[i] = crc32(0L, Z_NULL, 0);
 		crc_buf[i] = crc32(crc_buf[i], (const unsigned char*)file_buffer, file_len);
-		crc_buf[i] = htonl(crc_buf[i]);
 		crc_buf[num_files] = (crc_buf[num_files] << 1) + crc_buf[i];
+		crc_buf[i] = htonl(crc_buf[i]);
 	}
 	crc_buf[num_files] = htonl(crc_buf[num_files]);
 	memcpy(buffer, (char*)&crc_buf, buf_len);
@@ -160,7 +160,7 @@ int cache_get(cache_t* cache, int index, int file, char* buffer)
 	int to_read = cache_index.file_size;
 	int file_part = 0;
 
-	while (to_read > 0) {
+	while (current_block != 0) {
 		if (current_block <= 0 || current_block > cache->num_blocks) {
 			return 0;
 		}
@@ -177,6 +177,10 @@ int cache_get(cache_t* cache, int index, int file, char* buffer)
 		to_read -= read_this_block;
 		current_block = block.next_block;
 		file_part++;
+	}
+	if (to_read > 0) {
+		printf("file incomplete\n");
+		return 0;
 	}
 	return 1;
 }

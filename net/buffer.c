@@ -42,15 +42,15 @@ size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
 {
 	size_t to_read = min(len, buffer_read_avail(buffer));
 	size_t total_read = to_read;
+	int write_ofs = 0;
 	if (buffer->read_ptr + to_read > buffer->real_size) {
 		// We have to wrap around halfway through
 		size_t partial_read_amt = buffer->real_size - buffer->read_ptr;
 		buffer_read(buffer, buf, partial_read_amt);
-		to_read -= partial_read_amt;
-		buf += partial_read_amt;
 		buffer->read_ptr = 0;
+		write_ofs = partial_read_amt;
 	}
-	memcpy(buf, buffer->data+buffer->read_ptr, to_read);
+	memcpy(buf+write_ofs, buffer->data+buffer->read_ptr, to_read-write_ofs);
 	buffer->read_avail -= to_read;
 	buffer->read_ptr += to_read;
 	return total_read;
@@ -61,15 +61,15 @@ size_t buffer_write(buffer_t* buffer, const char* buf, size_t len)
 	size_t to_write = min(len, buffer_write_avail(buffer));
 	size_t total_write = to_write;
 	int write_ptr = buffer->read_ptr + buffer->read_avail;
+	int read_ofs = 0;
 	if (write_ptr + to_write > buffer->real_size) {
 		// We have to wrap around halfway through
 		size_t partial_write_amt = buffer->real_size - write_ptr;
 		buffer_write(buffer, buf, partial_write_amt);
 		write_ptr = 0;
-		buf += partial_write_amt;
-		to_write -= partial_write_amt;
+		read_ofs = partial_write_amt;
 	}
-	memcpy(buffer->data+write_ptr, buf, to_write);
+	memcpy(buffer->data+write_ptr, buf+read_ofs, to_write-read_ofs);
 	buffer->read_avail += to_write;
 	return total_write;
 }

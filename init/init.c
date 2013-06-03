@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 	pthread_create(&instance.io_thread, NULL, (void*)io_thread, (void*)NULL);
 	pthread_create(&instance.engine_thread, NULL, (void*)engine_thread, (void*)NULL);
 
+	pthread_join(instance.io_thread, NULL);
 	pthread_join(instance.engine_thread, NULL);
 	return 0;
 }

@@ -95,7 +95,7 @@ void accept_cb(struct ev_loop* loop, accept_io_t* accept_io, int revents)
 		return;
 	}
 
-	INFO("accept_cb: accepted new client from %s", inet_ntoa(client->addr));
+	INFO("accept_cb: accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
 
 	ev_io_init((struct ev_io*)client, client_io_avail, client->fd, EV_READ|EV_WRITE);
 	ev_io_start(loop, (struct ev_io*)client);
@@ -149,6 +149,7 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 			WARN("client_io_avail: buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
 
+
 		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
 			server->read_cb(client);
 		}
@@ -190,14 +191,21 @@ void client_io_avail(struct ev_loop *loop, client_t* client, int revents)
 		}
 	}
 
+
 	if (client->handshake_stage == HANDSHAKE_PENDING) {
 		client->handshake_stage = server->handshake_cb(client);
-	}
-
-	if (client->handshake_stage == HANDSHAKE_DENIED) {
-		server_client_drop(server, client);
-		INFO("accept_cb: handshake failed. dropping");
-		return;
+		switch (client->handshake_stage) {
+		case HANDSHAKE_DENIED:
+			server_client_drop(server, client);
+			INFO("handshake failed. dropping");
+			break;
+		case HANDSHAKE_ACCEPTED:
+			// Notify client of any buffered data
+			if (buffer_read_avail(&client->read_buffer) > 0) {
+				server->read_cb(client);
+			}
+			break;
+		}
 	}
 }
 
