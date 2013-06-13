@@ -2,6 +2,7 @@
 #define _JAGGRAB_H_
 
 #include <regex.h>
+#include <stdbool.h>
 
 #include <net/server.h>
 #include <runite/cache.h>

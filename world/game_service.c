@@ -31,9 +31,9 @@ game_service_t* game_create(game_service_t* game, cache_t* cache)
 {
 	if (game == NULL) {
 		game = (game_service_t*)malloc(sizeof(game_service_t));
-		game->must_free = 1;
+		game->must_free = true;
 	} else {
-		game->must_free = 0;
+		game->must_free = false;
 	}
 	game->service.accept_cb = (service_accept_t)&game_service_accept;
 	game->service.handshake_cb = (service_handshake_t)&game_service_handshake;
@@ -51,7 +51,7 @@ game_service_t* game_create(game_service_t* game, cache_t* cache)
  */
 void game_free(game_service_t* game)
 {
-	if (game->must_free == 1) {
+	if (game->must_free) {
 		free(game);
 	}
 }

@@ -3,6 +3,7 @@
 
 #include <ev.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 
 #include <net/buffer.h>
 
@@ -50,7 +51,7 @@ struct server {
 	client_drop_t drop_cb;
 	/* misc stuff */
 	uint8_t flags;
-	int must_free;
+	bool must_free;
 };
 typedef struct server server_t;
 
@@ -68,7 +69,7 @@ typedef struct client client_t;
 
 server_t* server_create(server_t* server, const char* addr, int port, uint8_t flags);
 void server_free(server_t* server);
-int server_start(server_t* server, struct ev_loop* loop);
+bool server_start(server_t* server, struct ev_loop* loop);
 void server_stop(server_t* server);
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr);
 void server_client_drop(server_t* server, client_t* client);

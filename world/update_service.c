@@ -32,9 +32,9 @@ update_service_t* update_create(update_service_t* update, cache_t* cache)
 {
 	if (update == NULL) {
 		update = (update_service_t*)malloc(sizeof(update_service_t));
-		update->must_free = 1;
+		update->must_free = true;
 	} else {
-		update->must_free = 0;
+		update->must_free = false;
 	}
 	update->cache = cache;
 	update->service.accept_cb = (service_accept_t)&update_service_accept;
@@ -53,7 +53,7 @@ update_service_t* update_create(update_service_t* update, cache_t* cache)
  */
 void update_free(update_service_t* update)
 {
-	if (update->must_free == 1) {
+	if (update->must_free) {
 		free(update);
 	}
 }

@@ -22,9 +22,9 @@ buffer_t* buffer_create(buffer_t* buffer, size_t size)
 {
 	if (buffer == NULL) {
 		buffer = (buffer_t*)malloc(sizeof(buffer_t));
-		buffer->must_free = 1;
+		buffer->must_free = true;
 	} else {
-		buffer->must_free = 0;
+		buffer->must_free = false;
 	}
 	buffer->data = (char*)malloc(sizeof(char)*size);
 	buffer->real_size = size;

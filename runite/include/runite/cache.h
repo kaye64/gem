@@ -2,6 +2,7 @@
 #define _CACHE_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 struct cache_index {
 	uint32_t file_size : 24;
@@ -24,16 +25,16 @@ struct cache {
 	int num_blocks;
 	cache_index_t** indices;
 	cache_block_t* data;
-	int must_free;
+	bool must_free;
 };
 typedef struct cache cache_t;
 
 cache_t* cache_open_dir(cache_t* cache, const char* directory);
-cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, const char* dataFile);
+cache_t* cache_open(cache_t* cache, int num_indices, const char** index_files, const char* data_file);
 void cache_free(cache_t* cache);
 
 void cache_gen_crc(cache_t* cache, int index, char* buffer);
 uint32_t cache_query_size(cache_t* cache, int index, int file);
-int cache_get(cache_t* cache, int index, int file, char* buffer);
+bool cache_get(cache_t* cache, int index, int file, char* buffer);
 
 #endif /* _CACHE_H_ */

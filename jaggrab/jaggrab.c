@@ -151,8 +151,8 @@ void jaggrab_read(client_t* client, server_t* server)
 		archive_client->file_size = cache_query_size(archive_server->cache, 0, archive_id);
 		archive_client->file_buffer = (char*)malloc(sizeof(char)*archive_client->file_size);
 
-		int cache_res = cache_get(archive_server->cache, 0, archive_id, archive_client->file_buffer);
-		if (cache_res == 0) {
+		bool success = cache_get(archive_server->cache, 0, archive_id, archive_client->file_buffer);
+		if (!success) {
 			ERROR("jaggrab_read: unable to retrieve archive %s from cache", request);
 			return;
 		}

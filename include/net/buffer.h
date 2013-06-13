@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* A circular buffer designed for use in network IO. */
 struct buffer {
@@ -12,7 +13,7 @@ struct buffer {
 	int prev_read_ptr;
 	int prev_read_avail;
 	size_t real_size;
-	int must_free;
+	bool must_free;
 };
 typedef struct buffer buffer_t;
 

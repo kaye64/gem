@@ -62,9 +62,9 @@ cache_t* cache_open(cache_t* cache, int num_indices, const char** indexFiles, co
 {
 	if (cache == NULL) { // Caller wants us to allocate and manage one
 		cache = (cache_t*)malloc(sizeof(cache_t));
-		cache->must_free = 1;
+		cache->must_free = true;
 	} else {
-		cache->must_free = 0;
+		cache->must_free = false;
 	}
 	cache->num_indices = num_indices;
 
@@ -149,10 +149,10 @@ uint32_t cache_query_size(cache_t* cache, int index, int file)
 	return cache->indices[index][file].file_size;
 }
 
-int cache_get(cache_t* cache, int index, int file, char* buffer)
+bool cache_get(cache_t* cache, int index, int file, char* buffer)
 {
 	if (file < 0 || file > cache->num_files[index]) {
-		return 0;
+		return false;
 	}
 	cache_index_t cache_index = cache->indices[index][file];
 	int current_block = cache_index.start_block;
@@ -162,7 +162,7 @@ int cache_get(cache_t* cache, int index, int file, char* buffer)
 
 	while (current_block != 0) {
 		if (current_block <= 0 || current_block > cache->num_blocks) {
-			return 0;
+			return false;
 		}
 		cache_block_t block = cache->data[current_block];
 		int read_this_block = to_read;
@@ -180,7 +180,7 @@ int cache_get(cache_t* cache, int index, int file, char* buffer)
 	}
 	if (to_read > 0) {
 		printf("file incomplete\n");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }

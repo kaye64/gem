@@ -1,6 +1,8 @@
 #ifndef _UPDATE_SERVICE_H_
 #define _UPDATE_SERVICE_H_
 
+#include <stdbool.h>
+
 #include <net/server.h>
 #include <world/service.h>
 #include <runite/cache.h>
@@ -12,7 +14,7 @@
 struct update_service {
 	service_t service;
 	cache_t* cache;
-	int must_free;
+	bool must_free;
 };
 typedef struct update_service update_service_t;
 

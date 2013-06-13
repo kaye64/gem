@@ -34,9 +34,9 @@ server_t* server_create(server_t* server, const char* addr, int port, uint8_t fl
 {
 	if (server == NULL) {
 		server = (server_t*)malloc(sizeof(server_t));
-		server->must_free = 1;
+		server->must_free = true;
 	} else {
-		server->must_free = 0;
+		server->must_free = false;
 	}
 	strcpy(server->addr, addr);
 	server->port = port;
@@ -66,15 +66,15 @@ void server_free(server_t* server)
  * Starts a server io loop
  *  - server: The server
  *  - loop: The loop to run on
- * returns: 0 on failure, 1 on success
+ * returns: true on success
  */
-int server_start(server_t* server, struct ev_loop* loop)
+bool server_start(server_t* server, struct ev_loop* loop)
 {
 	server->io_loop = loop;
 	server->fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (server->fd < 0) {
 		ERROR("server_start: socket open failed");
-		return 0;
+		return false;
 	}
 
 	int temp = 1;
@@ -88,17 +88,17 @@ int server_start(server_t* server, struct ev_loop* loop)
 
 	if (bind(server->fd, (struct sockaddr*)&address, sizeof(address)) != 0) {
 		ERROR("server_start: bind failed");
-		return 0;
+		return false;
 	}
 
 	if (listen(server->fd, 0) < 0) {
 		ERROR("server_start: listen failed");
-		return 0;
+		return false;
 	}
 
 	ev_io_init(&server->io_accept, accept_cb, server->fd, EV_READ);
 	ev_io_start(server->io_loop, &server->io_accept);
-	return 1;
+	return true;
 }
 
 /**
