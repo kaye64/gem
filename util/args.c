@@ -1,3 +1,8 @@
+/**
+ * args.c
+ *
+ * Parses command line arguments
+ */
 #include <util/args.h>
 
 #include <getopt.h>
@@ -14,6 +19,13 @@ static struct option program_options[] = {
 	{"cache", required_argument, 0, 'c'}
 };
 
+/**
+ * parse_args
+ *
+ * Parses command line arguments into inst_args
+ *  - argc: The number of arguments
+ *  - argv: The value of each argument
+ */
 void parse_args(int argc, char **argv)
 {
 	int c = 0;

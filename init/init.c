@@ -1,3 +1,8 @@
+/**
+ * init.c
+ *
+ * Performs Gem startup routine
+ */
 #include <init/signal.h>
 #include <util/args.h>
 #include <util/log.h>
@@ -55,6 +60,11 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+/**
+ * io_thread
+ *
+ * The main networking/io thread
+ */
 void io_thread()
 {
 	instance.io_loop = ev_loop_new(EVBACKEND_EPOLL | EVFLAG_NOENV);
@@ -65,8 +75,8 @@ void io_thread()
 	jaggrab_start(instance.jag_server, instance.io_loop);
 
 	/* create the world dispatcher */
-	instance.game_service = game_create(NULL);
-	instance.update_service = update_create(NULL);
+	instance.game_service = game_create(NULL, instance.cache);
+	instance.update_service = update_create(NULL, instance.cache);
 	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
 	assert(instance.game_service != 0);
 	assert(instance.update_service != 0);
@@ -76,6 +86,11 @@ void io_thread()
 	ev_loop(instance.io_loop, 0);
 }
 
+/**
+ * engine_thread
+ *
+ * The game logic thread
+ */
 void engine_thread()
 {
 	instance.engine_loop = ev_default_loop(0);
@@ -87,11 +102,22 @@ void engine_thread()
 	ev_loop(instance.engine_loop, 0);
 }
 
+/**
+ * tick
+ *
+ * The engine tick function
+ */
 void tick()
 {
 	ev_timer_again(instance.engine_loop, &instance.engine_tick);
 }
 
+/**
+ * cleanup
+ *
+ * Cleanly closes all sockets, quits all threads, generally cleans up for shutdown
+ *  - forceful: How quickly we need to shutdown. SIGINT/SIGTERM = 0, SIGQUIT = 1
+ */
 void cleanup(int forceful) {
 	INFO("Cleaning up for shutdown");
 	ev_timer_stop(instance.engine_loop, &instance.engine_tick);

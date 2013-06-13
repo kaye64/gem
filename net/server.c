@@ -1,3 +1,8 @@
+/**
+ * server.c
+ *
+ * Defines and provides access to a generic network server
+ */
 #include <net/server.h>
 
 #include <errno.h>
@@ -15,6 +20,15 @@
 void accept_cb(struct ev_loop* loop, struct ev_io* watcher, int revents);
 void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents);
 
+/**
+ * server_create
+ *
+ * Initializes a new server
+ *  - server: Some preallocated memory, or null to put on heap
+ *  - addr: The address to bind to
+ *  - port: The port to bind to
+ * returns: The initialized server
+ */
 server_t* server_create(server_t* server, const char* addr, int port)
 {
 	if (server == NULL) {
@@ -31,6 +45,12 @@ server_t* server_create(server_t* server, const char* addr, int port)
 	return server;
 }
 
+/**
+ * server_free
+ *
+ * Properly frees a server_t
+ *  - server: The server
+ */
 void server_free(server_t* server)
 {
 	if (server->must_free) {
@@ -38,6 +58,14 @@ void server_free(server_t* server)
 	}
 }
 
+/**
+ * server_start
+ *
+ * Starts a server io loop
+ *  - server: The server
+ *  - loop: The loop to run on
+ * returns: 0 on failure, 1 on success
+ */
 int server_start(server_t* server, struct ev_loop* loop)
 {
 	server->io_loop = loop;
@@ -71,6 +99,14 @@ int server_start(server_t* server, struct ev_loop* loop)
 	return 1;
 }
 
+/**
+ * accept_cb
+ *
+ * The ev client accept callback
+ *  - loop: The event loop
+ *  - accept_io: The io handler
+ *  - revents: Event flags
+ */
 void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 {
 	struct sockaddr_in client_addr;
@@ -101,6 +137,13 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 	ev_io_start(loop, &client->io_read);
 }
 
+/**
+ * server_client_drop
+ *
+ * Cleanly disconnects a client
+ *  - server: The server
+ *  - client: The client
+ */
 void server_client_drop(server_t* server, client_t* client)
 {
 	ev_io_stop(server->io_loop, &client->io_read);
@@ -108,6 +151,14 @@ void server_client_drop(server_t* server, client_t* client)
 	server_client_cleanup(server, client);
 }
 
+/**
+ * client_io_avail
+ *
+ * The ev client io callback
+ *  - loop: The event loop
+ *  - accept_io: The io handler
+ *  - revents: Event flags
+ */
 void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 {
 	client_t* client = container_of(io_read, client_t, io_read);
@@ -210,6 +261,15 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	}
 }
 
+/**
+ * server_client_init
+ *
+ * Initializes a client
+ *  - server: The server
+ *  - fd: The file descriptor of the client
+ *  - addr: The address of the client
+ * returns: An initialized client
+ */
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 {
 	client_t* client = server->accept_cb(fd, addr, server);
@@ -225,6 +285,13 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 	return client;
 }
 
+/**
+ * server_client_cleanup
+ *
+ * Cleans up a client for exit
+ *  - server: The server
+ *  - client: The client
+ */
 void server_client_cleanup(server_t* server, client_t* client)
 {
 	buffer_free(&client->read_buffer);
@@ -232,6 +299,12 @@ void server_client_cleanup(server_t* server, client_t* client)
 	server->drop_cb(client, server);
 }
 
+/**
+ * server_stop
+ *
+ * Stops the server io loop
+ *  - server: The server
+ */
 void server_stop(server_t* server)
 {
 	ev_io_stop(server->io_loop, &server->io_accept);

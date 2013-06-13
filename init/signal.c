@@ -1,9 +1,20 @@
+/**
+ * signal.c
+ *
+ * The signal handler
+ */
 #include <init/signal.h>
 
 #include <signal.h>
 
 exit_func_t exit_func;
 
+/**
+ * sig_install
+ *
+ * Installs our signal handler
+ *  - exit: An exit_func_t to call upon shutdown
+ */
 void sig_install(exit_func_t exit)
 {
 	exit_func = exit;

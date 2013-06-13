@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix util/,stack.o log.o args.o)
+OBJECTS += $(addprefix util/,log.o args.o)
