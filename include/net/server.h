@@ -12,6 +12,12 @@
 #define HANDSHAKE_DENIED 1
 #define HANDSHAKE_ACCEPTED 2
 
+// SF_PARTIAL_READ indicates that the service may leave full packets
+// in the read buffer after a cycle. This is so that the event loop
+// can re-report data which has already been signalled to the service
+// in a previous iteration.
+#define SF_PARTIAL_READ (1 << 0)
+
 // forward declarations
 struct server;
 struct client;
@@ -43,6 +49,7 @@ struct server {
 	client_write_t write_cb;
 	client_drop_t drop_cb;
 	/* misc stuff */
+	uint8_t flags;
 	int must_free;
 };
 typedef struct server server_t;
@@ -59,7 +66,7 @@ struct client {
 };
 typedef struct client client_t;
 
-server_t* server_create(server_t* server, const char* addr, int port);
+server_t* server_create(server_t* server, const char* addr, int port, uint8_t flags);
 void server_free(server_t* server);
 int server_start(server_t* server, struct ev_loop* loop);
 void server_stop(server_t* server);

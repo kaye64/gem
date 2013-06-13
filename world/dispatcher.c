@@ -30,7 +30,7 @@ dispatcher_t* dispatcher_create(const char* addr, service_t* game, service_t* up
 {
 	dispatcher_t* dispatcher = (dispatcher_t*)malloc(sizeof(dispatcher_t));
 	server_t* base_server = &dispatcher->server;
-	server_create(base_server, addr, 43594);
+	server_create(base_server, addr, 43594, SF_PARTIAL_READ);
 	base_server->accept_cb = (client_accept_t)&dispatcher_accept;
 	base_server->handshake_cb = (client_handshake_t)&dispatcher_handshake;
 	base_server->read_cb = (client_read_t)&dispatcher_read;

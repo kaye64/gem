@@ -36,7 +36,7 @@ archive_server_t* jaggrab_create(cache_t* cache, const char* addr)
 	archive_server_t* server = (archive_server_t*)malloc(sizeof(archive_server_t));
 	server_t* base_server = &server->io_server;
 	server->cache = cache;
-	server_create(base_server, addr, 43595);
+	server_create(base_server, addr, 43595, SF_PARTIAL_READ);
 	base_server->buf_size = JAG_BUFFER_SIZE;
 	base_server->accept_cb = (client_accept_t)&jaggrab_accept;
 	base_server->handshake_cb = (client_handshake_t)&jaggrab_handshake;

@@ -27,9 +27,10 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents);
  *  - server: Some preallocated memory, or null to put on heap
  *  - addr: The address to bind to
  *  - port: The port to bind to
+ *  - flags: Server flags. One of SF_*. See server.h
  * returns: The initialized server
  */
-server_t* server_create(server_t* server, const char* addr, int port)
+server_t* server_create(server_t* server, const char* addr, int port, uint8_t flags)
 {
 	if (server == NULL) {
 		server = (server_t*)malloc(sizeof(server_t));
@@ -42,6 +43,7 @@ server_t* server_create(server_t* server, const char* addr, int port)
 	server->fd = -1;
 	server->buf_size = SERVER_DEFAULT_BUFFER_SIZE;
 	server->io_loop = 0;
+	server->flags = flags;
 	return server;
 }
 
@@ -170,6 +172,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 
 	server_t* server = client->server;
 	char buffer[server->buf_size];	// todo: work out a better place to put this buffer
+	int report_read = 0;
 
 	if (revents & EV_READ) {
 		int read_avail = recv(client->fd, buffer, server->buf_size, 0);
@@ -203,7 +206,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 
 
 		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
-			server->read_cb(client, server);
+			report_read = 1;
 		}
 	}
 
@@ -254,10 +257,21 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		case HANDSHAKE_ACCEPTED:
 			// Notify client of any buffered data
 			if (buffer_read_avail(&client->read_buffer) > 0) {
-				server->read_cb(client, server);
+				report_read = 1;
 			}
 			break;
 		}
+	}
+
+	if (client->handshake_stage == HANDSHAKE_ACCEPTED &&
+		buffer_read_avail(&client->read_buffer) > 0 &&
+		server->flags & SF_PARTIAL_READ) {
+		// re-report previously buffered but un-processed data
+		report_read = 1;
+	}
+
+	if (report_read) {
+		server->read_cb(client, server);
 	}
 }
 
