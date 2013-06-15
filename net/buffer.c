@@ -83,19 +83,12 @@ size_t buffer_write_avail(buffer_t* buffer)
 size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
 {
 	size_t to_read = min(len, buffer_read_avail(buffer));
-	size_t total_read = to_read;
-	int write_ofs = 0;
-	if (buffer->read_ptr + to_read > buffer->real_size) {
-		// We have to wrap around halfway through
-		size_t partial_read_amt = buffer->real_size - buffer->read_ptr;
-		buffer_read(buffer, buf, partial_read_amt);
-		buffer->read_ptr = 0;
-		write_ofs = partial_read_amt;
+	for (int i = 0; i < to_read; i++) {
+		buf[i] = buffer->data[(buffer->read_ptr + i) % buffer->real_size];
 	}
-	memcpy(buf+write_ofs, buffer->data+buffer->read_ptr, to_read-write_ofs);
+	buffer->read_ptr = (buffer->read_ptr + to_read) % buffer->real_size;
 	buffer->read_avail -= to_read;
-	buffer->read_ptr += to_read;
-	return total_read;
+	return to_read;
 }
 
 /**
@@ -110,19 +103,24 @@ size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
 size_t buffer_write(buffer_t* buffer, const char* buf, size_t len)
 {
 	size_t to_write = min(len, buffer_write_avail(buffer));
-	size_t total_write = to_write;
-	int write_ptr = buffer->read_ptr + buffer->read_avail;
-	int read_ofs = 0;
-	if (write_ptr + to_write > buffer->real_size) {
-		// We have to wrap around halfway through
-		size_t partial_write_amt = buffer->real_size - write_ptr;
-		buffer_write(buffer, buf, partial_write_amt);
-		write_ptr = 0;
-		read_ofs = partial_write_amt;
+	int write_ptr = (buffer->read_ptr + buffer->read_avail) % buffer->real_size;
+	for (int i = 0; i < to_write; i++) {
+		buffer->data[(write_ptr + i) % buffer->real_size] = buf[i];
 	}
-	memcpy(buffer->data+write_ptr, buf+read_ofs, to_write-read_ofs);
 	buffer->read_avail += to_write;
-	return total_write;
+	return to_write;
+}
+
+/**
+ * buffer_print
+ *
+ * Print debugging info for a given buffer
+ *  - buffer: The buffer
+ */
+void buffer_print(buffer_t* buffer)
+{
+	int write_ptr = (buffer->read_ptr + buffer->read_avail) % buffer->real_size;
+	printf("read_ptr: %d, write_ptr: %d, read_avail: %d, write_avail: %d\n", buffer->read_ptr, write_ptr, buffer_read_avail(buffer), buffer_write_avail(buffer));
 }
 
 /**

@@ -25,6 +25,8 @@ size_t buffer_write_avail(buffer_t* buffer);
 size_t buffer_read(buffer_t* buffer, char* buf, size_t len);
 size_t buffer_write(buffer_t* buffer, const char* buf, size_t len);
 
+void buffer_print(buffer_t* buffer);
+
 void buffer_pushp(buffer_t* buffer);
 void buffer_popp(buffer_t* buffer);
 
