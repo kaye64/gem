@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <util/math.h>
 
@@ -120,7 +121,7 @@ size_t buffer_write(buffer_t* buffer, const char* buf, size_t len)
 void buffer_print(buffer_t* buffer)
 {
 	int write_ptr = (buffer->read_ptr + buffer->read_avail) % buffer->real_size;
-	printf("read_ptr: %d, write_ptr: %d, read_avail: %d, write_avail: %d\n", buffer->read_ptr, write_ptr, buffer_read_avail(buffer), buffer_write_avail(buffer));
+	printf("read_ptr: %d, write_ptr: %d, read_avail: %d, write_avail: %d\n", buffer->read_ptr, write_ptr, (int)buffer_read_avail(buffer), (int)buffer_write_avail(buffer));
 }
 
 /**
