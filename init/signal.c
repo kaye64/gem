@@ -28,10 +28,10 @@ void sig_handler(int signal)
 	switch (signal) {
 	case SIGINT:
 	case SIGTERM:
-		exit_func(0);
+		exit_func(false);
 		break;
 	case SIGQUIT:
-		exit_func(1);
+		exit_func(true);
 		break;
 	}
 }

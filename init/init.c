@@ -34,7 +34,7 @@ struct {
 } instance;
 
 void tick();
-void cleanup(int forceful);
+void cleanup(bool forceful);
 void io_thread();
 void engine_thread();
 
@@ -116,15 +116,24 @@ void tick()
  * cleanup
  *
  * Cleanly closes all sockets, quits all threads, generally cleans up for shutdown
- *  - forceful: How quickly we need to shutdown. SIGINT/SIGTERM = 0, SIGQUIT = 1
+ *  - forceful: How quickly we need to shutdown. SIGINT/SIGTERM = false, SIGQUIT = true
  */
-void cleanup(int forceful) {
-	INFO("Cleaning up for shutdown");
-	ev_timer_stop(instance.engine_loop, &instance.engine_tick);
+void cleanup(bool forceful) {
+	if (!forceful) {
+		INFO("Cleaning up for shutdown");
+		ev_timer_stop(instance.engine_loop, &instance.engine_tick);
+
+		ev_break(instance.engine_loop, EVBREAK_ALL);
+		ev_break(instance.io_loop, EVBREAK_ALL);
+	}
+
 	dispatcher_free(instance.world_dispatcher);
 	game_free(instance.game_service);
 	update_free(instance.update_service);
-	server_stop((server_t*)instance.jag_server);
+
 	jaggrab_free(instance.jag_server);
+
 	cache_free(instance.cache);
+
+	exit(EXIT_SUCCESS);
 }
