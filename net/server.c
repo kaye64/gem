@@ -148,9 +148,7 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
  */
 void server_client_drop(server_t* server, client_t* client)
 {
-	ev_io_stop(server->io_loop, &client->io_read);
-	close(client->fd);
-	server_client_cleanup(server, client);
+	client->client_drop = true;
 }
 
 /**
@@ -173,6 +171,13 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	server_t* server = client->server;
 	char buffer[server->buf_size];	// todo: work out a better place to put this buffer
 	int report_read = 0;
+
+	if (client->client_drop) {
+		ev_io_stop(server->io_loop, &client->io_read);
+		close(client->fd);
+		server_client_cleanup(server, client);
+		return;
+	}
 
 	if (revents & EV_READ) {
 		int read_avail = recv(client->fd, buffer, server->buf_size, 0);
@@ -294,6 +299,7 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 	client->addr = addr;
 	client->server = server;
 	client->handshake_stage = HANDSHAKE_PENDING;
+	client->client_drop = false;
 	buffer_create(&client->read_buffer, server->buf_size);
 	buffer_create(&client->write_buffer, server->buf_size);
 	return client;

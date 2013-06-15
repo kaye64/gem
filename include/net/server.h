@@ -58,6 +58,7 @@ typedef struct server server_t;
 struct client {
 	server_t* server;
 	int handshake_stage;
+	bool client_drop;
 	/* net stuff */
 	struct ev_io io_read;
 	int fd;
