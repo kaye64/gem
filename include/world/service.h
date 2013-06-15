@@ -3,8 +3,8 @@
 
 #include <net/server.h>
 
+#define SERVICE_GAME 14
 #define SERVICE_UPDATE 15
-#define SERVICE_GAME 18
 
 struct service_client;
 
