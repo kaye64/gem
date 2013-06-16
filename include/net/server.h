@@ -5,9 +5,8 @@
 #include <netinet/in.h>
 #include <stdbool.h>
 
+#include <util/config.h>
 #include <net/buffer.h>
-
-#define SERVER_DEFAULT_BUFFER_SIZE 4096 // todo: make cvar
 
 #define HANDSHAKE_PENDING 0
 #define HANDSHAKE_DENIED 1

@@ -41,7 +41,7 @@ server_t* server_create(server_t* server, const char* addr, int port, uint8_t fl
 	strcpy(server->addr, addr);
 	server->port = port;
 	server->fd = -1;
-	server->buf_size = SERVER_DEFAULT_BUFFER_SIZE;
+	server->buf_size = DEFAULT_BUFFER_SIZE;
 	server->io_loop = 0;
 	server->flags = flags;
 	return server;
