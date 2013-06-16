@@ -11,6 +11,13 @@
 
 #define LOG_TAG "codec"
 
+/**
+ * codec_create
+ *
+ * Initializes a new codec
+ *  - codec: Some preallocated memory, or null to put on heap
+ * returns: The initialized codec
+ */
 stream_codec_t* codec_create(stream_codec_t* codec)
 {
 	if (codec == NULL) {
@@ -24,6 +31,15 @@ stream_codec_t* codec_create(stream_codec_t* codec)
 	return codec;
 }
 
+/**
+ * codec_create
+ *
+ * Initializes a new codec and fills it with some data
+ *  - codec: Some preallocated memory, or null to put on heap
+ *  - data: Some data
+ *  - len: The length of the data
+ * returns: The initialized codec
+ */
 stream_codec_t* codec_create_buf(stream_codec_t* codec, char* data, int len)
 {
 	codec = codec_create(codec);
@@ -31,6 +47,12 @@ stream_codec_t* codec_create_buf(stream_codec_t* codec, char* data, int len)
 	return codec;
 }
 
+/**
+ * codec_free
+ *
+ * Properly frees a stream_codec_t
+ *  - codec: The codec to free
+ */
 void codec_free(stream_codec_t* codec)
 {
 	if (codec->must_free) {
@@ -38,6 +60,13 @@ void codec_free(stream_codec_t* codec)
 	}
 }
 
+/**
+ * codec_seek
+ *
+ * Seek to a given position in the codec
+ *  - codec: The codec
+ *  - caret: The position
+ */
 void codec_seek(stream_codec_t* codec, size_t caret)
 {
 	if (caret > DEFAULT_BUFFER_SIZE) {
@@ -47,6 +76,13 @@ void codec_seek(stream_codec_t* codec, size_t caret)
 	codec->caret = caret;
 }
 
+/**
+ * codec_len
+ *
+ * Returns the amount of valid data in the codec
+ *  - codec: The codec
+ * returns: The amount of valid data in the codec
+ */
 size_t codec_len(stream_codec_t* codec)
 {
 	// We could do with a more reliable way to keep track of
@@ -54,6 +90,15 @@ size_t codec_len(stream_codec_t* codec)
 	return codec->caret;
 }
 
+/**
+ * codec_buffer_write
+ *
+ * Writes the entire contents (and only the entire contents)
+ * of the codec to a buffer_t
+ *  - codec: The codec
+ *  - buffer: The buffer
+ * returns: Whether the operation was a success
+ */
 bool codec_buffer_write(stream_codec_t* codec, buffer_t* buffer)
 {
 	buffer_pushp(buffer);
@@ -64,6 +109,15 @@ bool codec_buffer_write(stream_codec_t* codec, buffer_t* buffer)
 	return true;
 }
 
+/**
+ * codec_buffer_read
+ *
+ * Reads a given amount from a buffer_t into the codec
+ *  - codec: The codec
+ *  - buffer: The buffer
+ *  - len: The amount of data to read
+ * returns: Whether the operation was a success
+ */
 bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
@@ -79,6 +133,14 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 	return true;
 }
 
+/**
+ * codec_put8
+ *
+ * Puts 8 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ *  - flags: Modifier flags
+ */
 void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags)
 {
 	if (codec->caret+1 > DEFAULT_BUFFER_SIZE) {
@@ -100,6 +162,14 @@ void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags)
 	codec->data[codec->caret++] = val[0];
 }
 
+/**
+ * codec_put16
+ *
+ * Puts 16 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ *  - flags: Modifier flags
+ */
 void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags)
 {
 	if (codec->caret+2 > DEFAULT_BUFFER_SIZE) {
@@ -126,6 +196,15 @@ void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags)
 	codec->data[codec->caret++] = val[1];
 	codec->data[codec->caret++] = val[0];
 }
+
+/**
+ * codec_put24
+ *
+ * Puts 24 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ *  - flags: Modifier flags
+ */
 void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags)
 {
 	if (codec->caret+3 > DEFAULT_BUFFER_SIZE) {
@@ -156,6 +235,14 @@ void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags)
 	codec->data[codec->caret++] = val[0];
 }
 
+/**
+ * codec_put32
+ *
+ * Puts 32 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ *  - flags: Modifier flags
+ */
 void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags)
 {
 	if (codec->caret+4 > DEFAULT_BUFFER_SIZE) {
@@ -187,6 +274,14 @@ void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags)
 	codec->data[codec->caret++] = val[0];
 }
 
+/**
+ * codec_put64
+ *
+ * Puts 64 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ *  - flags: Modifier flags
+ */
 void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
 {
 	if (codec->caret+8 > DEFAULT_BUFFER_SIZE) {
@@ -226,6 +321,14 @@ void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
 	codec->data[codec->caret++] = val[0];
 }
 
+/**
+ * codec_putn
+ *
+ * Puts a given number of bytes to the codec
+ *  - codec: The codec
+ *  - data: The data
+ *  - len: The length of the data
+ */
 void codec_putn(stream_codec_t* codec, char* data, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
@@ -237,6 +340,16 @@ void codec_putn(stream_codec_t* codec, char* data, size_t len)
 	codec->caret += len;
 }
 
+
+/**
+ * codec_get8
+ *
+ * Gets 8 bits from the codec
+ *  - codec: The codec
+ *  - i: Location to store the value, or NULL
+ *  - flags: Modifier flags
+ * returns: The value
+ */
 uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags)
 {
 	if (codec->caret+1 > DEFAULT_BUFFER_SIZE) {
@@ -264,6 +377,15 @@ uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags)
 	return *i;
 }
 
+/**
+ * codec_get16
+ *
+ * Gets 16 bits from the codec
+ *  - codec: The codec
+ *  - i: Location to store the value, or NULL
+ *  - flags: Modifier flags
+ * returns: The value
+ */
 uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
 {
 	if (codec->caret+2 > DEFAULT_BUFFER_SIZE) {
@@ -297,6 +419,15 @@ uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
 	return *i;
 }
 
+/**
+ * codec_get24
+ *
+ * Gets 24 bits from the codec
+ *  - codec: The codec
+ *  - i: Location to store the value, or NULL
+ *  - flags: Modifier flags
+ * returns: The value
+ */
 uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 {
 	if (codec->caret+3 > DEFAULT_BUFFER_SIZE) {
@@ -333,6 +464,15 @@ uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 	return *i;
 }
 
+/**
+ * codec_get32
+ *
+ * Gets 32 bits from the codec
+ *  - codec: The codec
+ *  - i: Location to store the value, or NULL
+ *  - flags: Modifier flags
+ * returns: The value
+ */
 uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 {
 	if (codec->caret+4 > DEFAULT_BUFFER_SIZE) {
@@ -369,6 +509,17 @@ uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 	}
 	return *i;
 }
+
+
+/**
+ * codec_get64
+ *
+ * Gets 64 bits from the codec
+ *  - codec: The codec
+ *  - i: Location to store the value, or NULL
+ *  - flags: Modifier flags
+ * returns: The value
+ */
 uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
 {
 	if (codec->caret+8 > DEFAULT_BUFFER_SIZE) {
@@ -414,6 +565,17 @@ uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
 	return *i;
 }
 
+/**
+ * codec_getn
+ *
+ * Gets a given number of bytes from the codec. If data is NULL,
+ * space is created on the heap. Caller is responsible for freeing
+ * this memory.
+ *  - codec: The codec
+ *  - data: A place to store the data, or NULL
+ *  - len: The length of the data
+ * returns: A pointer to the data read
+ */
 char* codec_getn(stream_codec_t* codec, char* data, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
