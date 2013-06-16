@@ -12,6 +12,7 @@
 #include <util/log.h>
 #include <util/container_of.h>
 #include <world/dispatcher.h>
+#include <net/stream_codec.h>
 #include <runite/util/byte_order.h>
 
 #define LOG_TAG "update"
@@ -109,16 +110,19 @@ void update_service_read(service_client_t* service_client)
 	update_client_t* update_client = (update_client_t*)service_client->attrib;
 	client_t* client = &service_client->client;
 	cache_t* cache = update_service->cache;
+	stream_codec_t codec;
+	codec_create(&codec);
 
 	// Read the request
-	buffer_pushp(&client->read_buffer);
-	update_request_t* req = (update_request_t*)malloc(sizeof(update_request_t));
-	if (buffer_read(&client->read_buffer, (char*)req, 4) < 4) {
-		buffer_popp(&client->read_buffer);
+	if (!codec_buffer_read(&codec, &client->read_buffer, 4)) {
 		return;
 	}
+
+	update_request_t* req = (update_request_t*)malloc(sizeof(update_request_t));
+	codec_get8(&codec, &req->cache_id, 0);
+	codec_get16(&codec, &req->file_id, 0);
+	codec_get8(&codec, &req->priority, 0);
 	req->cache_id++;
-	req->file_id = to_host_order_s(req->file_id);
 
 	// Validate it
 	if (req->cache_id < 0 || req->cache_id > cache->num_indices) {
@@ -180,19 +184,21 @@ void update_service_write(service_client_t* service_client)
 	// Construct the chunk
 	update_response_t chunk;
 	chunk.cache_id = request->cache_id-1;
-	chunk.file_id = to_net_order_s(request->file_id);
-	chunk.file_size = to_net_order_s(request->file_size);
+	chunk.file_id = request->file_id;
+	chunk.file_size = request->file_size;
 	chunk.chunk_num = request->next_chunk;
 	int ofs = request->next_chunk*500;
 	int chunk_size = min(500, request->file_size-ofs);
 
-	buffer_pushp(&client->write_buffer);
-	if (buffer_write(&client->write_buffer, (char*)&chunk, sizeof(update_response_t)) < sizeof(update_response_t)) {
-		buffer_popp(&client->write_buffer);
-		return;
-	}
-	if (buffer_write(&client->write_buffer, request->payload+ofs, chunk_size) < chunk_size) {
-		buffer_popp(&client->write_buffer);
+	stream_codec_t codec;
+	codec_create(&codec);
+	codec_put8(&codec, chunk.cache_id, 0);
+	codec_put16(&codec, chunk.file_id, 0);
+	codec_put16(&codec, chunk.file_size, 0);
+	codec_put8(&codec, chunk.chunk_num, 0);
+	codec_putn(&codec, request->payload+ofs, chunk_size);
+
+	if (!codec_buffer_write(&codec, &client->write_buffer)) {
 		return;
 	}
 
