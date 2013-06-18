@@ -9,9 +9,10 @@
 
 #include <util/config.h>
 #include <net/buffer.h>
+#include <crypto/rsa.h>
 
 struct stream_codec {
-	char data[DEFAULT_BUFFER_SIZE];
+	unsigned char data[DEFAULT_BUFFER_SIZE];
 	size_t caret;
 	bool must_free;
 };
@@ -22,9 +23,10 @@ typedef struct stream_codec stream_codec_t;
 #define CODEC_INV128   (1 << 1)
 #define CODEC_OFS128   (1 << 2)
 #define CODEC_LITTLE   (1 << 3)
+#define CODEC_JSTRING  (1 << 4)
 
 stream_codec_t* codec_create(stream_codec_t* codec);
-stream_codec_t* codec_create_buf(stream_codec_t* codec, char* data, int len);
+stream_codec_t* codec_create_buf(stream_codec_t* codec, unsigned char* data, int len);
 void codec_free(stream_codec_t* codec);
 
 void codec_seek(stream_codec_t* codec, size_t caret);
@@ -38,13 +40,15 @@ void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags);
 void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags);
 void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags);
 void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags);
-void codec_putn(stream_codec_t* codec, char* data, size_t len);
+void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len);
+void codec_puts(stream_codec_t* codec, char* s, int len, uint8_t flags);
 
 uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags);
 uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags);
 uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags);
 uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags);
 uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags);
-char* codec_getn(stream_codec_t* codec, char* data, size_t len);
+unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len);
+char* codec_gets(stream_codec_t* codec, char* s, int* len, uint8_t flags);
 
 #endif /* _STREAM_CODEC_H_ */

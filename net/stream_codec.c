@@ -40,7 +40,7 @@ stream_codec_t* codec_create(stream_codec_t* codec)
  *  - len: The length of the data
  * returns: The initialized codec
  */
-stream_codec_t* codec_create_buf(stream_codec_t* codec, char* data, int len)
+stream_codec_t* codec_create_buf(stream_codec_t* codec, unsigned char* data, int len)
 {
 	codec = codec_create(codec);
 	memcpy(codec->data, data, len);
@@ -189,8 +189,8 @@ void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags)
 	}
 	if (flags & CODEC_LITTLE) {
 		uint16_t tmp = i;
-		val[0] = ((char*)&tmp)[1];
-		val[1] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[1];
+		val[1] = ((unsigned char*)&tmp)[0];
 	}
 
 	codec->data[codec->caret++] = val[1];
@@ -225,9 +225,9 @@ void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags)
 	}
 	if (flags & CODEC_LITTLE) {
 		uint32_t tmp = i;
-		val[0] = ((char*)&tmp)[2];
-		val[1] = ((char*)&tmp)[1];
-		val[2] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[2];
+		val[1] = ((unsigned char*)&tmp)[1];
+		val[2] = ((unsigned char*)&tmp)[0];
 	}
 
 	codec->data[codec->caret++] = val[2];
@@ -262,10 +262,10 @@ void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags)
 	}
 	if (flags & CODEC_LITTLE) {
 		uint32_t tmp = i;
-		val[0] = ((char*)&tmp)[3];
-		val[1] = ((char*)&tmp)[2];
-		val[2] = ((char*)&tmp)[1];
-		val[3] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[3];
+		val[1] = ((unsigned char*)&tmp)[2];
+		val[2] = ((unsigned char*)&tmp)[1];
+		val[3] = ((unsigned char*)&tmp)[0];
 	}
 
 	codec->data[codec->caret++] = val[3];
@@ -301,14 +301,14 @@ void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
 	}
 	if (flags & CODEC_LITTLE) {
 		uint64_t tmp = i;
-		val[0] = ((char*)&tmp)[7];
-		val[1] = ((char*)&tmp)[6];
-		val[2] = ((char*)&tmp)[5];
-		val[3] = ((char*)&tmp)[4];
-		val[4] = ((char*)&tmp)[3];
-		val[5] = ((char*)&tmp)[2];
-		val[6] = ((char*)&tmp)[1];
-		val[7] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[7];
+		val[1] = ((unsigned char*)&tmp)[6];
+		val[2] = ((unsigned char*)&tmp)[5];
+		val[3] = ((unsigned char*)&tmp)[4];
+		val[4] = ((unsigned char*)&tmp)[3];
+		val[5] = ((unsigned char*)&tmp)[2];
+		val[6] = ((unsigned char*)&tmp)[1];
+		val[7] = ((unsigned char*)&tmp)[0];
 	}
 
 	codec->data[codec->caret++] = val[7];
@@ -329,7 +329,7 @@ void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
  *  - data: The data
  *  - len: The length of the data
  */
-void codec_putn(stream_codec_t* codec, char* data, size_t len)
+void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -340,6 +340,29 @@ void codec_putn(stream_codec_t* codec, char* data, size_t len)
 	codec->caret += len;
 }
 
+/**
+ * codec_puts
+ *
+ * Puts a string to the codec
+ *  - codec: The codec
+ *  - s: The string
+ *  - len: The length of the string
+ *  - flags: Can be CODEC_JSTRING for 0xA terminated string
+ */
+void codec_puts(stream_codec_t* codec, char* s, int len, uint8_t flags)
+{
+	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
+		ERROR("tried to put past end of buffer");
+		return;
+	}
+
+	codec_putn(codec, (unsigned char*)s, len);
+	if (flags & CODEC_JSTRING) {
+		codec_put8(codec, 10, 0);
+	} else {
+		codec_put8(codec, 0, 0);
+	}
+}
 
 /**
  * codec_get8
@@ -404,8 +427,8 @@ uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
 
 	if (flags & CODEC_LITTLE) {
 		uint16_t tmp = *i;
-		val[0] = ((char*)&tmp)[1];
-		val[1] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[1];
+		val[1] = ((unsigned char*)&tmp)[0];
 	}
 	if (flags & CODEC_NEGATIVE) {
 		val[0] = -val[0];
@@ -448,9 +471,9 @@ uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 
 	if (flags & CODEC_LITTLE) {
 		uint32_t tmp = *i;
-		val[0] = ((char*)&tmp)[2];
-		val[1] = ((char*)&tmp)[1];
-		val[2] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[2];
+		val[1] = ((unsigned char*)&tmp)[1];
+		val[2] = ((unsigned char*)&tmp)[0];
 	}
 	if (flags & CODEC_NEGATIVE) {
 		val[0] = -val[0];
@@ -493,10 +516,10 @@ uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 
 	if (flags & CODEC_LITTLE) {
 		uint32_t tmp = *i;
-		val[0] = ((char*)&tmp)[3];
-		val[1] = ((char*)&tmp)[2];
-		val[2] = ((char*)&tmp)[1];
-		val[3] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[3];
+		val[1] = ((unsigned char*)&tmp)[2];
+		val[2] = ((unsigned char*)&tmp)[1];
+		val[3] = ((unsigned char*)&tmp)[0];
 	}
 	if (flags & CODEC_NEGATIVE) {
 		val[0] = -val[0];
@@ -544,14 +567,14 @@ uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
 
 	if (flags & CODEC_LITTLE) {
 		uint64_t tmp = *i;
-		val[0] = ((char*)&tmp)[7];
-		val[1] = ((char*)&tmp)[6];
-		val[2] = ((char*)&tmp)[5];
-		val[3] = ((char*)&tmp)[4];
-		val[4] = ((char*)&tmp)[3];
-		val[5] = ((char*)&tmp)[2];
-		val[6] = ((char*)&tmp)[1];
-		val[7] = ((char*)&tmp)[0];
+		val[0] = ((unsigned char*)&tmp)[7];
+		val[1] = ((unsigned char*)&tmp)[6];
+		val[2] = ((unsigned char*)&tmp)[5];
+		val[3] = ((unsigned char*)&tmp)[4];
+		val[4] = ((unsigned char*)&tmp)[3];
+		val[5] = ((unsigned char*)&tmp)[2];
+		val[6] = ((unsigned char*)&tmp)[1];
+		val[7] = ((unsigned char*)&tmp)[0];
 	}
 	if (flags & CODEC_NEGATIVE) {
 		val[0] = -val[0];
@@ -576,7 +599,7 @@ uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
  *  - len: The length of the data
  * returns: A pointer to the data read
  */
-char* codec_getn(stream_codec_t* codec, char* data, size_t len)
+unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -584,10 +607,48 @@ char* codec_getn(stream_codec_t* codec, char* data, size_t len)
 	}
 
 	if (data == NULL) {
-		data = (char*)malloc(len); // Caller is responsible for freeing
+		data = (unsigned char*)malloc(len); // Caller is responsible for freeing
 	}
 
-	memcpy(&codec->data[codec->caret], data, len);
+	memcpy(data, &codec->data[codec->caret], len);
 	codec->caret += len;
 	return data;
+}
+
+/**
+ * codec_gets
+ *
+ * Gets a string from the codec
+ *  - codec: The codec
+ *  - s: The output buffer
+ *  - len: The length of the output buffer. Set to the length of the string
+ *  - flags: Can be CODEC_JSTRING for 0xA terminated string
+ * returns: A pointer to the output buffer
+ */
+char* codec_gets(stream_codec_t* codec, char* s, int* len, uint8_t flags)
+{
+	if (codec->caret+(*len) > DEFAULT_BUFFER_SIZE) {
+		ERROR("tried to put past end of buffer");
+		return NULL;
+	}
+
+	char terminator = 0;
+	if (flags & CODEC_JSTRING) {
+		terminator = 10;
+	}
+	bool valid = false;
+	for (int i = 0; i < (*len)-1; i++) {
+		if (codec->data[codec->caret+i] == terminator) {
+			*len = i;
+			valid = true;
+			break;
+		}
+	}
+	if (!valid) {
+		ERROR("No valid string found");
+		return NULL;
+	}
+	codec_getn(codec, (unsigned char*)s, *len);
+	s[*len] = 0;
+	return s;
 }

@@ -15,7 +15,7 @@ struct cache_block {
 	int file_pos : 16;
 	int next_block : 24;
 	int cache_id : 8;
-	char data[512];
+	unsigned char data[512];
 } __attribute__((packed));
 typedef struct cache_block cache_block_t;
 
@@ -33,8 +33,8 @@ cache_t* cache_open_dir(cache_t* cache, const char* directory);
 cache_t* cache_open(cache_t* cache, int num_indices, const char** index_files, const char* data_file);
 void cache_free(cache_t* cache);
 
-void cache_gen_crc(cache_t* cache, int index, char* buffer);
+void cache_gen_crc(cache_t* cache, int index, unsigned char* buffer);
 uint32_t cache_query_size(cache_t* cache, int index, int file);
-bool cache_get(cache_t* cache, int index, int file, char* buffer);
+bool cache_get(cache_t* cache, int index, int file, unsigned char* buffer);
 
 #endif /* _CACHE_H_ */

@@ -169,7 +169,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	}
 
 	server_t* server = client->server;
-	char buffer[server->buf_size];	// todo: work out a better place to put this buffer
+	unsigned char buffer[server->buf_size];	// todo: work out a better place to put this buffer
 	int report_read = 0;
 
 	if (client->client_drop) {

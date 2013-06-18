@@ -27,7 +27,7 @@ buffer_t* buffer_create(buffer_t* buffer, size_t size)
 	} else {
 		buffer->must_free = false;
 	}
-	buffer->data = (char*)malloc(sizeof(char)*size);
+	buffer->data = (unsigned char*)malloc(sizeof(unsigned char)*size);
 	buffer->real_size = size;
 	buffer->read_ptr = buffer->prev_read_ptr = 0;
 	buffer->read_avail = buffer->prev_read_avail = 0;
@@ -81,7 +81,7 @@ size_t buffer_write_avail(buffer_t* buffer)
  *  - len: The amount of bytes to read up to
  * returns: The amount of bytes read
  */
-size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
+size_t buffer_read(buffer_t* buffer, unsigned char* buf, size_t len)
 {
 	size_t to_read = min(len, buffer_read_avail(buffer));
 	for (int i = 0; i < to_read; i++) {
@@ -101,7 +101,7 @@ size_t buffer_read(buffer_t* buffer, char* buf, size_t len)
  *  - len: The amount of bytes to write up to
  * returns: The amount of bytes written
  */
-size_t buffer_write(buffer_t* buffer, const char* buf, size_t len)
+size_t buffer_write(buffer_t* buffer, const unsigned char* buf, size_t len)
 {
 	size_t to_write = min(len, buffer_write_avail(buffer));
 	int write_ptr = (buffer->read_ptr + buffer->read_avail) % buffer->real_size;

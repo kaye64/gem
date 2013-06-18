@@ -129,7 +129,7 @@ int dispatcher_handshake(service_client_t* service_client)
 	if (service_client->service == NULL) {
 		buffer_pushp(&client->read_buffer);
 
-		char service_type = 0;
+		unsigned char service_type = 0;
 		if (buffer_read(&client->read_buffer, &service_type, 1) < 1) {
 			buffer_popp(&client->read_buffer);
 			return HANDSHAKE_PENDING;

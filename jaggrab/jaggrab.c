@@ -127,7 +127,7 @@ void jaggrab_read(client_t* client, server_t* server)
 	/* read in the request */
 	char request_buffer[128];
 	buffer_pushp(&client->read_buffer);
-	size_t read = buffer_read(&client->read_buffer, request_buffer, 128);
+	size_t read = buffer_read(&client->read_buffer, (unsigned char*)request_buffer, 128);
 	request_buffer[read] = '\0';
 
 	/* extract the archive name */
@@ -149,7 +149,7 @@ void jaggrab_read(client_t* client, server_t* server)
 	int archive_id = resolve_archive(request);
 	if (archive_id > 0) {
 		archive_client->file_size = cache_query_size(archive_server->cache, 0, archive_id);
-		archive_client->file_buffer = (char*)malloc(sizeof(char)*archive_client->file_size);
+		archive_client->file_buffer = (unsigned char*)malloc(sizeof(char)*archive_client->file_size);
 
 		bool success = cache_get(archive_server->cache, 0, archive_id, archive_client->file_buffer);
 		if (!success) {
@@ -158,7 +158,7 @@ void jaggrab_read(client_t* client, server_t* server)
 		}
 	} else {
 		archive_client->file_size = 80;
-		archive_client->file_buffer = (char*)malloc(sizeof(char)*archive_client->file_size);
+		archive_client->file_buffer = (unsigned char*)malloc(sizeof(char)*archive_client->file_size);
 		memcpy(archive_client->file_buffer, archive_server->crc_table, archive_client->file_size);
 	}
 }

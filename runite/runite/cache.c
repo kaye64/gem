@@ -123,7 +123,7 @@ void cache_free(cache_t* cache)
 	}
 }
 
-void cache_gen_crc(cache_t* cache, int index, char* buffer)
+void cache_gen_crc(cache_t* cache, int index, unsigned char* buffer)
 {
 	int num_files = cache->num_files[index];
 	size_t num_crcs = (num_files+1);
@@ -133,7 +133,7 @@ void cache_gen_crc(cache_t* cache, int index, char* buffer)
 	crc_buf[num_files] = 1234;
 	for (int i = 0; i < num_files; i++) {
 		size_t file_len = cache_query_size(cache, index, i);
-		char file_buffer[file_len];
+		unsigned char file_buffer[file_len];
 		cache_get(cache, index, i, file_buffer);
 		crc_buf[i] = crc32(0L, Z_NULL, 0);
 		crc_buf[i] = crc32(crc_buf[i], (const unsigned char*)file_buffer, file_len);
@@ -149,7 +149,7 @@ uint32_t cache_query_size(cache_t* cache, int index, int file)
 	return cache->indices[index][file].file_size;
 }
 
-bool cache_get(cache_t* cache, int index, int file, char* buffer)
+bool cache_get(cache_t* cache, int index, int file, unsigned char* buffer)
 {
 	if (file < 0 || file > cache->num_files[index]) {
 		return false;

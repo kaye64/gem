@@ -90,7 +90,7 @@ int update_service_handshake(service_client_t* service_client)
 	// Client reads but ignores 8 bytes
 	static char* empty = "\0\0\0\0\0\0\0\0";
 	buffer_pushp(&client->write_buffer);
-	if (buffer_write(&client->write_buffer, empty, 8) < 8) {
+	if (buffer_write(&client->write_buffer, (unsigned char*)empty, 8) < 8) {
 		buffer_popp(&client->write_buffer);
 		return HANDSHAKE_PENDING;
 	}
@@ -172,7 +172,7 @@ void update_service_write(service_client_t* service_client)
 		// Resolve the file
 		request->next_chunk = 0;
 		request->file_size = cache_query_size(cache, request->cache_id, request->file_id);
-		request->payload = (char*)malloc(request->file_size);
+		request->payload = (unsigned char*)malloc(request->file_size);
 		if (!cache_get(cache, request->cache_id, request->file_id, request->payload)) {
 			WARN("unable to serve request for %d:%d. dropping", request->cache_id, request->file_id);
 			return;
@@ -209,7 +209,7 @@ void update_service_write(service_client_t* service_client)
 		free(request->payload);
 		free(update_client->current_request);
 		update_client->current_request = (update_request_t*)NULL;
-		request->payload = (char*)NULL;
+		request->payload = (unsigned char*)NULL;
 		request->next_chunk = 0;
 	}
 }
