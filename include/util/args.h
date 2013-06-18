@@ -1,5 +1,5 @@
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _ARGS_H_
+#define _ARGS_H_
 
 struct args_t {
 	int verbose_on;
@@ -9,4 +9,4 @@ struct args_t {
 
 void parse_args(int argc, char **argv);
 
-#endif /* _CONFIG_H_ */
+#endif /* _ARGS_H_ */
