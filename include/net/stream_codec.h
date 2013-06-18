@@ -38,20 +38,32 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len);
 void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa);
 void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa);
 
-void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags);
-void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags);
-void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags);
-void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags);
-void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags);
+void codec_put8(stream_codec_t* codec, uint8_t i);
+void codec_put16(stream_codec_t* codec, uint16_t i);
+void codec_put24(stream_codec_t* codec, uint32_t i);
+void codec_put32(stream_codec_t* codec, uint32_t i);
+void codec_put64(stream_codec_t* codec, uint64_t i);
 void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len);
+
+void codec_put8f(stream_codec_t* codec, uint8_t i, uint8_t flags);
+void codec_put16f(stream_codec_t* codec, uint16_t i, uint8_t flags);
+void codec_put24f(stream_codec_t* codec, uint32_t i, uint8_t flags);
+void codec_put32f(stream_codec_t* codec, uint32_t i, uint8_t flags);
+void codec_put64f(stream_codec_t* codec, uint64_t i, uint8_t flags);
 void codec_puts(stream_codec_t* codec, char* s, int len, uint8_t flags);
 
-uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags);
-uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags);
-uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags);
-uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags);
-uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags);
+uint8_t codec_get8(stream_codec_t* codec);
+uint16_t codec_get16(stream_codec_t* codec);
+uint32_t codec_get24(stream_codec_t* codec);
+uint32_t codec_get32(stream_codec_t* codec);
+uint64_t codec_get64(stream_codec_t* codec);
 unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len);
+
+uint8_t codec_get8fp(stream_codec_t* codec, uint8_t* i, uint8_t flags);
+uint16_t codec_get16fp(stream_codec_t* codec, uint16_t* i, uint8_t flags);
+uint32_t codec_get24fp(stream_codec_t* codec, uint32_t* i, uint8_t flags);
+uint32_t codec_get32fp(stream_codec_t* codec, uint32_t* i, uint8_t flags);
+uint64_t codec_get64fp(stream_codec_t* codec, uint64_t* i, uint8_t flags);
 char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags);
 
 #endif /* _STREAM_CODEC_H_ */

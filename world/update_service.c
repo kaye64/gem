@@ -120,9 +120,9 @@ void update_service_read(service_client_t* service_client)
 	}
 
 	update_request_t* req = (update_request_t*)malloc(sizeof(update_request_t));
-	codec_get8(&codec, &req->cache_id, 0);
-	codec_get16(&codec, &req->file_id, 0);
-	codec_get8(&codec, &req->priority, 0);
+	req->cache_id = codec_get8(&codec);
+	req->file_id = codec_get16(&codec);
+	req->priority = codec_get8(&codec);
 	req->cache_id++;
 
 	// Validate it
@@ -193,10 +193,10 @@ void update_service_write(service_client_t* service_client)
 
 	stream_codec_t codec;
 	codec_create(&codec);
-	codec_put8(&codec, chunk.cache_id, 0);
-	codec_put16(&codec, chunk.file_id, 0);
-	codec_put16(&codec, chunk.file_size, 0);
-	codec_put8(&codec, chunk.chunk_num, 0);
+	codec_put8(&codec, chunk.cache_id);
+	codec_put16(&codec, chunk.file_id);
+	codec_put16(&codec, chunk.file_size);
+	codec_put8(&codec, chunk.chunk_num);
 	codec_putn(&codec, request->payload+ofs, chunk_size);
 
 	if (!codec_buffer_write(&codec, &client->write_buffer)) {

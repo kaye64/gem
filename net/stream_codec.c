@@ -161,9 +161,88 @@ void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa)
  * Puts 8 bits to the codec
  *  - codec: The codec
  *  - i: The value
+ */
+void codec_put8(stream_codec_t* codec, uint8_t i)
+{
+	codec_put8f(codec, i, 0);
+}
+
+/**
+ * codec_put16
+ *
+ * Puts 16 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ */
+void codec_put16(stream_codec_t* codec, uint16_t i)
+{
+	codec_put16f(codec, i, 0);
+}
+
+/**
+ * codec_put24
+ *
+ * Puts 24 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ */
+void codec_put24(stream_codec_t* codec, uint32_t i)
+{
+	codec_put24f(codec, i, 0);
+}
+
+/**
+ * codec_put32
+ *
+ * Puts 32 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ */
+void codec_put32(stream_codec_t* codec, uint32_t i)
+{
+	codec_put32f(codec, i, 0);
+}
+
+/**
+ * codec_put64
+ *
+ * Puts 64 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
+ */
+void codec_put64(stream_codec_t* codec, uint64_t i)
+{
+	codec_put64f(codec, i, 0);
+}
+
+/**
+ * codec_putn
+ *
+ * Puts a given number of bytes to the codec
+ *  - codec: The codec
+ *  - data: The data
+ *  - len: The length of the data
+ */
+void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len)
+{
+	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
+		ERROR("tried to put past end of buffer");
+		return;
+	}
+
+	memcpy(&codec->data[codec->caret], data, len);
+	codec->caret += len;
+}
+
+/**
+ * codec_put8f
+ *
+ * Puts 8 bits to the codec
+ *  - codec: The codec
+ *  - i: The value
  *  - flags: Modifier flags
  */
-void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags)
+void codec_put8f(stream_codec_t* codec, uint8_t i, uint8_t flags)
 {
 	if (codec->caret+1 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -185,14 +264,14 @@ void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags)
 }
 
 /**
- * codec_put16
+ * codec_put16f
  *
  * Puts 16 bits to the codec
  *  - codec: The codec
  *  - i: The value
  *  - flags: Modifier flags
  */
-void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags)
+void codec_put16f(stream_codec_t* codec, uint16_t i, uint8_t flags)
 {
 	if (codec->caret+2 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -220,14 +299,14 @@ void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags)
 }
 
 /**
- * codec_put24
+ * codec_put24f
  *
  * Puts 24 bits to the codec
  *  - codec: The codec
  *  - i: The value
  *  - flags: Modifier flags
  */
-void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags)
+void codec_put24f(stream_codec_t* codec, uint32_t i, uint8_t flags)
 {
 	if (codec->caret+3 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -258,14 +337,14 @@ void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags)
 }
 
 /**
- * codec_put32
+ * codec_put32f
  *
  * Puts 32 bits to the codec
  *  - codec: The codec
  *  - i: The value
  *  - flags: Modifier flags
  */
-void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags)
+void codec_put32f(stream_codec_t* codec, uint32_t i, uint8_t flags)
 {
 	if (codec->caret+4 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -297,14 +376,14 @@ void codec_put32(stream_codec_t* codec, uint32_t i, uint8_t flags)
 }
 
 /**
- * codec_put64
+ * codec_put64f
  *
  * Puts 64 bits to the codec
  *  - codec: The codec
  *  - i: The value
  *  - flags: Modifier flags
  */
-void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
+void codec_put64f(stream_codec_t* codec, uint64_t i, uint8_t flags)
 {
 	if (codec->caret+8 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
@@ -344,25 +423,6 @@ void codec_put64(stream_codec_t* codec, uint64_t i, uint8_t flags)
 }
 
 /**
- * codec_putn
- *
- * Puts a given number of bytes to the codec
- *  - codec: The codec
- *  - data: The data
- *  - len: The length of the data
- */
-void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len)
-{
-	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
-		ERROR("tried to put past end of buffer");
-		return;
-	}
-
-	memcpy(&codec->data[codec->caret], data, len);
-	codec->caret += len;
-}
-
-/**
  * codec_puts
  *
  * Puts a string to the codec
@@ -380,9 +440,9 @@ void codec_puts(stream_codec_t* codec, char* s, int len, uint8_t flags)
 
 	codec_putn(codec, (unsigned char*)s, len);
 	if (flags & CODEC_JSTRING) {
-		codec_put8(codec, 10, 0);
+		codec_put8(codec, 10);
 	} else {
-		codec_put8(codec, 0, 0);
+		codec_put8(codec, 0);
 	}
 }
 
@@ -391,11 +451,99 @@ void codec_puts(stream_codec_t* codec, char* s, int len, uint8_t flags)
  *
  * Gets 8 bits from the codec
  *  - codec: The codec
+ * returns: The value
+ */
+uint8_t codec_get8(stream_codec_t* codec)
+{
+	return codec_get8fp(codec, NULL, 0);
+}
+
+/**
+ * codec_get16
+ *
+ * Gets 16 bits from the codec
+ *  - codec: The codec
+ * returns: The value
+ */
+uint16_t codec_get16(stream_codec_t* codec)
+{
+	return codec_get16fp(codec, NULL, 0);
+}
+
+/**
+ * codec_get24
+ *
+ * Gets 24 bits from the codec
+ *  - codec: The codec
+ * returns: The value
+ */
+uint32_t codec_get24(stream_codec_t* codec)
+{
+	return codec_get24fp(codec, NULL, 0);
+}
+
+/**
+ * codec_get32
+ *
+ * Gets 32 bits from the codec
+ *  - codec: The codec
+ * returns: The value
+ */
+uint32_t codec_get32(stream_codec_t* codec)
+{
+	return codec_get32fp(codec, NULL, 0);
+}
+
+
+/**
+ * codec_get64
+ *
+ * Gets 64 bits from the codec
+ *  - codec: The codec
+ * returns: The value
+ */
+uint64_t codec_get64(stream_codec_t* codec)
+{
+	return codec_get64fp(codec, NULL, 0);
+}
+
+/**
+ * codec_getn
+ *
+ * Gets a given number of bytes from the codec. If data is NULL,
+ * space is created on the heap. Caller is responsible for freeing
+ * this memory.
+ *  - codec: The codec
+ *  - data: A place to store the data, or NULL
+ *  - len: The length of the data
+ * returns: A pointer to the data read
+ */
+unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len)
+{
+	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
+		ERROR("tried to put past end of buffer");
+		return 0;
+	}
+
+	if (data == NULL) {
+		data = (unsigned char*)malloc(len); // Caller is responsible for freeing
+	}
+
+	memcpy(data, &codec->data[codec->caret], len);
+	codec->caret += len;
+	return data;
+}
+
+/**
+ * codec_get8fp
+ *
+ * Gets 8 bits from the codec
+ *  - codec: The codec
  *  - i: Location to store the value, or NULL
  *  - flags: Modifier flags
  * returns: The value
  */
-uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags)
+uint8_t codec_get8fp(stream_codec_t* codec, uint8_t* i, uint8_t flags)
 {
 	if (codec->caret+1 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to get past end of buffer");
@@ -423,7 +571,7 @@ uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags)
 }
 
 /**
- * codec_get16
+ * codec_get16fp
  *
  * Gets 16 bits from the codec
  *  - codec: The codec
@@ -431,7 +579,7 @@ uint8_t codec_get8(stream_codec_t* codec, uint8_t* i, uint8_t flags)
  *  - flags: Modifier flags
  * returns: The value
  */
-uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
+uint16_t codec_get16fp(stream_codec_t* codec, uint16_t* i, uint8_t flags)
 {
 	if (codec->caret+2 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to get past end of buffer");
@@ -465,7 +613,7 @@ uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
 }
 
 /**
- * codec_get24
+ * codec_get24fp
  *
  * Gets 24 bits from the codec
  *  - codec: The codec
@@ -473,7 +621,7 @@ uint16_t codec_get16(stream_codec_t* codec, uint16_t* i, uint8_t flags)
  *  - flags: Modifier flags
  * returns: The value
  */
-uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
+uint32_t codec_get24fp(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 {
 	if (codec->caret+3 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to get past end of buffer");
@@ -510,7 +658,7 @@ uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 }
 
 /**
- * codec_get32
+ * codec_get32fp
  *
  * Gets 32 bits from the codec
  *  - codec: The codec
@@ -518,7 +666,7 @@ uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags)
  *  - flags: Modifier flags
  * returns: The value
  */
-uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
+uint32_t codec_get32fp(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 {
 	if (codec->caret+4 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to get past end of buffer");
@@ -557,7 +705,7 @@ uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
 
 
 /**
- * codec_get64
+ * codec_get64fp
  *
  * Gets 64 bits from the codec
  *  - codec: The codec
@@ -565,7 +713,7 @@ uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags)
  *  - flags: Modifier flags
  * returns: The value
  */
-uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
+uint64_t codec_get64fp(stream_codec_t* codec, uint64_t* i, uint8_t flags)
 {
 	if (codec->caret+8 > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to get past end of buffer");
@@ -608,33 +756,6 @@ uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags)
 		val[0] = val[0] - 128;
 	}
 	return *i;
-}
-
-/**
- * codec_getn
- *
- * Gets a given number of bytes from the codec. If data is NULL,
- * space is created on the heap. Caller is responsible for freeing
- * this memory.
- *  - codec: The codec
- *  - data: A place to store the data, or NULL
- *  - len: The length of the data
- * returns: A pointer to the data read
- */
-unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len)
-{
-	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
-		ERROR("tried to put past end of buffer");
-		return 0;
-	}
-
-	if (data == NULL) {
-		data = (unsigned char*)malloc(len); // Caller is responsible for freeing
-	}
-
-	memcpy(data, &codec->data[codec->caret], len);
-	codec->caret += len;
-	return data;
 }
 
 /**

@@ -92,13 +92,13 @@ int game_service_handshake(service_client_t* service_client)
 	}
 
 	codec_seek(&game_client->codec, 0);
-	codec_put8(&game_client->codec, status, 0);
+	codec_put8(&game_client->codec, status);
 
 	int handshake_status = HANDSHAKE_ACCEPTED;
 
 	if (status == LOGIN_OKAY) {
-		codec_put8(&game_client->codec, PLAYER_RIGHTS_SUPER, 0);
-		codec_put8(&game_client->codec, 0, 0); // I believe this can toggle advanced player stats for bot detection
+		codec_put8(&game_client->codec, game_client->rights);
+		codec_put8(&game_client->codec, 0); // I believe this can toggle advanced player stats for bot detection
 	} else {
 		handshake_status = HANDSHAKE_DENIED;
 	}
@@ -150,22 +150,22 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 
 		// This is one byte of the hashed form of the user's login name.
 		// Probably used to select a login server, but we don't need it.
-		/*uint8_t name_hash = */codec_get8(&game_client->codec, NULL, 0);
+		/*uint8_t name_hash = */codec_get8(&game_client->codec);
 
 		codec_seek(&game_client->codec, 0);
 		// Write the 8 ignored bytes
 		for (int i = 0; i < 8; i++) {
-			codec_put8(&game_client->codec, 0, 0);
+			codec_put8(&game_client->codec, 0);
 		}
 
 		// Request the login packet
-		codec_put8(&game_client->codec, 0, 0);
+		codec_put8(&game_client->codec, 0);
 
 		// Send the server's random seed
 		game_client->server_isaac_seed = isaac_next(&game_service->rand_gen);
 		game_client->server_isaac_seed <<= 32;
 		game_client->server_isaac_seed += isaac_next(&game_service->rand_gen);
-		codec_put64(&game_client->codec, game_client->server_isaac_seed, 0);
+		codec_put64(&game_client->codec, game_client->server_isaac_seed);
 
 		if (!codec_buffer_write(&game_client->codec, &client->write_buffer)) {
 			return LOGIN_PENDING;
@@ -180,19 +180,19 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 2)) {
 			return LOGIN_PENDING;
 		}
-		int login_type = codec_get8(&game_client->codec, NULL, 0);
-		int login_len = codec_get8(&game_client->codec, NULL, 0);
+		/*int login_type = */codec_get8(&game_client->codec);
+		int login_len = codec_get8(&game_client->codec);
 
 		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, login_len)) {
 			return LOGIN_PENDING;
 		}
 
-		if (codec_get8(&game_client->codec, NULL, 0) != 255) {
+		if (codec_get8(&game_client->codec) != 255) {
 			WARN("Client sent invalid login magic");
 			return LOGIN_REJECTED;
 		}
-		uint16_t client_ver = codec_get16(&game_client->codec, NULL, 0);
-		uint8_t client_mem_type = codec_get8(&game_client->codec, NULL, 0);
+		uint16_t client_ver = codec_get16(&game_client->codec);
+		uint8_t client_mem_type = codec_get8(&game_client->codec);
 
 		if (client_ver != CLIENT_REVISION) {
 			WARN("Client connected with unexpected revision %d", client_ver);
@@ -209,7 +209,7 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 		uint32_t client_archive_crcs[9];
 		for (int i = 0; i < 9; i++) {
 			// todo: validate these values
-			client_archive_crcs[i] = codec_get32(&game_client->codec, NULL, 0);
+			client_archive_crcs[i] = codec_get32(&game_client->codec);
 		}
 		game_client->login_stage = STAGE_SECURE_BLOCK;
 		return LOGIN_PENDING;
@@ -218,14 +218,14 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 	if (game_client->login_stage == STAGE_SECURE_BLOCK) {
 		// Decrypt the secure login block
 		codec_block_decrypt(&game_client->codec, game_service->rsa);
-		if (codec_get8(&game_client->codec, NULL, 0) != 10) {
+		if (codec_get8(&game_client->codec) != 10) {
 			WARN("Corrupt secure login block");
 			return LOGIN_REJECTED;
 		}
 
 		// Verify isaac seed, create the RNGs
-		game_client->client_isaac_seed = codec_get64(&game_client->codec, NULL, 0);
-		if (codec_get64(&game_client->codec, NULL, 0) != game_client->server_isaac_seed) {
+		game_client->client_isaac_seed = codec_get64(&game_client->codec);
+		if (codec_get64(&game_client->codec) != game_client->server_isaac_seed) {
 			WARN("Client modified server isaac seed");
 			return LOGIN_REJECTED;
 		}
@@ -240,11 +240,12 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 		}
 		isaac_create(&game_client->isaac_out, isaac_seed, 4);
 
-		game_client->client_uid = codec_get32(&game_client->codec, NULL, 0);
+		game_client->client_uid = codec_get32(&game_client->codec);
 		codec_gets(&game_client->codec, game_client->username, 32, CODEC_JSTRING);
 		codec_gets(&game_client->codec, game_client->password, 32, CODEC_JSTRING);
 		INFO("New client: %s, uid: %d", game_client->username, game_client->client_uid);
 		/* Until we have a profile loader, just accept the client */
+		game_client->rights = PLAYER_RIGHTS_SUPER;
 		game_client->login_stage = STAGE_COMPLETE;
 		return LOGIN_OKAY;
 	}

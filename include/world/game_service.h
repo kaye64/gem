@@ -50,10 +50,12 @@ struct game_service {
 typedef struct game_service game_service_t;
 
 struct game_client {
+	/* client config */
 	uint32_t client_uid;
 	char username[32];
 	char password[32]; // We should just validate on login and remove this from memory
 	bool high_memory;
+	int rights;
 	int login_stage;
 	/* cryption */
 	uint64_t server_isaac_seed;
