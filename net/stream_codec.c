@@ -122,7 +122,7 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 {
 	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
-		return;
+		return false;
 	}
 
 	buffer_pushp(buffer);
@@ -641,11 +641,11 @@ unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len
  * Gets a string from the codec
  *  - codec: The codec
  *  - s: The output buffer
- *  - len: The length of the output buffer. Set to the length of the string
+ *  - len: The length of the output buffer
  *  - flags: Can be CODEC_JSTRING for 0xA terminated string
  * returns: A pointer to the output buffer
  */
-char* codec_gets(stream_codec_t* codec, char* s, int* len, uint8_t flags)
+char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags)
 {
 	if (codec->caret+(*len) > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");

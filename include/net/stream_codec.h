@@ -52,6 +52,6 @@ uint32_t codec_get24(stream_codec_t* codec, uint32_t* i, uint8_t flags);
 uint32_t codec_get32(stream_codec_t* codec, uint32_t* i, uint8_t flags);
 uint64_t codec_get64(stream_codec_t* codec, uint64_t* i, uint8_t flags);
 unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len);
-char* codec_gets(stream_codec_t* codec, char* s, int* len, uint8_t flags);
+char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags);
 
 #endif /* _STREAM_CODEC_H_ */
