@@ -647,7 +647,7 @@ unsigned char* codec_getn(stream_codec_t* codec, unsigned char* data, size_t len
  */
 char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags)
 {
-	if (codec->caret+(*len) > DEFAULT_BUFFER_SIZE) {
+	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
 		ERROR("tried to put past end of buffer");
 		return NULL;
 	}
@@ -657,9 +657,9 @@ char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags)
 		terminator = 10;
 	}
 	bool valid = false;
-	for (int i = 0; i < (*len)-1; i++) {
+	for (int i = 0; i < len-1; i++) {
 		if (codec->data[codec->caret+i] == terminator) {
-			*len = i;
+			len = i;
 			valid = true;
 			break;
 		}
@@ -668,7 +668,7 @@ char* codec_gets(stream_codec_t* codec, char* s, int len, uint8_t flags)
 		ERROR("No valid string found");
 		return NULL;
 	}
-	codec_getn(codec, (unsigned char*)s, *len);
-	s[*len] = 0;
+	codec_getn(codec, (unsigned char*)s, len);
+	s[len] = 0;
 	return s;
 }

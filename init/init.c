@@ -81,7 +81,7 @@ void io_thread()
 	jaggrab_start(instance.jag_server, instance.io_loop);
 
 	/* create the world dispatcher */
-	instance.game_service = game_create(NULL, instance.cache);
+	instance.game_service = game_create(NULL, &instance.rsa, instance.cache);
 	instance.update_service = update_create(NULL, instance.cache);
 	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
 	assert(instance.game_service != 0);
