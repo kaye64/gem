@@ -5,12 +5,14 @@
  */
 #include <init/signal.h>
 #include <util/args.h>
+#include <util/config.h>
 #include <util/log.h>
 #include <jaggrab/jaggrab.h>
 #include <runite/cache.h>
 #include <world/dispatcher.h>
 #include <world/game_service.h>
 #include <world/update_service.h>
+#include <crypto/rsa.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -31,6 +33,7 @@ struct {
 	struct ev_loop* engine_loop;
 	struct ev_loop* io_loop;
 	ev_timer engine_tick;
+	rsa_t rsa;
 } instance;
 
 void tick();
@@ -43,6 +46,9 @@ int main(int argc, char **argv)
 	INFO("Starting up...");
 	sig_install(cleanup);
 	parse_args(argc, argv);
+
+	/* load our rsa private key, generating one if necessary */
+	rsa_create(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
 
 	/* open the cache */
 	instance.cache = cache_open_dir(instance.cache, inst_args.cache_dir);

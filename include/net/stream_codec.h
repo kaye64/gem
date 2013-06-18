@@ -35,6 +35,9 @@ size_t codec_len(stream_codec_t* codec);
 bool codec_buffer_write(stream_codec_t* codec, buffer_t* buffer);
 bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len);
 
+void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa);
+void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa);
+
 void codec_put8(stream_codec_t* codec, uint8_t i, uint8_t flags);
 void codec_put16(stream_codec_t* codec, uint16_t i, uint8_t flags);
 void codec_put24(stream_codec_t* codec, uint32_t i, uint8_t flags);

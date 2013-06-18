@@ -133,6 +133,26 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 	return true;
 }
 
+void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa)
+{
+	int in_len = codec->caret;
+	int out_len = DEFAULT_BUFFER_SIZE;
+	unsigned char message[in_len];
+	memcpy(message, codec->data, in_len);
+	rsa_encrypt(rsa, message, in_len, &codec->data[1], &out_len);
+	codec->data[0] = out_len;
+	codec->caret = out_len+1;
+}
+
+void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa)
+{
+	int enc_len = codec->data[codec->caret];
+	int out_len = DEFAULT_BUFFER_SIZE-codec->caret;
+	unsigned char message_enc[enc_len];
+	memcpy(message_enc, &codec->data[codec->caret+1], enc_len);
+	rsa_decrypt(rsa, message_enc, enc_len, &codec->data[codec->caret], &out_len);
+}
+
 /**
  * codec_put8
  *

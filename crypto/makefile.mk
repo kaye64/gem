@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix crypto/,isaac.o)
+OBJECTS += $(addprefix crypto/,isaac.o rsa.o)
