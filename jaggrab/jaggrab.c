@@ -138,6 +138,7 @@ void jaggrab_read(client_t* client, server_t* server)
 		buffer_popp(&client->read_buffer);
 		return;
 	}
+	buffer_dropp(&client->read_buffer);
 	int start = matches[1].rm_so;
 	int end = matches[1].rm_eo;
 	int len = end-start;

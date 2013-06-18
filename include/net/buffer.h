@@ -5,13 +5,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <util/stack.h>
+
 /* A circular buffer designed for use in network IO. */
 struct buffer {
 	unsigned char* data;
 	int read_ptr;
 	int read_avail;
-	int prev_read_ptr;
-	int prev_read_avail;
+	_stack_t ptr_stack;
 	size_t real_size;
 	bool must_free;
 };
@@ -29,5 +30,6 @@ void buffer_print(buffer_t* buffer);
 
 void buffer_pushp(buffer_t* buffer);
 void buffer_popp(buffer_t* buffer);
+void buffer_dropp(buffer_t* buffer);
 
 #endif /* _IO_BUFFER_H_ */

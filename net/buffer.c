@@ -29,8 +29,9 @@ buffer_t* buffer_create(buffer_t* buffer, size_t size)
 	}
 	buffer->data = (unsigned char*)malloc(sizeof(unsigned char)*size);
 	buffer->real_size = size;
-	buffer->read_ptr = buffer->prev_read_ptr = 0;
-	buffer->read_avail = buffer->prev_read_avail = 0;
+	buffer->read_ptr = 0;
+	buffer->read_avail = 0;
+	stack_create(&buffer->ptr_stack);
 	return buffer;
 }
 
@@ -43,6 +44,7 @@ buffer_t* buffer_create(buffer_t* buffer, size_t size)
 void buffer_free(buffer_t* buffer)
 {
 	free(buffer->data);
+	stack_free(&buffer->ptr_stack);
 	if (buffer->must_free) {
 		free(buffer);
 	}
@@ -132,8 +134,8 @@ void buffer_print(buffer_t* buffer)
  */
 void buffer_pushp(buffer_t* buffer)
 {
-	buffer->prev_read_ptr = buffer->read_ptr;
-	buffer->prev_read_avail = buffer->read_avail;
+	stack_push(&buffer->ptr_stack, buffer->read_ptr);
+	stack_push(&buffer->ptr_stack, buffer->read_avail);
 }
 
 /**
@@ -144,6 +146,18 @@ void buffer_pushp(buffer_t* buffer)
  */
 void buffer_popp(buffer_t* buffer)
 {
-	buffer->read_ptr = buffer->prev_read_ptr;
-	buffer->read_avail = buffer->prev_read_avail;
+	buffer->read_avail = stack_pop(&buffer->ptr_stack);
+	buffer->read_ptr = stack_pop(&buffer->ptr_stack);
+}
+
+/**
+ * buffer_dropp
+ *
+ * Drops the previous set of read and write pointers
+ *  - buffer: The buffer
+ */
+void buffer_dropp(buffer_t* buffer)
+{
+	stack_pop(&buffer->ptr_stack);
+	stack_pop(&buffer->ptr_stack);
 }

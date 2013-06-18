@@ -134,6 +134,7 @@ int dispatcher_handshake(service_client_t* service_client)
 			buffer_popp(&client->read_buffer);
 			return HANDSHAKE_PENDING;
 		}
+		buffer_dropp(&client->read_buffer);
 
 		dispatcher_set_service(dispatcher, service_client, service_type);
 		if (service_client->attrib == NULL) {

@@ -94,6 +94,7 @@ int update_service_handshake(service_client_t* service_client)
 		buffer_popp(&client->write_buffer);
 		return HANDSHAKE_PENDING;
 	}
+	buffer_dropp(&client->write_buffer);
 
 	return HANDSHAKE_ACCEPTED;
 }

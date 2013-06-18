@@ -106,6 +106,7 @@ bool codec_buffer_write(stream_codec_t* codec, buffer_t* buffer)
 		buffer_popp(buffer);
 		return false;
 	}
+	buffer_dropp(buffer);
 	return true;
 }
 
@@ -130,6 +131,7 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 		buffer_popp(buffer);
 		return false;
 	}
+	buffer_dropp(buffer);
 	return true;
 }
 
