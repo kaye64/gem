@@ -30,7 +30,7 @@ cache_t* cache_open_dir(cache_t* cache, const char* directory)
 
 	while ((entry = readdir(dir)) != NULL) {
 		if (strstr(entry->d_name, "idx")) {
-			index_list = list_insert(index_list, entry->d_name, strcmp_wrap);
+			index_list = slist_insert(index_list, entry->d_name, strcmp_wrap);
 			num_indices++;
 		} else if (strstr(entry->d_name, "dat")) {
 			sprintf(data_file, "%s/%s", directory, entry->d_name);
@@ -43,7 +43,7 @@ cache_t* cache_open_dir(cache_t* cache, const char* directory)
 
 	char* index_files[num_indices];
 	int i = 0;
-	for (link_t* index = list_top(index_list); index != NULL; index = index->next) {
+	for (link_t* index = slist_top(index_list); index != NULL; index = index->next) {
 		index_files[i] = (char*)malloc(256 * sizeof(char));
 		sprintf(index_files[i++], "%s/%s", directory, (char*)index->data);
 	}
@@ -53,7 +53,7 @@ cache_t* cache_open_dir(cache_t* cache, const char* directory)
 	for (i = 0; i < num_indices; i++) {
 		free(index_files[i]);
 	}
-	list_free(index_list);
+	slist_free(index_list);
 	closedir(dir);
 	return cache;
 }

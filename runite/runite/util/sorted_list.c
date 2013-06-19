@@ -2,9 +2,9 @@
 
 #include <stdlib.h>
 
-void list_free(link_t* link)
+void slist_free(link_t* link)
 {
-	link = list_bottom(link);
+	link = slist_bottom(link);
 
 	while (link != NULL) {
 		link_t* end = link;
@@ -13,7 +13,7 @@ void list_free(link_t* link)
 	}
 }
 
-link_t* list_top(link_t* link)
+link_t* slist_top(link_t* link)
 {
 	while (link->prev != NULL) {
 		link = link->prev;
@@ -21,7 +21,7 @@ link_t* list_top(link_t* link)
 	return link;
 }
 
-link_t* list_bottom(link_t* link)
+link_t* slist_bottom(link_t* link)
 {
 	while (link->next != NULL) {
 		link = link->next;
@@ -29,7 +29,7 @@ link_t* list_bottom(link_t* link)
 	return link;
 }
 
-link_t* list_insert_before(link_t* link, void* data)
+link_t* slist_insert_before(link_t* link, void* data)
 {
 	link_t* new_link = (link_t*)malloc(sizeof(link_t));
 	new_link->data = data;
@@ -44,7 +44,7 @@ link_t* list_insert_before(link_t* link, void* data)
 	return new_link;
 }
 
-link_t* list_insert_after(link_t* link, void* data)
+link_t* slist_insert_after(link_t* link, void* data)
 {
 	link_t* new_link = (link_t*)malloc(sizeof(link_t));
 	new_link->data = data;
@@ -59,7 +59,7 @@ link_t* list_insert_after(link_t* link, void* data)
 	return new_link;
 }
 
-link_t* list_insert(link_t* link, void* data, compare_func_t compare)
+link_t* slist_insert(link_t* link, void* data, compare_func_t compare)
 {
 	if (link == NULL) {
 		link_t* root = (link_t*)malloc(sizeof(link_t));
@@ -71,35 +71,35 @@ link_t* list_insert(link_t* link, void* data, compare_func_t compare)
 	int cmp_result = compare(data, link->data);
 
 	if (cmp_result == 0) {
-		return list_insert_after(link, data);
+		return slist_insert_after(link, data);
 	}
 
 	if (cmp_result < 0) {
 		if (link->prev == NULL) {
-			return list_insert_before(link, data);
+			return slist_insert_before(link, data);
 		}
 		cmp_result = compare(data, link->prev->data);
 		if (cmp_result > 0) {
-			return list_insert_before(link, data);
+			return slist_insert_before(link, data);
 		}
-		return list_insert(link->prev, data, compare);
+		return slist_insert(link->prev, data, compare);
 	}
 
 	if (cmp_result > 0) {
 		if (link->next == NULL) {
-			return list_insert_after(link, data);
+			return slist_insert_after(link, data);
 		}
 		cmp_result = compare(data, link->next->data);
 		if (cmp_result < 0) {
-			return list_insert_after(link, data);
+			return slist_insert_after(link, data);
 		}
-		return list_insert(link->next, data, compare);
+		return slist_insert(link->next, data, compare);
 	}
 	// Shouldn't get here
-	return list_insert(link, data, compare);
+	return slist_insert(link, data, compare);
 }
 
-void list_remove(link_t* link)
+void slist_remove(link_t* link)
 {
 	if (link->prev == NULL && link->next == NULL) {
 		free(link);

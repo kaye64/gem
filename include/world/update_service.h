@@ -26,7 +26,7 @@ struct update_request {
 	size_t file_size;
 	int next_chunk;
 	unsigned char* payload;
-	queue_item_t queue_item;
+	list_node_t list_node;
 } __attribute__((packed));
 typedef struct update_request update_request_t;
 

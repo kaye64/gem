@@ -22,7 +22,7 @@ queue_t* queue_create(queue_t* queue)
 	} else {
 		queue->must_free = false;
 	}
-	queue->top = queue->bottom = NULL;
+	list_create(&queue->list);
 	return queue;
 }
 
@@ -34,6 +34,7 @@ queue_t* queue_create(queue_t* queue)
  */
 void queue_free(queue_t* queue)
 {
+	list_free(&queue->list);
 	if (queue->must_free) {
 		free(queue);
 	}
@@ -46,16 +47,9 @@ void queue_free(queue_t* queue)
  *  - queue: The queue
  *  - item: The item
  */
-void queue_push(queue_t* queue, queue_item_t* item)
+void queue_push(queue_t* queue, list_node_t* item)
 {
-	if (queue_empty(queue)) {
-		queue->top = queue->bottom = item;
-		item->prev = item->next = NULL;
-		return;
-	}
-	item->prev = NULL;
-	item->next = queue->top;
-	queue->top = item;
+	list_push_front(&queue->list, item);
 }
 
 /**
@@ -65,20 +59,11 @@ void queue_push(queue_t* queue, queue_item_t* item)
  *  - queue: The queue
  * returns: The item
  */
-queue_item_t* queue_pop(queue_t* queue)
+list_node_t* queue_pop(queue_t* queue)
 {
-	if (queue_empty(queue)) {
-		return NULL;
-	}
-
-	queue_item_t* item = queue->bottom;
-	if (item->prev != NULL) {
-		item->prev->next = NULL;
-		queue->bottom = item->prev;
-	} else {
-		queue->top = queue->bottom = NULL;
-	}
-	return item;
+	list_node_t* node = list_back(&queue->list);
+	list_erase(&queue->list, node);
+	return node;
 }
 
 /**
@@ -90,5 +75,5 @@ queue_item_t* queue_pop(queue_t* queue)
  */
 bool queue_empty(queue_t* queue)
 {
-	return queue->top == (queue_item_t*)NULL || queue->bottom == (queue_item_t*)NULL;
+	return list_empty(&queue->list);
 }

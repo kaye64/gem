@@ -145,7 +145,7 @@ void update_service_read(service_client_t* service_client)
 	}
 
 	// Queue it
-	queue_push(&update_client->request_queue, &req->queue_item);
+	queue_push(&update_client->request_queue, &req->list_node);
 }
 
 /**
@@ -167,8 +167,8 @@ void update_service_write(service_client_t* service_client)
 		if (queue_empty(&update_client->request_queue)) {
 			return;
 		}
-		queue_item_t* queue_item = queue_pop(&update_client->request_queue);
-		request = container_of(queue_item, update_request_t, queue_item);
+		list_node_t* list_node = queue_pop(&update_client->request_queue);
+		request = container_of(list_node, update_request_t, list_node);
 
 		// Resolve the file
 		request->next_chunk = 0;
