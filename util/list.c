@@ -1,5 +1,18 @@
+/**
+ * list.c
+ *
+ * A simple list structure
+ */
+
 #include <util/list.h>
 
+/**
+ * list_create
+ *
+ * Creates a new list_t
+ *  - list: Some preallocated memory, or NULL to put on heap
+ * returns: The list
+ */
 list_t* list_create(list_t* list)
 {
 	if (list == NULL) {
@@ -12,6 +25,12 @@ list_t* list_create(list_t* list)
 	return list;
 }
 
+/**
+ * list_free
+ *
+ * Properly frees a list_t
+ *  - list: The list
+ */
 void list_free(list_t* list)
 {
 	if (list->must_free) {
@@ -19,11 +38,25 @@ void list_free(list_t* list)
 	}
 }
 
+/**
+ * list_empty
+ *
+ * Checks whether a list is empty or not
+ *  - list: The list
+ * returns: Whether the list is empty
+ */
 bool list_empty(list_t* list)
 {
 	return list->top == (list_node_t*)NULL && list->bottom == (list_node_t*)NULL;
 }
 
+/**
+ * list_push_back
+ *
+ * Puts a node to the back of the list
+ *  - list: The list
+ *  - node: The node
+ */
 void list_push_back(list_t* list, list_node_t* node)
 {
 	if (list_empty(list)) {
@@ -34,6 +67,13 @@ void list_push_back(list_t* list, list_node_t* node)
 	}
 }
 
+/**
+ * list_push_front
+ *
+ * Puts a node to the front of the list
+ *  - list: The list
+ *  - node: The node
+ */
 void list_push_front(list_t* list, list_node_t* node)
 {
 	if (list_empty(list)) {
@@ -44,6 +84,14 @@ void list_push_front(list_t* list, list_node_t* node)
 	}
 }
 
+/**
+ * list_inert_before
+ *
+ * Inserts one node before another
+ *  - list: The list
+ *  - other: The other node
+ *  - node: The node
+ */
 void list_insert_before(list_t* list, list_node_t* other, list_node_t* node)
 {
 	list_node_t* prev = other->prev;
@@ -58,6 +106,14 @@ void list_insert_before(list_t* list, list_node_t* other, list_node_t* node)
 	}
 }
 
+/**
+ * list_inert_after
+ *
+ * Inserts one node after another
+ *  - list: The list
+ *  - other: The other node
+ *  - node: The node
+ */
 void list_insert_after(list_t* list, list_node_t* other, list_node_t* node)
 {
 	list_node_t* next = other->next;
@@ -72,16 +128,37 @@ void list_insert_after(list_t* list, list_node_t* other, list_node_t* node)
 	}
 }
 
+/**
+ * list_back
+ *
+ * Returns the node at the back of the list
+ *  - list: The list
+ * returns: The node
+ */
 list_node_t* list_back(list_t* list)
 {
 	return list->bottom;
 }
 
+/**
+ * list_front
+ *
+ * Returns the node at the front of the list
+ *  - list: The list
+ * returns: The node
+ */
 list_node_t* list_front(list_t* list)
 {
 	return list->top;
 }
 
+/**
+ * list_erase
+ *
+ * Erases a node from the list
+ *  - list: The list
+ *  - node: The node
+ */
 void list_erase(list_t* list, list_node_t* node)
 {
 	list_node_t* prev = node->prev;
