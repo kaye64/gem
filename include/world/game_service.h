@@ -9,32 +9,7 @@
 #include <crypto/isaac.h>
 #include <crypto/rsa.h>
 #include <net/stream_codec.h>
-
-#define STAGE_INIT 0
-#define STAGE_HANDSHAKE 1
-#define STAGE_SECURE_BLOCK 2
-#define STAGE_COMPLETE 3
-
-#define LOGIN_PENDING 0
-#define LOGIN_DELAY 1
-#define LOGIN_OKAY 2
-#define LOGIN_INVALID_CREDENTIALS 3
-#define LOGIN_DISABLED 4
-#define LOGIN_DUPLICATE_SESSION 5
-#define LOGIN_UPDATED 6
-#define LOGIN_SERVER_FULL 7
-#define LOGIN_NO_LOGIN_SERVER 8
-#define LOGIN_TOO_MANY_CONNECTIONS 9
-#define LOGIN_BAD_SESSION_ID 10
-#define LOGIN_REJECTED 11
-#define LOGIN_MEMBERS_WORLD 12
-#define LOGIN_INCOMPLETE 13
-#define LOGIN_UPDATING 14
-#define LOGIN_UNKNOWN 15 // What does this do?
-#define LOGIN_ATTEMPTS_EXCEEDED 16
-#define LOGIN_MEMBERS_AREA 17
-#define LOGIN_INVALID_LOGIN_SERVER 20
-#define LOGIN_INVALID_TRANSFERRING 21
+#include <util/list.h>
 
 #define PLAYER_RIGHTS_NORMAL 0
 #define PLAYER_RIGHTS_MODERATOR 1
@@ -45,11 +20,13 @@ struct game_service {
 	service_t service;
 	isaac_t rand_gen;
 	rsa_t* rsa;
+	list_t player_list;
 	bool must_free;
 };
 typedef struct game_service game_service_t;
 
 struct game_client {
+	list_node_t node;
 	/* client config */
 	uint32_t client_uid;
 	char username[32];
