@@ -73,7 +73,7 @@ bool server_start(server_t* server, struct ev_loop* loop)
 	server->io_loop = loop;
 	server->fd = socket(PF_INET, SOCK_STREAM, 0);
 	if (server->fd < 0) {
-		ERROR("server_start: socket open failed");
+		ERROR("socket open failed");
 		return false;
 	}
 
@@ -87,12 +87,12 @@ bool server_start(server_t* server, struct ev_loop* loop)
 	address.sin_addr.s_addr = inet_addr(server->addr);
 
 	if (bind(server->fd, (struct sockaddr*)&address, sizeof(address)) != 0) {
-		ERROR("server_start: bind failed");
+		ERROR("bind failed");
 		return false;
 	}
 
 	if (listen(server->fd, 0) < 0) {
-		ERROR("server_start: listen failed");
+		ERROR("listen failed");
 		return false;
 	}
 
@@ -116,24 +116,24 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 	server_t* server = container_of(accept_io, server_t, io_accept);
 
 	if (EV_ERROR & revents) {
-		ERROR("accept_cb: invalid event");
+		ERROR("invalid event");
 		return;
 	}
 
 	int fd = accept(server->fd, (struct sockaddr*)&client_addr, &client_len);
 	if (fd < 0) {
-		ERROR("accept_cb: accept failed");
+		ERROR("accept failed");
 		return;
 	}
 
 	client_t* client = server_client_init(server, fd, client_addr.sin_addr);
 	if (client == NULL) {
 		close(fd);
-		INFO("accept_cb: client dropped");
+		INFO("client dropped");
 		return;
 	}
 
-	INFO("accept_cb: accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
+	INFO("accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
 
 	ev_io_init(&client->io_read, client_io_avail, client->fd, EV_READ|EV_WRITE);
 	ev_io_start(loop, &client->io_read);
@@ -164,7 +164,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	client_t* client = container_of(io_read, client_t, io_read);
 	// Check for errors
 	if (EV_ERROR & revents) {
-		ERROR("client_io_avail: invalid event");
+		ERROR("invalid event");
 		return;
 	}
 
@@ -184,14 +184,13 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 
 		// Check for read error
 		if (read_avail < 0) {
-			WARN("client_io_avail: %s", strerror(errno));
 			switch (errno) {
 			case ECONNRESET:
 			case ETIMEDOUT:
 				read_avail = 0; // drop the client later on
 				break;
 			default:
-				ERROR("client_io_avail: unable to handle error: %s", strerror(errno));
+				ERROR("unable to handle error: %s", strerror(errno));
 				break;
 			}
 			return;
@@ -200,13 +199,13 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		// Check for client drop
 		if (read_avail == 0) {
 			server_client_drop(server, client);
-			INFO("client_io_avail: client dropped");
+			INFO("client dropped");
 			return;
 		}
 
 		int buffered = buffer_write(&client->read_buffer, buffer, read_avail);
 		if (buffered != read_avail) {
-			WARN("client_io_avail: buffer overflow. dropping %i bytes", read_avail-buffered);
+			WARN("buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
 
 
@@ -227,14 +226,13 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 
 			// Check for write error
 			if (sent < 0) {
-				WARN("client_io_avail: %s", strerror(errno));
 				switch (errno) {
 				case ECONNRESET:
 				case ETIMEDOUT:
 					sent = 0; // drop the client later on
 					break;
 				default:
-					ERROR("client_io_avail: unable to handle error: %s", strerror(errno));
+					ERROR("unable to handle error: %s", strerror(errno));
 					break;
 				}
 				return;
@@ -243,7 +241,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 			// Check for client drop
 			if (sent == 0) {
 				server_client_drop(server, client);
-				INFO("client_io_avail: client dropped");
+				INFO("client dropped");
 				return;
 			}
 

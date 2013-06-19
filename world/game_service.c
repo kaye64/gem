@@ -11,7 +11,7 @@
 #include <util/container_of.h>
 #include <world/dispatcher.h>
 
-#define LOG_TAG "update"
+#define LOG_TAG "game"
 
 void* game_service_accept(service_client_t* service_client);
 int game_service_handshake(service_client_t* service_client);
