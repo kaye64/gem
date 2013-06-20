@@ -3,7 +3,7 @@
  *
  * Defines the packet lookup tables
  */
-#include <world/packet_def.h>
+#include <world/packet/packet_def.h>
 
 packet_def_t pkt_null = { .opcode = PKT_NULL, .type = PACKET_LEN_FIXED, .len = 0 };
 

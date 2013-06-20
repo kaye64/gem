@@ -2,7 +2,7 @@
 #define _PACKET_H_
 
 #include <net/stream_codec.h>
-#include <world/packet_def.h>
+#include <world/packet/packet_def.h>
 #include <util/list.h>
 
 struct packet {

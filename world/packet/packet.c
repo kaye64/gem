@@ -3,7 +3,7 @@
  *
  * Defines the packet data structure
  */
-#include <world/packet.h>
+#include <world/packet/packet.h>
 
 #include <stdlib.h>
 

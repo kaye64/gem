@@ -11,7 +11,7 @@
 #include <util/container_of.h>
 #include <world/dispatcher.h>
 #include <world/game_login.h>
-#include <world/packet.h>
+#include <world/packet/packet.h>
 
 #define LOG_TAG "game"
 
