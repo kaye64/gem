@@ -134,7 +134,6 @@ void game_service_read(service_client_t* service_client)
 	/* read the opcode */
 	uint8_t opcode = codec_get8(&game_client->codec) - isaac_next(&game_client->isaac_in);
 	int payload_len;
-	/* todo: isaac */
 	packet_def_t definition = packet_lookup(PACKET_TYPE_IN, opcode);
 	if (definition.opcode == PKT_NULL) {
 		WARN("unknown opcode: %d", opcode);
@@ -191,7 +190,6 @@ void game_service_write(service_client_t* service_client)
 		packet_t* packet = container_of(node, packet_t, node);
 		int payload_len = codec_len(&packet->payload);
 		codec_seek(&game_client->codec, 0);
-		/* todo: isaac */
 		int opcode = packet->def.opcode + isaac_next(&game_client->isaac_out);
 		codec_put8(&game_client->codec, opcode);
 		switch (packet->def.type) {

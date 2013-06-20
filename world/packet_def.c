@@ -1,3 +1,8 @@
+/**
+ * packet_def.c
+ *
+ * Defines the packet lookup tables
+ */
 #include <world/packet_def.h>
 
 packet_def_t pkt_null = { .opcode = PKT_NULL, .type = PACKET_LEN_FIXED, .len = 0 };
@@ -524,6 +529,15 @@ packet_def_t packet_table_in[] = {
 	{ .opcode = PKT_NULL, .type = PACKET_LEN_FIXED, .len = 0 }
 };
 
+/**
+ * packet_lookup
+ *
+ * Performs a lookup of a packet definition in either the server or
+ * client packet tables.
+ *  - type: One of PACKET_TYPE_{IN,OUT}
+ *  - opcode: The opcode of the packet to lookup
+ * returns: The packet definition, or a definition with opcode = PKT_NULL
+ */
 packet_def_t packet_lookup(int type, int opcode)
 {
 	packet_def_t* lookup_table;
@@ -539,7 +553,7 @@ packet_def_t packet_lookup(int type, int opcode)
 	}
 	for (int i = 0; ; i++) {
 		if (lookup_table[i].opcode == opcode || lookup_table[i].opcode == PKT_NULL) {
-			return lookup_table[i]; // we want to return PKT_NULL even if it's the last entry
+			return lookup_table[i]; // we want to return even if it's the last entry (PKT_NULL)
 		}
 	}
 	return pkt_null;
