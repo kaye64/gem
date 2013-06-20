@@ -21,6 +21,7 @@
 
 #define LOG_TAG "init"
 #define ENGINE_TICK_RATE 0.6
+#define IO_TICK_RATE 0.2
 
 struct {
 	cache_t* cache;
@@ -33,10 +34,12 @@ struct {
 	struct ev_loop* engine_loop;
 	struct ev_loop* io_loop;
 	ev_timer engine_tick;
+	ev_timer io_tick;
 	rsa_t rsa;
 } instance;
 
-void tick();
+void engine_tick();
+void io_tick();
 void cleanup(bool forceful);
 void io_thread();
 void engine_thread();
@@ -104,22 +107,40 @@ void engine_thread()
 	instance.engine_loop = ev_default_loop(0);
 
 	/* create the engine tick timer */
-	ev_timer_init(&instance.engine_tick, tick, 0.0, ENGINE_TICK_RATE);
+	ev_timer_init(&instance.engine_tick, engine_tick, 0.0, ENGINE_TICK_RATE);
 	ev_timer_start(instance.engine_loop, &instance.engine_tick);
+
+	/* create the io tick timer */
+	ev_timer_init(&instance.io_tick, io_tick, 0.0, IO_TICK_RATE);
+	ev_timer_start(instance.engine_loop, &instance.io_tick);
 
 	ev_loop(instance.engine_loop, 0);
 }
 
 /**
- * tick
+ * engine_tick
  *
- * The engine tick function
+ * The engine tick function.
+ * Sends the client periodic update
  */
-void tick()
+void engine_tick()
+{
+
+
+	ev_timer_again(instance.engine_loop, &instance.engine_tick);
+}
+
+/**
+ * io_tick
+ *
+ * The io tick function.
+ * Processes incoming and outgoing packet queues
+ */
+void io_tick()
 {
 	game_process_io(instance.game_service);
 
-	ev_timer_again(instance.engine_loop, &instance.engine_tick);
+	ev_timer_again(instance.engine_loop, &instance.io_tick);
 }
 
 /**
@@ -131,10 +152,13 @@ void tick()
 void cleanup(bool forceful) {
 	if (!forceful) {
 		INFO("Cleaning up for shutdown");
+		server_stop(&instance.jag_server);
+		server_stop(&instance.world_dispatcher);
 		ev_timer_stop(instance.engine_loop, &instance.engine_tick);
+		ev_timer_stop(instance.engine_loop, &instance.io_tick);
 
-		ev_break(instance.engine_loop, EVBREAK_ALL);
 		ev_break(instance.io_loop, EVBREAK_ALL);
+		ev_break(instance.engine_loop, EVBREAK_ALL);
 	}
 
 	dispatcher_free(instance.world_dispatcher);
