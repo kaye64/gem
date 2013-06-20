@@ -11,6 +11,7 @@
 #include <util/container_of.h>
 #include <world/dispatcher.h>
 #include <world/game_login.h>
+#include <world/packet.h>
 
 #define LOG_TAG "game"
 
@@ -74,6 +75,8 @@ void* game_service_accept(service_client_t* service_client)
 {
 	game_client_t* client = (game_client_t*)malloc(sizeof(game_client_t));
 	codec_create(&client->codec);
+	queue_create(&client->packet_queue_in);
+	queue_create(&client->packet_queue_out);
 	client->login_stage = STAGE_INIT;
 	return client;
 }
@@ -119,7 +122,58 @@ int game_service_handshake(service_client_t* service_client)
  */
 void game_service_read(service_client_t* service_client)
 {
+	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	client_t* client = &service_client->client;
+	buffer_pushp(&client->read_buffer);
+	codec_seek(&game_client->codec, 0);
+	if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 1)) {
+		buffer_popp(&client->read_buffer);
+		return;
+	}
 
+	/* read the opcode */
+	uint8_t opcode = codec_get8(&game_client->codec) - isaac_next(&game_client->isaac_in);
+	int payload_len;
+	/* todo: isaac */
+	packet_def_t definition = packet_lookup(PACKET_TYPE_IN, opcode);
+	if (definition.opcode == PKT_NULL) {
+		WARN("unknown opcode: %d", opcode);
+		return;
+	}
+
+	/* find the payload length */
+	packet_t* packet = packet_create(definition);
+	switch (definition.type) {
+	case PACKET_LEN_FIXED:
+		payload_len = definition.len;
+		break;
+	case PACKET_LEN_8:
+		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 1)) {
+			buffer_popp(&client->read_buffer);
+			packet_free(packet);
+			return;
+		}
+		payload_len = codec_get8(&game_client->codec);
+		break;
+	case PACKET_LEN_16:
+		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 2)) {
+			buffer_popp(&client->read_buffer);
+			packet_free(packet);
+			return;
+		}
+		payload_len = codec_get16(&game_client->codec);
+		break;
+	}
+
+	/* read the payload */
+	if (codec_buffer_read(&packet->payload, &client->read_buffer, payload_len)) {
+		codec_seek(&packet->payload, 0);
+		queue_push(&game_client->packet_queue_in, &packet->node);
+		DEBUG("enqueued new packet: %d, len %d", packet->def.opcode, payload_len);
+	} else {
+		buffer_popp(&client->read_buffer);
+		packet_free(packet);
+	}
 }
 
 /**
@@ -130,7 +184,35 @@ void game_service_read(service_client_t* service_client)
  */
 void game_service_write(service_client_t* service_client)
 {
-
+	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	client_t* client = &service_client->client;
+	while (!queue_empty(&game_client->packet_queue_out)) {
+		list_node_t* node = queue_pop(&game_client->packet_queue_out);
+		packet_t* packet = container_of(node, packet_t, node);
+		int payload_len = codec_len(&packet->payload);
+		codec_seek(&game_client->codec, 0);
+		/* todo: isaac */
+		int opcode = packet->def.opcode + isaac_next(&game_client->isaac_out);
+		codec_put8(&game_client->codec, opcode);
+		switch (packet->def.type) {
+		case PACKET_LEN_FIXED:
+			break;
+		case PACKET_LEN_8:
+			codec_put8(&game_client->codec, payload_len);
+			break;
+		case PACKET_LEN_16:
+			codec_put16(&game_client->codec, payload_len);
+			break;
+		}
+		codec_concat(&game_client->codec, &packet->payload);
+		if (codec_buffer_write(&game_client->codec, &client->write_buffer)) {
+			DEBUG("wrote packet: %d, len %d", packet->def.opcode, payload_len);
+			packet_free(packet);
+		} else {
+			WARN("unable to write packet");
+			queue_push(&game_client->packet_queue_out, &packet->node);
+		}
+	}
 }
 
 /**
@@ -146,6 +228,9 @@ void game_service_drop(service_client_t* service_client)
 	if (game_client->login_stage == STAGE_COMPLETE) {
 		game_player_logout(game_service, game_client);
 	}
+	queue_free(&game_client->packet_queue_out);
+	queue_free(&game_client->packet_queue_in);
+	codec_free(&game_client->codec);
 	free(game_client);
 }
 

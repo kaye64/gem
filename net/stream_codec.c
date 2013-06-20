@@ -235,6 +235,19 @@ void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len)
 }
 
 /**
+ * codec_concat
+ *
+ * Concatenates one codec onto another
+ *  - codec: The destination codec
+ *  - other: The source codec
+ */
+void codec_concat(stream_codec_t* codec, stream_codec_t* other)
+{
+	size_t other_len = codec_len(other);
+	codec_putn(codec, other->data, other_len);
+}
+
+/**
  * codec_put8f
  *
  * Puts 8 bits to the codec

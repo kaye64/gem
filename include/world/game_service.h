@@ -10,6 +10,7 @@
 #include <crypto/rsa.h>
 #include <net/stream_codec.h>
 #include <util/list.h>
+#include <util/queue.h>
 
 #define PLAYER_RIGHTS_NORMAL 0
 #define PLAYER_RIGHTS_MODERATOR 1
@@ -40,6 +41,8 @@ struct game_client {
 	isaac_t isaac_in;
 	isaac_t isaac_out;
 	/* net */
+	queue_t packet_queue_in;
+	queue_t packet_queue_out;
 	stream_codec_t codec;
 };
 typedef struct game_client game_client_t;

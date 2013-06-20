@@ -44,6 +44,7 @@ void codec_put24(stream_codec_t* codec, uint32_t i);
 void codec_put32(stream_codec_t* codec, uint32_t i);
 void codec_put64(stream_codec_t* codec, uint64_t i);
 void codec_putn(stream_codec_t* codec, unsigned char* data, size_t len);
+void codec_concat(stream_codec_t* codec, stream_codec_t* other);
 
 void codec_put8f(stream_codec_t* codec, uint8_t i, uint8_t flags);
 void codec_put16f(stream_codec_t* codec, uint16_t i, uint8_t flags);
