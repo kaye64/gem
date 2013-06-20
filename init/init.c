@@ -57,6 +57,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	/* create the archive server */
+	instance.jag_server = jaggrab_create(instance.cache, inst_args.bind_addr);
+	assert(instance.jag_server != 0);
+
+	/* create the world dispatcher */
+	instance.game_service = game_create(NULL, &instance.rsa, instance.cache);
+	instance.update_service = update_create(NULL, instance.cache);
+	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
+	assert(instance.game_service != 0);
+	assert(instance.update_service != 0);
+	assert(instance.world_dispatcher != 0);
+
 	/* create the main game threads */
 	pthread_create(&instance.io_thread, NULL, (void*)io_thread, (void*)NULL);
 	pthread_create(&instance.engine_thread, NULL, (void*)engine_thread, (void*)NULL);
@@ -75,18 +87,8 @@ void io_thread()
 {
 	instance.io_loop = ev_loop_new(EVBACKEND_EPOLL | EVFLAG_NOENV);
 
-	/* create the archive server */
-	instance.jag_server = jaggrab_create(instance.cache, inst_args.bind_addr);
-	assert(instance.jag_server != 0);
+	/* start the servers listening */
 	jaggrab_start(instance.jag_server, instance.io_loop);
-
-	/* create the world dispatcher */
-	instance.game_service = game_create(NULL, &instance.rsa, instance.cache);
-	instance.update_service = update_create(NULL, instance.cache);
-	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
-	assert(instance.game_service != 0);
-	assert(instance.update_service != 0);
-	assert(instance.world_dispatcher != 0);
 	dispatcher_start(instance.world_dispatcher, instance.io_loop);
 
 	ev_loop(instance.io_loop, 0);
@@ -115,6 +117,8 @@ void engine_thread()
  */
 void tick()
 {
+	game_process_io(instance.game_service);
+
 	ev_timer_again(instance.engine_loop, &instance.engine_tick);
 }
 

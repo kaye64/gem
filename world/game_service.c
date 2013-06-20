@@ -12,6 +12,7 @@
 #include <world/dispatcher.h>
 #include <world/game_login.h>
 #include <world/packet/packet.h>
+#include <world/packet/packet_router.h>
 
 #define LOG_TAG "game"
 
@@ -168,7 +169,6 @@ void game_service_read(service_client_t* service_client)
 	if (codec_buffer_read(&packet->payload, &client->read_buffer, payload_len)) {
 		codec_seek(&packet->payload, 0);
 		queue_push(&game_client->packet_queue_in, &packet->node);
-		DEBUG("enqueued new packet: %d, len %d", packet->def.opcode, payload_len);
 	} else {
 		buffer_popp(&client->read_buffer);
 		packet_free(packet);
@@ -230,6 +230,26 @@ void game_service_drop(service_client_t* service_client)
 	queue_free(&game_client->packet_queue_in);
 	codec_free(&game_client->codec);
 	free(game_client);
+}
+
+/**
+ * game_process_io
+ *
+ * Dispatches packets in the packet queue to their handler routines
+ *  - game: The game service
+ */
+void game_process_io(game_service_t* game)
+{
+	list_node_t* player_node = list_front(&game->player_list);
+	while (player_node != NULL) {
+		game_client_t* game_client = container_of(player_node, game_client_t, node);
+		while (!queue_empty(&game_client->packet_queue_in)) {
+			list_node_t* packet_node = queue_pop(&game_client->packet_queue_in);
+			packet_t* packet = container_of(packet_node, packet_t, node);
+			packet_dispatch(game_client, packet);
+		}
+		player_node = player_node->next;
+	}
 }
 
 /**

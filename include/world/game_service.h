@@ -50,4 +50,6 @@ typedef struct game_client game_client_t;
 game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache);
 void game_free(game_service_t* game);
 
+void game_process_io(game_service_t* game);
+
 #endif /* _GAME_SERVICE_H_ */
