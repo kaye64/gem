@@ -89,7 +89,7 @@ packet_def_t packet_table_out[] = {
 	{ .opcode = PKT_CL_UNKNOWN78, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN79, .type = PACKET_LEN_FIXED, .len = 4},
 	{ .opcode = PKT_CL_UNKNOWN80, .type = PACKET_LEN_FIXED, .len = 0},
-	{ .opcode = PKT_CL_UNKNOWN81, .type = PACKET_LEN_16, .len = 0},
+	{ .opcode = PKT_CL_PLAYER_UPDATE, .type = PACKET_LEN_16, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN82, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN83, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN84, .type = PACKET_LEN_FIXED, .len = 7},

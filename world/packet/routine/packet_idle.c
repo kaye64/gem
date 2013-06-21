@@ -11,5 +11,5 @@
 
 void packet_idle(game_client_t* client, packet_t* packet)
 {
-	DEBUG("recieved idle packet from %s", client->username);
+
 }

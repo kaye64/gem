@@ -204,7 +204,6 @@ void game_service_write(service_client_t* service_client)
 		}
 		codec_concat(&game_client->codec, &packet->payload);
 		if (codec_buffer_write(&game_client->codec, &client->write_buffer)) {
-			DEBUG("wrote packet: %d, len %d", packet->def.opcode, payload_len);
 			packet_free(packet);
 		} else {
 			WARN("unable to write packet");
@@ -253,15 +252,24 @@ void game_process_io(game_service_t* game)
 }
 
 /**
- * game_enqueue_packet
+ * game_client_sync
  *
- * Queues an outgoing packet for a given game client
- *  - game_client: The client
- *  - packet: The packet
+ * Syncs players, mobs, items etc. between clients
+ *  - game_service: The game service
  */
-void game_enqueue_packet(game_client_t* game_client, packet_t* packet)
+void game_client_sync(game_service_t* game_service)
 {
-	queue_push(&game_client->packet_queue_out, &packet->node);
+	list_node_t* player_node = list_front(&game_service->player_list);
+	while (player_node != NULL) {
+		game_client_t* game_client = container_of(player_node, game_client_t, node);
+
+		// Check if the client has changed region
+		if (game_client->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
+			game_client_enqueue_packet(game_client, packet_build_region_update(game_client));
+		}
+		game_client_enqueue_packet(game_client, packet_build_player_update(game_client));
+		player_node = player_node->next;
+	}
 }
 
 /**
@@ -275,8 +283,6 @@ void game_player_login(game_service_t* game_service, game_client_t* game_client)
 {
 	list_push_back(&game_service->player_list, &game_client->node);
 	INFO("Player login: %s", game_client->username);
-	// Send the region update
-	game_enqueue_packet(game_client, packet_build_region_update(game_client));
 }
 
 /**
