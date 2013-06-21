@@ -5,6 +5,7 @@
 
 #include <net/server.h>
 #include <world/service.h>
+#include <world/mob.h>
 #include <runite/cache.h>
 #include <crypto/isaac.h>
 #include <crypto/rsa.h>
@@ -36,6 +37,7 @@ struct game_client {
 	bool high_memory;
 	int rights;
 	int login_stage;
+	mob_t mob;
 	/* cryption */
 	uint64_t server_isaac_seed;
 	uint64_t client_isaac_seed;

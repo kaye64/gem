@@ -4,6 +4,8 @@
 
 #define LOG_TAG "game_login"
 
+int game_player_load(game_service_t* game_service, game_client_t* game_client);
+
 /**
  * game_process_login
  *
@@ -118,9 +120,16 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 		codec_gets(&game_client->codec, game_client->password, 32, CODEC_JSTRING);
 
 		/* Until we have a profile loader, just accept the client */
-		game_client->rights = PLAYER_RIGHTS_SUPER;
+		int response = game_player_load(game_service, game_client);
 		game_client->login_stage = STAGE_COMPLETE;
-		return LOGIN_OKAY;
+		return response;
 	}
 	return LOGIN_PENDING;
+}
+
+int game_player_load(game_service_t* game_service, game_client_t* game_client)
+{
+	game_client->rights = PLAYER_RIGHTS_SUPER;
+	game_client->mob.pos.x = game_client->mob.pos.y = 3200;
+	return LOGIN_OKAY;
 }
