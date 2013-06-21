@@ -11,6 +11,7 @@
 #include <net/stream_codec.h>
 #include <util/list.h>
 #include <util/queue.h>
+#include <world/packet/packet.h>
 
 #define PLAYER_RIGHTS_NORMAL 0
 #define PLAYER_RIGHTS_MODERATOR 1
@@ -51,5 +52,6 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache);
 void game_free(game_service_t* game);
 
 void game_process_io(game_service_t* game);
+void game_enqueue_packet(game_client_t* game_client, packet_t* packet);
 
 #endif /* _GAME_SERVICE_H_ */

@@ -8,7 +8,7 @@
 #include <util/log.h>
 
 /* packet handlers */
-#include <world/packet/packet_idle.h>
+#include <world/packet/routine/packet_idle.h>
 
 #define LOG_TAG "packet_router"
 

@@ -3,7 +3,7 @@
  *
  * Defines the packet routine for the Idle packet
  */
-#include <world/packet/packet_idle.h>
+#include <world/packet/routine/packet_idle.h>
 
 #include <util/log.h>
 

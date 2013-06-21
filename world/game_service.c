@@ -11,8 +11,8 @@
 #include <util/container_of.h>
 #include <world/dispatcher.h>
 #include <world/game_login.h>
-#include <world/packet/packet.h>
 #include <world/packet/packet_router.h>
+#include <world/packet/builders.h>
 
 #define LOG_TAG "game"
 
@@ -250,6 +250,18 @@ void game_process_io(game_service_t* game)
 		}
 		player_node = player_node->next;
 	}
+}
+
+/**
+ * game_enqueue_packet
+ *
+ * Queues an outgoing packet for a given game client
+ *  - game_client: The client
+ *  - packet: The packet
+ */
+void game_enqueue_packet(game_client_t* game_client, packet_t* packet)
+{
+	queue_push(&game_client->packet_queue_out, &packet->node);
 }
 
 /**
