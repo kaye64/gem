@@ -7,6 +7,8 @@
 
 #include <net/stream_codec.h>
 
+#include <assert.h>
+
 #include <util/log.h>
 
 #define LOG_TAG "codec"
@@ -28,6 +30,7 @@ stream_codec_t* codec_create(stream_codec_t* codec)
 	}
 	memset(codec->data, 0, DEFAULT_BUFFER_SIZE);
 	codec->caret = 0;
+	codec->bit_access_mode = false;
 	return codec;
 }
 
@@ -135,6 +138,13 @@ bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len)
 	return true;
 }
 
+/**
+ * codec_block_encrypt
+ *
+ * Encrypt an rsa block from 0 to the current caret
+ *  - codec: The codec
+ *  - rsa: The RSA keypair to encrypt with
+ */
 void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa)
 {
 	int in_len = codec->caret;
@@ -146,6 +156,13 @@ void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa)
 	codec->caret = out_len+1;
 }
 
+/**
+ * codec_block_decrypt
+ *
+ * Decrypt an rsa block from the current caret
+ *  - codec: The codec
+ *  - rsa: The RSA keypair to decrypt with
+ */
 void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa)
 {
 	int enc_len = codec->data[codec->caret];
@@ -153,6 +170,67 @@ void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa)
 	unsigned char message_enc[enc_len];
 	memcpy(message_enc, &codec->data[codec->caret+1], enc_len);
 	rsa_decrypt(rsa, message_enc, enc_len, &codec->data[codec->caret], &out_len);
+}
+
+/**
+ * codec_set_bit_access_mode
+ *
+ * Enables or disables bit access mode on a codec
+ *  - codec: The codec
+ *  - bit_mode: Whether to enable or disable bit access mode
+ */
+void codec_set_bit_access_mode(stream_codec_t* codec, bool bit_mode)
+{
+	if (codec->bit_access_mode == bit_mode) {
+		// nothing to do
+		return;
+	}
+	if (bit_mode) {
+		codec->bit_caret = 7;
+	} else {
+		codec->caret++;
+	}
+	codec->bit_access_mode = bit_mode;
+}
+
+/**
+ * codec_put_bits
+ *
+ * Puts a given number of bits to the codec
+ *  - codec: The codec
+ *  - nbits: The number of bits to put
+ *  - i: The value to put
+ */
+void codec_put_bits(stream_codec_t* codec, int nbits, uint32_t i)
+{
+	assert(codec->bit_access_mode);
+	for (int n = nbits-1; n >= 0; n--) {
+		uint8_t bit_val = (i & (1 << n)) >> n;
+		if (bit_val) {
+			codec->data[codec->caret] |= (1 << codec->bit_caret);
+		} else {
+			codec->data[codec->caret] &= ~(1 << codec->bit_caret);
+		}
+		if (codec->bit_caret == 0) {
+			codec->bit_caret = 7;
+			codec->caret++;
+		} else {
+			codec->bit_caret--;
+		}
+	}
+}
+
+/**
+ * codec_get_bits
+ *
+ * Gets a given number of bits from the codec
+ *  - codec: The codec
+ *  - nbits: The number of bits to get
+ * returns: The value
+ */
+uint32_t codec_get_bits(stream_codec_t* codec, int nbits)
+{
+	// todo
 }
 
 /**

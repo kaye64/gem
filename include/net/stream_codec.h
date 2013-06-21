@@ -14,6 +14,8 @@
 struct stream_codec {
 	unsigned char data[DEFAULT_BUFFER_SIZE];
 	size_t caret;
+	bool bit_access_mode;
+	size_t bit_caret;
 	bool must_free;
 };
 typedef struct stream_codec stream_codec_t;
@@ -32,12 +34,20 @@ void codec_free(stream_codec_t* codec);
 void codec_seek(stream_codec_t* codec, size_t caret);
 size_t codec_len(stream_codec_t* codec);
 
+/* buffer operations */
 bool codec_buffer_write(stream_codec_t* codec, buffer_t* buffer);
 bool codec_buffer_read(stream_codec_t* codec, buffer_t* buffer, size_t len);
 
+/* rsa operations */
 void codec_block_encrypt(stream_codec_t* codec, rsa_t* rsa);
 void codec_block_decrypt(stream_codec_t* codec, rsa_t* rsa);
 
+/* bit mode operations */
+void codec_set_bit_access_mode(stream_codec_t* codec, bool bit_mode);
+void codec_put_bits(stream_codec_t* codec, int nbits, uint32_t i);
+uint32_t codec_get_bits(stream_codec_t* codec, int nbits);
+
+/* byte mode operations */
 void codec_put8(stream_codec_t* codec, uint8_t i);
 void codec_put16(stream_codec_t* codec, uint16_t i);
 void codec_put24(stream_codec_t* codec, uint32_t i);
