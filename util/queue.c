@@ -67,6 +67,19 @@ list_node_t* queue_pop(queue_t* queue)
 }
 
 /**
+ * queue_peek
+ *
+ * Returns the next item in the queue without removing it
+ *  - queue: The queue
+ * returns: The item
+ */
+list_node_t* queue_peek(queue_t* queue)
+{
+	list_node_t* node = list_back(&queue->list);
+	return node;
+}
+
+/**
  * queue_empty
  *
  * Checks if a queue is empty
@@ -76,4 +89,17 @@ list_node_t* queue_pop(queue_t* queue)
 bool queue_empty(queue_t* queue)
 {
 	return list_empty(&queue->list);
+}
+
+/**
+ * queue_clear
+ *
+ * Empties a queue
+ *  - queue: The queue to clear
+ */
+void queue_clear(queue_t* queue)
+{
+	while (!queue_empty(queue)) {
+		queue_pop(queue);
+	}
 }

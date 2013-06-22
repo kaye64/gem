@@ -17,6 +17,8 @@ void queue_free(queue_t* queue);
 
 void queue_push(queue_t* queue, list_node_t* item);
 list_node_t* queue_pop(queue_t* queue);
+list_node_t* queue_peek(queue_t* queue);
 bool queue_empty(queue_t* queue);
+void queue_clear(queue_t* queue);
 
 #endif /* _QUEUE_H_ */

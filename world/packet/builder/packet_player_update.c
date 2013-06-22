@@ -44,10 +44,15 @@ void build_movement_block(game_client_t* game_client, stream_codec_t* codec)
 			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
 			codec_put_bits(codec, 7, local_y(*location));
 			codec_put_bits(codec, 7, local_x(*location));
-		} else if (mob->update_flags & MOB_FLAG_WALK_UPDATE) {
-
 		} else if (mob->update_flags & MOB_FLAG_RUN_UPDATE) {
-
+			codec_put_bits(codec, 2, 2); // Update type 2 = running
+			codec_put_bits(codec, 3, mob->last_direction);
+			codec_put_bits(codec, 3, mob->direction);
+			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
+		} else if (mob->update_flags & MOB_FLAG_WALK_UPDATE) {
+			codec_put_bits(codec, 2, 1); // Update type 1 = walk
+			codec_put_bits(codec, 3, mob->direction);
+			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
 		} else {
 			codec_put_bits(codec, 2, 0); // Update type 0 = No movement update
 		}

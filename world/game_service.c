@@ -78,6 +78,7 @@ void* game_service_accept(service_client_t* service_client)
 	codec_create(&client->codec);
 	queue_create(&client->packet_queue_in);
 	queue_create(&client->packet_queue_out);
+	mob_create(&client->mob);
 	client->login_stage = STAGE_INIT;
 	return client;
 }
@@ -164,6 +165,7 @@ void game_service_read(service_client_t* service_client)
 		payload_len = codec_get16(&game_client->codec);
 		break;
 	}
+	packet->len = payload_len;
 
 	/* read the payload */
 	if (codec_buffer_read(&packet->payload, &client->read_buffer, payload_len)) {
@@ -225,6 +227,7 @@ void game_service_drop(service_client_t* service_client)
 	if (game_client->login_stage == STAGE_COMPLETE) {
 		game_player_logout(game_service, game_client);
 	}
+	mob_free(&game_client->mob);
 	queue_free(&game_client->packet_queue_out);
 	queue_free(&game_client->packet_queue_in);
 	codec_free(&game_client->codec);
@@ -260,6 +263,16 @@ void game_process_io(game_service_t* game)
 void game_client_sync(game_service_t* game_service)
 {
 	list_node_t* player_node = list_front(&game_service->player_list);
+	while (player_node != NULL) {
+		game_client_t* game_client = container_of(player_node, game_client_t, node);
+		if (game_client->mob.running) {
+			mob_update_path(&game_client->mob);
+		}
+		mob_update_path(&game_client->mob);
+		player_node = player_node->next;
+	}
+
+	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
 		game_client_t* game_client = container_of(player_node, game_client_t, node);
 

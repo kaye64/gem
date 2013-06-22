@@ -5,8 +5,8 @@
 #include <util/queue.h>
 #include <net/stream_codec.h>
 #include <world/mob.h>
-#include <crypto/isaac.h>
 #include <world/packet/packet.h>
+#include <crypto/isaac.h>
 
 #define PLAYER_RIGHTS_NORMAL 0
 #define PLAYER_RIGHTS_MODERATOR 1
@@ -15,7 +15,7 @@
 
 struct game_client {
 	list_node_t node;
-	/* client config */
+	/* client state */
 	uint32_t client_uid;
 	char username[32];
 	char password[32]; // We should just validate on login and remove this from memory

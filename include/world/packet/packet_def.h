@@ -115,7 +115,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_SV_UNKNOWN95 95
 #define PKT_SV_UNKNOWN96 96
 #define PKT_SV_UNKNOWN97 97
-#define PKT_SV_UNKNOWN98 98
+#define PKT_SV_WALK_C 98
 #define PKT_SV_UNKNOWN99 99
 #define PKT_SV_UNKNOWN100 100
 #define PKT_SV_UNKNOWN101 101
@@ -181,7 +181,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_SV_UNKNOWN161 161
 #define PKT_SV_UNKNOWN162 162
 #define PKT_SV_UNKNOWN163 163
-#define PKT_SV_UNKNOWN164 164
+#define PKT_SV_WALK_A 164
 #define PKT_SV_UNKNOWN165 165
 #define PKT_SV_UNKNOWN166 166
 #define PKT_SV_UNKNOWN167 167
@@ -265,7 +265,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_SV_UNKNOWN245 245
 #define PKT_SV_UNKNOWN246 246
 #define PKT_SV_UNKNOWN247 247
-#define PKT_SV_UNKNOWN248 248
+#define PKT_SV_WALK_B 248
 #define PKT_SV_UNKNOWN249 249
 #define PKT_SV_UNKNOWN250 250
 #define PKT_SV_UNKNOWN251 251

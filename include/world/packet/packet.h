@@ -7,6 +7,7 @@
 
 struct packet {
 	packet_def_t def;
+	int len;
 	stream_codec_t payload;
 	list_node_t node;
 };
