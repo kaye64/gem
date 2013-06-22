@@ -188,7 +188,9 @@ void codec_set_bit_access_mode(stream_codec_t* codec, bool bit_mode)
 	if (bit_mode) {
 		codec->bit_caret = 7;
 	} else {
-		codec->caret++;
+		if (codec->bit_caret != 7) {
+			codec->caret++;
+		}
 	}
 	codec->bit_access_mode = bit_mode;
 }
