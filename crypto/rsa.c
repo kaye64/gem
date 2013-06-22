@@ -33,6 +33,10 @@ void rsa_free(rsa_t* rsa)
 
 void rsa_encrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len)
 {
+#ifdef RSA_DISABLE
+	memcpy(out, in, in_len);
+	*out_len = in_len;
+#else
 	mpz_t message; mpz_init(message);
 	mpz_t encrypted; mpz_init(encrypted);
 
@@ -42,10 +46,15 @@ void rsa_encrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, 
 
 	mpz_clear(message);
 	mpz_clear(encrypted);
+#endif
 }
 
 void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len)
 {
+#ifdef RSA_DISABLE
+	memcpy(out, in, in_len);
+	*out_len = in_len;
+#else
 	mpz_t encrypted; mpz_init(encrypted);
 	mpz_t message; mpz_init(message);
 
@@ -55,4 +64,5 @@ void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, 
 
 	mpz_clear(encrypted);
 	mpz_clear(message);
+#endif
 }
