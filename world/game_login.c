@@ -132,5 +132,6 @@ int game_player_load(game_service_t* game_service, game_client_t* game_client)
 	game_client->rights = PLAYER_RIGHTS_SUPER;
 	location_t new_location = { .x = 3200, .y = 3200, .z = 0 };
 	mob_warp_to(&game_client->mob, new_location);
+	game_client->mob.update_flags |= MOB_FLAG_APPEARANCE_UPDATE;
 	return LOGIN_OKAY;
 }
