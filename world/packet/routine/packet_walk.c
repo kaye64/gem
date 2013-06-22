@@ -11,9 +11,9 @@
 
 void packet_walk(game_client_t* client, packet_t* packet)
 {
-	// The second walking packet appends 14 extra bytes
-	// Not sure what it is yet. It's in method92. Ignore it for now.
-	if (packet->def.opcode == PKT_SV_WALK_B) {
+	// The map walk packet appends 14 extra bytes
+	// Not sure what it is yet. Maybe anti-cheat stuff. It's in method92. Ignore it for now.
+	if (packet->def.opcode == PKT_SV_WALK_MAP) {
 		packet->len -= 14;
 	}
 	mob_t* mob = &client->mob;
