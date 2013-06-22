@@ -1,5 +1,7 @@
 #include <world/packet/builder/packet_player_update.h>
 
+#include <util/jstring_encode.h>
+
 #define CL_FLAG_APPEARANCE_UPDATE (1 << 4)
 
 stream_codec_t* build_appearance_block(game_client_t* game_client);
@@ -123,7 +125,7 @@ stream_codec_t* build_appearance_block(game_client_t* game_client)
 	codec_put16(appearance_block, 0x336);
 	codec_put16(appearance_block, 0x338);
 
-	codec_put64(appearance_block, game_client->name_hash); // username hash
+	codec_put64(appearance_block, jstring_encode(game_client->username));
 	codec_put8(appearance_block, 3); // combat level
 	codec_put16(appearance_block, 0);
 	return appearance_block;

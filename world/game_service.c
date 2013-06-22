@@ -9,7 +9,6 @@
 
 #include <util/log.h>
 #include <util/container_of.h>
-#include <util/jhash.h>
 #include <world/dispatcher.h>
 #include <world/game_login.h>
 #include <world/packet/packet_router.h>
@@ -295,7 +294,6 @@ void game_player_login(game_service_t* game_service, game_client_t* game_client)
 {
 	list_push_back(&game_service->player_list, &game_client->node);
 	INFO("Player login: %s", game_client->username);
-	game_client->name_hash = string_jhash(game_client->username);
 }
 
 /**
