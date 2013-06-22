@@ -19,6 +19,7 @@ struct game_client {
 	uint32_t client_uid;
 	char username[32];
 	char password[32]; // We should just validate on login and remove this from memory
+	long name_hash;
 	bool high_memory;
 	int rights;
 	int login_stage;

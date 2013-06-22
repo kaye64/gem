@@ -123,7 +123,7 @@ stream_codec_t* build_appearance_block(game_client_t* game_client)
 	codec_put16(appearance_block, 0x336);
 	codec_put16(appearance_block, 0x338);
 
-	codec_put64(appearance_block, 0); // username hash
+	codec_put64(appearance_block, game_client->name_hash); // username hash
 	codec_put8(appearance_block, 3); // combat level
 	codec_put16(appearance_block, 0);
 	return appearance_block;
