@@ -54,6 +54,11 @@ location_t waypoint_queue_tick(waypoint_queue_t* queue, location_t current_locat
 	return next_position;
 }
 
+bool waypoint_queue_empty(waypoint_queue_t* queue)
+{
+	return queue_empty(&queue->waypoints);
+}
+
 int interpolate_coord(int i, int y) {
 	if (i == y) {
 		return i;

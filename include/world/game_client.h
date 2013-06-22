@@ -35,6 +35,7 @@ struct game_client {
 };
 typedef struct game_client game_client_t;
 
+void game_client_logic_update(game_client_t* game_client);
 void game_client_enqueue_packet(game_client_t* game_client, packet_t* packet);
 
 #endif /* _GAME_CLIENT_H_ */

@@ -36,6 +36,7 @@ void mob_warp_to(mob_t* mob, location_t position)
 {
 	mob->update_flags |= MOB_FLAG_REGION_UPDATE;
 	mob->pos = position;
+	waypoint_queue_clear(&mob->waypoint_queue);
 }
 
 void mob_update_path(mob_t* mob)

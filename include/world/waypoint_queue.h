@@ -22,5 +22,6 @@ void waypoint_queue_free(waypoint_queue_t* queue);
 void waypoint_queue_clear(waypoint_queue_t* queue);
 void waypoint_queue_push(waypoint_queue_t* queue, location_t point);
 location_t waypoint_queue_tick(waypoint_queue_t* queue, location_t current_location);
+bool waypoint_queue_empty(waypoint_queue_t* queue);
 
 #endif /* _WAYPOINT_QUEUE_H_ */

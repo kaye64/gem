@@ -265,10 +265,9 @@ void game_client_sync(game_service_t* game_service)
 	list_node_t* player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
 		game_client_t* game_client = container_of(player_node, game_client_t, node);
-		if (game_client->mob.running) {
-			mob_update_path(&game_client->mob);
-		}
-		mob_update_path(&game_client->mob);
+
+		game_client_logic_update(game_client);
+
 		player_node = player_node->next;
 	}
 
@@ -281,6 +280,7 @@ void game_client_sync(game_service_t* game_service)
 			game_client_enqueue_packet(game_client, packet_build_region_update(game_client));
 		}
 		game_client_enqueue_packet(game_client, packet_build_player_update(game_client));
+
 		player_node = player_node->next;
 	}
 
