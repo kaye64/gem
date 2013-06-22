@@ -152,8 +152,8 @@ void io_tick()
 void cleanup(bool forceful) {
 	if (!forceful) {
 		INFO("Cleaning up for shutdown");
-		server_stop(&instance.jag_server);
-		server_stop(&instance.world_dispatcher);
+		server_stop(&instance.jag_server->io_server);
+		server_stop(&instance.world_dispatcher->server);
 		ev_timer_stop(instance.engine_loop, &instance.engine_tick);
 		ev_timer_stop(instance.engine_loop, &instance.io_tick);
 
