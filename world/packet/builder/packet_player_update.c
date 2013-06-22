@@ -97,7 +97,23 @@ stream_codec_t* build_appearance_block(game_client_t* game_client)
 	stream_codec_t* appearance_block = codec_create(NULL);
 
 	codec_put8(appearance_block, 0); // gender
-	codec_put8(appearance_block, 0);
+	codec_put8(appearance_block, 0); // head icon
+
+	/**
+	 * If a value here is offset by 512, the value is treated
+	 * as an item id, and the item is displayed on the player.
+	 *
+	 * If a value is offset by 256, the value is treated as
+	 * an index from the identity kit (idk.dat).
+	 *
+	 * If the first value is == 65535, we can send 2 bytes indicating
+	 * an npc to use as the player's appearance. The rest of this block
+	 * is discarded.
+	 *
+	 * An actual value is only sent as 2 bytes. If anything other than 0
+	 * is sent as a single byte, the client will probably crash.
+	 */
+
 	codec_put8(appearance_block, 0); // head
 	codec_put8(appearance_block, 0); // cape
 	codec_put8(appearance_block, 0); // neck
@@ -110,6 +126,12 @@ stream_codec_t* build_appearance_block(game_client_t* game_client)
 	codec_put16(appearance_block, 256 + 35); // hands
 	codec_put16(appearance_block, 256 + 44); // feet
 	codec_put16(appearance_block, 256 + 10); // beard
+
+	/**
+	 * These colors have no relation to any other color indices.
+	 * This value is just translated to an actual color in a lookup table,
+	 * so there are a set number of colors for each body part.
+	 */
 	codec_put8(appearance_block, 7); // hair color
 	codec_put8(appearance_block, 8); // torso color
 	codec_put8(appearance_block, 9); // leg color
