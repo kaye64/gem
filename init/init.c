@@ -9,9 +9,9 @@
 #include <util/log.h>
 #include <jaggrab/jaggrab.h>
 #include <runite/cache.h>
-#include <world/dispatcher.h>
-#include <world/game_service.h>
-#include <world/update_service.h>
+#include <game/dispatcher.h>
+#include <game/game_service.h>
+#include <game/update_service.h>
 #include <crypto/rsa.h>
 
 #include <assert.h>
