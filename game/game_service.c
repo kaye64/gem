@@ -22,9 +22,6 @@ void game_service_read(service_client_t* service_client);
 void game_service_write(service_client_t* service_client);
 void game_service_drop(service_client_t* service_client);
 
-void player_login(game_service_t* game_service, player_t* player);
-void player_logout(game_service_t* game_service, player_t* player);
-
 /**
  * game_create
  *
@@ -287,30 +284,4 @@ void player_sync(game_service_t* game_service)
 		player_node = player_node->next;
 	}
 
-}
-
-/**
- * player_login
- *
- * Called when a new player successfully logs in
- *  - game_service: The game service
- *  - player: The player
- */
-void player_login(game_service_t* game_service, player_t* player)
-{
-	list_push_back(&game_service->player_list, &player->node);
-	INFO("Player login: %s", player->username);
-}
-
-/**
- * player_logout
- *
- * Called when a new player logs out
- *  - game_service: The game service
- *  - player: The player
- */
-void player_logout(game_service_t* game_service, player_t* player)
-{
-	list_erase(&game_service->player_list, &player->node);
-	INFO("Player logout: %s", player->username);
 }

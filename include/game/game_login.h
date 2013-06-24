@@ -33,4 +33,7 @@
 
 int game_process_login(game_service_t* game_service, client_t* client, player_t* player);
 
+void player_login(game_service_t* game_service, player_t* player);
+void player_logout(game_service_t* game_service, player_t* player);
+
 #endif /* _GAME_LOGIN_H_ */

@@ -7,6 +7,32 @@
 int player_load(game_service_t* game_service, player_t* player);
 
 /**
+ * player_login
+ *
+ * Called when a new player successfully logs in
+ *  - game_service: The game service
+ *  - player: The player
+ */
+void player_login(game_service_t* game_service, player_t* player)
+{
+	list_push_back(&game_service->player_list, &player->node);
+	INFO("Player login: %s", player->username);
+}
+
+/**
+ * player_logout
+ *
+ * Called when a new player logs out
+ *  - game_service: The game service
+ *  - player: The player
+ */
+void player_logout(game_service_t* game_service, player_t* player)
+{
+	list_erase(&game_service->player_list, &player->node);
+	INFO("Player logout: %s", player->username);
+}
+
+/**
  * game_process_login
  *
  * Performs the login sequence
