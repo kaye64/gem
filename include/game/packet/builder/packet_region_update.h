@@ -4,6 +4,6 @@
 #include <game/packet/packet.h>
 #include <game/game_service.h>
 
-packet_t* packet_build_region_update(game_client_t* game_client);
+packet_t* packet_build_region_update(player_t* player);
 
 #endif /* _PACKET_REGION_UPDATE_H_ */

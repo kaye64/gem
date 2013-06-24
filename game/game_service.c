@@ -22,8 +22,8 @@ void game_service_read(service_client_t* service_client);
 void game_service_write(service_client_t* service_client);
 void game_service_drop(service_client_t* service_client);
 
-void game_player_login(game_service_t* game_service, game_client_t* game_client);
-void game_player_logout(game_service_t* game_service, game_client_t* game_client);
+void player_login(game_service_t* game_service, player_t* player);
+void player_logout(game_service_t* game_service, player_t* player);
 
 /**
  * game_create
@@ -74,9 +74,9 @@ void game_free(game_service_t* game)
  */
 void* game_service_accept(service_client_t* service_client)
 {
-	game_client_t* client = game_client_create(NULL);
-	client->login_stage = STAGE_INIT;
-	return client;
+	player_t* player = player_create(NULL);
+	player->login_stage = STAGE_INIT;
+	return player;
 }
 
 /**
@@ -88,11 +88,11 @@ void* game_service_accept(service_client_t* service_client)
 void game_service_drop(service_client_t* service_client)
 {
 	game_service_t* game_service = container_of(service_client->service, game_service_t, service);
-	game_client_t* game_client = (game_client_t*)service_client->attrib;
-	if (game_client->login_stage == STAGE_COMPLETE) {
-		game_player_logout(game_service, game_client);
+	player_t* player = (player_t*)service_client->attrib;
+	if (player->login_stage == STAGE_COMPLETE) {
+		player_logout(game_service, player);
 	}
-	game_client_free(game_client);
+	player_free(player);
 	service_client->attrib = NULL;
 }
 
@@ -106,26 +106,26 @@ void game_service_drop(service_client_t* service_client)
 int game_service_handshake(service_client_t* service_client)
 {
 	game_service_t* game_service = container_of(service_client->service, game_service_t, service);
-	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	player_t* player = (player_t*)service_client->attrib;
 	client_t* client = &service_client->client;
-	int status = game_process_login(game_service, client, game_client);
+	int status = game_process_login(game_service, client, player);
 	if (status == LOGIN_PENDING) {
 		return HANDSHAKE_PENDING;
 	}
 
-	codec_seek(&game_client->codec, 0);
-	codec_put8(&game_client->codec, status);
+	codec_seek(&player->codec, 0);
+	codec_put8(&player->codec, status);
 
 	int handshake_status = HANDSHAKE_ACCEPTED;
 
 	if (status == LOGIN_OKAY) {
-		codec_put8(&game_client->codec, game_client->rights);
-		codec_put8(&game_client->codec, 0); // I believe this can toggle advanced player stats for bot detection
-		game_player_login(game_service, game_client);
+		codec_put8(&player->codec, player->rights);
+		codec_put8(&player->codec, 0); // I believe this can toggle advanced player stats for bot detection
+		player_login(game_service, player);
 	} else {
 		handshake_status = HANDSHAKE_DENIED;
 	}
-	codec_buffer_write(&game_client->codec, &client->write_buffer);
+	codec_buffer_write(&player->codec, &client->write_buffer);
 	return handshake_status;
 }
 
@@ -137,17 +137,17 @@ int game_service_handshake(service_client_t* service_client)
  */
 void game_service_read(service_client_t* service_client)
 {
-	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	player_t* player = (player_t*)service_client->attrib;
 	client_t* client = &service_client->client;
 	buffer_pushp(&client->read_buffer);
-	codec_seek(&game_client->codec, 0);
-	if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 1)) {
+	codec_seek(&player->codec, 0);
+	if (!codec_buffer_read(&player->codec, &client->read_buffer, 1)) {
 		buffer_popp(&client->read_buffer);
 		return;
 	}
 
 	/* read the opcode */
-	uint8_t opcode = codec_get8(&game_client->codec) - isaac_next(&game_client->isaac_in);
+	uint8_t opcode = codec_get8(&player->codec) - isaac_next(&player->isaac_in);
 	int payload_len;
 	packet_def_t definition = packet_lookup(PACKET_TYPE_IN, opcode);
 	if (definition.opcode == PKT_NULL) {
@@ -162,20 +162,20 @@ void game_service_read(service_client_t* service_client)
 		payload_len = definition.len;
 		break;
 	case PACKET_LEN_8:
-		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 1)) {
+		if (!codec_buffer_read(&player->codec, &client->read_buffer, 1)) {
 			buffer_popp(&client->read_buffer);
 			packet_free(packet);
 			return;
 		}
-		payload_len = codec_get8(&game_client->codec);
+		payload_len = codec_get8(&player->codec);
 		break;
 	case PACKET_LEN_16:
-		if (!codec_buffer_read(&game_client->codec, &client->read_buffer, 2)) {
+		if (!codec_buffer_read(&player->codec, &client->read_buffer, 2)) {
 			buffer_popp(&client->read_buffer);
 			packet_free(packet);
 			return;
 		}
-		payload_len = codec_get16(&game_client->codec);
+		payload_len = codec_get16(&player->codec);
 		break;
 	}
 	packet->len = payload_len;
@@ -183,7 +183,7 @@ void game_service_read(service_client_t* service_client)
 	/* read the payload */
 	if (codec_buffer_read(&packet->payload, &client->read_buffer, payload_len)) {
 		codec_seek(&packet->payload, 0);
-		queue_push(&game_client->packet_queue_in, &packet->node);
+		queue_push(&player->packet_queue_in, &packet->node);
 	} else {
 		buffer_popp(&client->read_buffer);
 		packet_free(packet);
@@ -198,31 +198,31 @@ void game_service_read(service_client_t* service_client)
  */
 void game_service_write(service_client_t* service_client)
 {
-	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	player_t* player = (player_t*)service_client->attrib;
 	client_t* client = &service_client->client;
-	while (!queue_empty(&game_client->packet_queue_out)) {
-		list_node_t* node = queue_pop(&game_client->packet_queue_out);
+	while (!queue_empty(&player->packet_queue_out)) {
+		list_node_t* node = queue_pop(&player->packet_queue_out);
 		packet_t* packet = container_of(node, packet_t, node);
 		int payload_len = codec_len(&packet->payload);
-		codec_seek(&game_client->codec, 0);
-		int opcode = packet->def.opcode + isaac_next(&game_client->isaac_out);
-		codec_put8(&game_client->codec, opcode);
+		codec_seek(&player->codec, 0);
+		int opcode = packet->def.opcode + isaac_next(&player->isaac_out);
+		codec_put8(&player->codec, opcode);
 		switch (packet->def.type) {
 		case PACKET_LEN_FIXED:
 			break;
 		case PACKET_LEN_8:
-			codec_put8(&game_client->codec, payload_len);
+			codec_put8(&player->codec, payload_len);
 			break;
 		case PACKET_LEN_16:
-			codec_put16(&game_client->codec, payload_len);
+			codec_put16(&player->codec, payload_len);
 			break;
 		}
-		codec_concat(&game_client->codec, &packet->payload);
-		if (codec_buffer_write(&game_client->codec, &client->write_buffer)) {
+		codec_concat(&player->codec, &packet->payload);
+		if (codec_buffer_write(&player->codec, &client->write_buffer)) {
 			packet_free(packet);
 		} else {
 			WARN("unable to write packet");
-			queue_push(&game_client->packet_queue_out, &packet->node);
+			queue_push(&player->packet_queue_out, &packet->node);
 		}
 	}
 }
@@ -237,52 +237,52 @@ void game_process_io(game_service_t* game)
 {
 	list_node_t* player_node = list_front(&game->player_list);
 	while (player_node != NULL) {
-		game_client_t* game_client = container_of(player_node, game_client_t, node);
-		while (!queue_empty(&game_client->packet_queue_in)) {
-			list_node_t* packet_node = queue_pop(&game_client->packet_queue_in);
+		player_t* player = container_of(player_node, player_t, node);
+		while (!queue_empty(&player->packet_queue_in)) {
+			list_node_t* packet_node = queue_pop(&player->packet_queue_in);
 			packet_t* packet = container_of(packet_node, packet_t, node);
-			packet_dispatch(game_client, packet);
+			packet_dispatch(player, packet);
 		}
 		player_node = player_node->next;
 	}
 }
 
 /**
- * game_client_sync
+ * player_sync
  *
  * Syncs players, mobs, items etc. between clients
  *  - game_service: The game service
  */
-void game_client_sync(game_service_t* game_service)
+void player_sync(game_service_t* game_service)
 {
 	list_node_t* player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		game_client_t* game_client = container_of(player_node, game_client_t, node);
+		player_t* player = container_of(player_node, player_t, node);
 
-		game_client_logic_update(game_client);
+		player_logic_update(player);
 
 		player_node = player_node->next;
 	}
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		game_client_t* game_client = container_of(player_node, game_client_t, node);
+		player_t* player = container_of(player_node, player_t, node);
 
 		// Check if the client has changed region
-		if (game_client->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
-			game_client_enqueue_packet(game_client, packet_build_region_update(game_client));
+		if (player->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
+			player_enqueue_packet(player, packet_build_region_update(player));
 		}
-		game_client_enqueue_packet(game_client, packet_build_player_update(game_client));
+		player_enqueue_packet(player, packet_build_player_update(player));
 
 		player_node = player_node->next;
 	}
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		game_client_t* game_client = container_of(player_node, game_client_t, node);
+		player_t* player = container_of(player_node, player_t, node);
 
 		// Clear the client's update flags
-		game_client->mob.update_flags = 0;
+		player->mob.update_flags = 0;
 
 		player_node = player_node->next;
 	}
@@ -290,27 +290,27 @@ void game_client_sync(game_service_t* game_service)
 }
 
 /**
- * game_player_login
+ * player_login
  *
  * Called when a new player successfully logs in
  *  - game_service: The game service
- *  - game_client: The game client
+ *  - player: The player
  */
-void game_player_login(game_service_t* game_service, game_client_t* game_client)
+void player_login(game_service_t* game_service, player_t* player)
 {
-	list_push_back(&game_service->player_list, &game_client->node);
-	INFO("Player login: %s", game_client->username);
+	list_push_back(&game_service->player_list, &player->node);
+	INFO("Player login: %s", player->username);
 }
 
 /**
- * game_player_logout
+ * player_logout
  *
  * Called when a new player logs out
  *  - game_service: The game service
- *  - game_client: The game client
+ *  - player: The player
  */
-void game_player_logout(game_service_t* game_service, game_client_t* game_client)
+void player_logout(game_service_t* game_service, player_t* player)
 {
-	list_erase(&game_service->player_list, &game_client->node);
-	INFO("Player logout: %s", game_client->username);
+	list_erase(&game_service->player_list, &player->node);
+	INFO("Player logout: %s", player->username);
 }

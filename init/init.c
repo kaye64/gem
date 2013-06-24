@@ -125,7 +125,7 @@ void engine_thread()
  */
 void engine_tick()
 {
-	game_client_sync(instance.game_service);
+	player_sync(instance.game_service);
 
 	ev_timer_again(instance.engine_loop, &instance.engine_tick);
 }

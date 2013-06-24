@@ -13,7 +13,7 @@
 #define PLAYER_RIGHTS_ADMIN 2
 #define PLAYER_RIGHTS_SUPER 3
 
-struct game_client {
+struct player {
 	list_node_t node;
 	/* client state */
 	uint32_t client_uid;
@@ -35,12 +35,12 @@ struct game_client {
 	/* misc */
 	bool must_free;
 };
-typedef struct game_client game_client_t;
+typedef struct player player_t;
 
-game_client_t* game_client_create(game_client_t* game_client);
-void game_client_free(game_client_t* client);
+player_t* player_create(player_t* player);
+void player_free(player_t* player);
 
-void game_client_logic_update(game_client_t* game_client);
-void game_client_enqueue_packet(game_client_t* game_client, packet_t* packet);
+void player_logic_update(player_t* player);
+void player_enqueue_packet(player_t* player, packet_t* packet);
 
 #endif /* _GAME_CLIENT_H_ */

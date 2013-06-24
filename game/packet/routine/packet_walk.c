@@ -9,14 +9,14 @@
 
 #define LOG_TAG "packet_walk"
 
-void packet_walk(game_client_t* client, packet_t* packet)
+void packet_walk(player_t* player, packet_t* packet)
 {
 	// The map walk packet appends 14 extra bytes
 	// Not sure what it is yet. Maybe anti-cheat stuff. It's in method92. Ignore it for now.
 	if (packet->def.opcode == PKT_SV_WALK_MAP) {
 		packet->len -= 14;
 	}
-	mob_t* mob = &client->mob;
+	mob_t* mob = &player->mob;
 	waypoint_queue_clear(&mob->waypoint_queue);
 	int waypoint_count = (packet->len-5)/2;
 	int path[waypoint_count][2];
@@ -36,6 +36,6 @@ void packet_walk(game_client_t* client, packet_t* packet)
 	}
 	/* This byte is set to 1 when the player holds control,
 	   however on my system (linux 3.9, openjdk 1.7) it doesn't seem to be recognized.
-	   Is this a bug in the client? */
-	client->mob.running = codec_get8(&packet->payload) == 1;
+	   Is this a bug in the player? */
+	player->mob.running = codec_get8(&packet->payload) == 1;
 }

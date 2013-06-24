@@ -34,7 +34,7 @@ packet_handler_t routing_table[] = {
  *  - client: The originating client
  *  - packet: The packet
  */
-void packet_dispatch(game_client_t* client, packet_t* packet)
+void packet_dispatch(player_t* player, packet_t* packet)
 {
 	int opcode = packet->def.opcode;
 	for (int i = 0; ; i++) {
@@ -43,7 +43,7 @@ void packet_dispatch(game_client_t* client, packet_t* packet)
 			return;
 		}
 		if (routing_table[i].opcode == opcode) {
-			routing_table[i].callback(client, packet);
+			routing_table[i].callback(player, packet);
 			return;
 		}
 	}

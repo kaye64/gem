@@ -1,8 +1,8 @@
 #include <game/packet/builder/packet_region_update.h>
 
-packet_t* packet_build_region_update(game_client_t* game_client)
+packet_t* packet_build_region_update(player_t* player)
 {
-	location_t* location = &game_client->mob.pos;
+	location_t* location = &player->mob.pos;
 	packet_t* region_update = packet_create(packet_lookup(PACKET_TYPE_OUT, PKT_CL_REGION_UPDATE));
 	int reg_x = region_x(*location);
 	int reg_y = region_y(*location);

@@ -12,7 +12,7 @@
 #include <util/list.h>
 #include <util/queue.h>
 #include <game/packet/packet.h>
-#include <game/game_client.h>
+#include <game/player.h>
 
 struct game_service {
 	service_t service;
@@ -27,6 +27,6 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache);
 void game_free(game_service_t* game);
 
 void game_process_io(game_service_t* game);
-void game_client_sync(game_service_t* game_service);
+void player_sync(game_service_t* game_service);
 
 #endif /* _GAME_SERVICE_H_ */

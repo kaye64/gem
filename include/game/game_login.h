@@ -31,6 +31,6 @@
 #define LOGIN_INVALID_LOGIN_SERVER 20
 #define LOGIN_INVALID_TRANSFERRING 21
 
-int game_process_login(game_service_t* game_service, client_t* client, game_client_t* game_client);
+int game_process_login(game_service_t* game_service, client_t* client, player_t* player);
 
 #endif /* _GAME_LOGIN_H_ */

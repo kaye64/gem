@@ -4,6 +4,6 @@
 #include <game/packet/packet.h>
 #include <game/game_service.h>
 
-void packet_idle(game_client_t* client, packet_t* packet);
+void packet_idle(player_t* player, packet_t* packet);
 
 #endif /* _PACKET_IDLE_H_ */
