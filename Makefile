@@ -1,4 +1,4 @@
-CFLAGS = -g -std=gnu99 -Wall -Lrunite/
+CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Lrunite/
 INCLUDE_DIRS = -Iinclude/ -Irunite/include/
 OUT = server
 LIBS = -lrunite -lev -lz -lpthread -lgmp
