@@ -17,7 +17,7 @@ char enc_table[] = {'_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
  */
 long jstring_encode(char* s) {
 	long encoded = 0;
-	for (int i = 0; i < strlen(s) && i < 12; i++) {
+	for (size_t i = 0; i < strlen(s) && i < 12; i++) {
 		encoded *= 37;
 		if (s[i] >= 'A' && s[i] <= 'Z') {
 			encoded += (1 + s[i]) - 65;

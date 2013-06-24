@@ -24,7 +24,7 @@ struct update_request {
 	uint16_t file_id;
 	uint8_t priority;
 	size_t file_size;
-	int next_chunk;
+	uint8_t next_chunk;
 	unsigned char* payload;
 	list_node_t list_node;
 } __attribute__((packed));

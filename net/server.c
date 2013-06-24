@@ -220,9 +220,9 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		}
 
 		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
-		int write_caret = 0;
+		size_t write_caret = 0;
 		while (write_avail > write_caret) {
-			size_t sent = send(client->fd, buffer+write_caret, write_avail, 0);
+			ssize_t sent = send(client->fd, buffer+write_caret, write_avail, 0);
 
 			// Check for write error
 			if (sent < 0) {

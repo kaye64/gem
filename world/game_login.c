@@ -74,7 +74,7 @@ int game_process_login(game_service_t* game_service, client_t* client, game_clie
 			return LOGIN_UPDATED;
 		}
 
-		if (client_mem_type < 0 || client_mem_type > 1) {
+		if (client_mem_type > 1) {
 			WARN("Client connected with invalid memory type %d", client_mem_type);
 			return LOGIN_REJECTED;
 		}

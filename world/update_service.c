@@ -126,11 +126,11 @@ void update_service_read(service_client_t* service_client)
 	req->cache_id++;
 
 	// Validate it
-	if (req->cache_id < 0 || req->cache_id > cache->num_indices) {
+	if (req->cache_id > cache->num_indices) {
 		WARN("request for invalid cache id %d", req->cache_id);
 		return;
 	}
-	if (req->file_id < 0 || req->file_id > cache->num_files[req->cache_id]) {
+	if (req->file_id > cache->num_files[req->cache_id]) {
 		WARN("request for invalid file id %d in cache %d", req->file_id, req->cache_id);
 		return;
 	}
@@ -205,7 +205,7 @@ void update_service_write(service_client_t* service_client)
 
 	request->next_chunk++;
 
-	if (request->next_chunk*500 >= request->file_size) {
+	if ((uint16_t)(request->next_chunk*500) >= request->file_size) {
 		// Last chunk of the file, clean up
 		free(request->payload);
 		free(update_client->current_request);
