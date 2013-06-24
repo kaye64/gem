@@ -1,5 +1,7 @@
 #include <game/mob.h>
 
+#include <math.h>
+
 #include <util/log.h>
 
 #define LOG_TAG "mob"
@@ -10,6 +12,13 @@ int mob_dir_map[3][3] = {
 	{MOB_DIR_NORTH_WEST, MOB_DIR_WEST, MOB_DIR_SOUTH_WEST}
 };
 
+/**
+ * mob_create
+ *
+ * Creates and initializes a mob_t
+ *  - mob: The mob, or NULL to put on heap
+ * returns: The mob
+ */
 mob_t* mob_create(mob_t* mob)
 {
 	if (mob != NULL) {
@@ -24,6 +33,12 @@ mob_t* mob_create(mob_t* mob)
 	return mob;
 }
 
+/**
+ * mob_free
+ *
+ * Frees a mob_t
+ *  - mob: The mob
+ */
 void mob_free(mob_t* mob)
 {
 	waypoint_queue_free(&mob->waypoint_queue);
@@ -32,6 +47,13 @@ void mob_free(mob_t* mob)
 	}
 }
 
+/**
+ * mob_warp_to
+ *
+ * Changes the mob's position, clearing the walk queue
+ *  - mob: The mob
+ *  - position: The location to warp to
+ */
 void mob_warp_to(mob_t* mob, location_t position)
 {
 	mob->update_flags |= MOB_FLAG_REGION_UPDATE;
@@ -39,6 +61,12 @@ void mob_warp_to(mob_t* mob, location_t position)
 	waypoint_queue_clear(&mob->waypoint_queue);
 }
 
+/**
+ * mob_update_path
+ *
+ * Advances a mob's walk queue by one step. Call twice in one cycle for running
+ *  - mob: The mob
+ */
 void mob_update_path(mob_t* mob)
 {
 	location_t next_step = waypoint_queue_tick(&mob->waypoint_queue, mob->pos);
@@ -47,7 +75,7 @@ void mob_update_path(mob_t* mob)
 	}
 	int delta_x = mob->pos.x - next_step.x;
 	int delta_y = mob->pos.y - next_step.y;
-	if (delta_x < -1 || delta_x > 1 || delta_y < -1 || delta_y > 1) {
+	if (abs(delta_x) > 1 || abs(delta_y) > 1) {
 		return;
 	}
 	mob->last_direction = mob->direction;
