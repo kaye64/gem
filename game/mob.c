@@ -30,6 +30,8 @@ mob_t* mob_create(mob_t* mob)
 	waypoint_queue_create(&mob->waypoint_queue);
 	mob->direction = mob->last_direction = MOB_DIR_NONE;
 	mob->running = false;
+	mob->update_flags = 0;
+	mob_warp_to(mob, absolute_coord(0, 0, 0));
 	return mob;
 }
 
@@ -58,6 +60,7 @@ void mob_warp_to(mob_t* mob, location_t position)
 {
 	mob->update_flags |= MOB_FLAG_REGION_UPDATE;
 	mob->pos = position;
+	mob->region = center_region_on(mob->pos);
 	waypoint_queue_clear(&mob->waypoint_queue);
 }
 

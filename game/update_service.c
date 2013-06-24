@@ -176,6 +176,8 @@ void update_service_write(service_client_t* service_client)
 		request->payload = (unsigned char*)malloc(request->file_size);
 		if (!cache_get(cache, request->cache_id, request->file_id, request->payload)) {
 			WARN("unable to serve request for %d:%d. dropping", request->cache_id, request->file_id);
+			free(request->payload);
+			free(request);
 			return;
 		}
 
@@ -224,6 +226,12 @@ void update_service_write(service_client_t* service_client)
 void update_service_drop(service_client_t* service_client)
 {
 	update_client_t* update_client = (update_client_t*)service_client->attrib;
+	while (!queue_empty(&update_client->request_queue)) {
+		list_node_t* list_node = queue_pop(&update_client->request_queue);
+		update_request_t* request = container_of(list_node, update_request_t, list_node);
+		free(request->payload);
+		free(request);
+	}
 	queue_free(&update_client->request_queue);
 	free(update_client);
 }

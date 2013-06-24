@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include <util/config.h>
+#include <util/list.h>
 #include <net/buffer.h>
 
 #define HANDSHAKE_PENDING 0
@@ -49,6 +50,7 @@ struct server {
 	client_write_t write_cb;
 	client_drop_t drop_cb;
 	/* misc stuff */
+	list_t client_list;
 	uint8_t flags;
 	bool must_free;
 };
@@ -58,6 +60,7 @@ struct client {
 	server_t* server;
 	int handshake_stage;
 	bool client_drop;
+	list_node_t node;
 	/* net stuff */
 	struct ev_io io_read;
 	int fd;

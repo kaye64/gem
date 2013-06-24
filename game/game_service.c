@@ -39,6 +39,8 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache)
 		game->must_free = false;
 	}
 	game->rsa = rsa;
+	uint32_t seed = 0; // Not particularly important
+	isaac_create(&game->rand_gen, &seed, 1);
 	list_create(&game->player_list);
 	game->service.accept_cb = (service_accept_t)&game_service_accept;
 	game->service.handshake_cb = (service_handshake_t)&game_service_handshake;
@@ -57,6 +59,7 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache)
 void game_free(game_service_t* game)
 {
 	list_free(&game->player_list);
+	isaac_free(&game->rand_gen);
 	if (game->must_free) {
 		free(game);
 	}
@@ -239,6 +242,7 @@ void game_process_io(game_service_t* game)
 			list_node_t* packet_node = queue_pop(&player->packet_queue_in);
 			packet_t* packet = container_of(packet_node, packet_t, node);
 			packet_dispatch(player, packet);
+			packet_free(packet);
 		}
 		player_node = player_node->next;
 	}

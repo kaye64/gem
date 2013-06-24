@@ -44,6 +44,7 @@ server_t* server_create(server_t* server, const char* addr, int port, uint8_t fl
 	server->buf_size = DEFAULT_BUFFER_SIZE;
 	server->io_loop = 0;
 	server->flags = flags;
+	list_create(&server->client_list);
 	return server;
 }
 
@@ -55,6 +56,14 @@ server_t* server_create(server_t* server, const char* addr, int port, uint8_t fl
  */
 void server_free(server_t* server)
 {
+	/* force a cleanup of each client */
+	while (!list_empty(&server->client_list)) {
+		list_node_t* node = list_front(&server->client_list);
+		client_t* client = container_of(node, client_t, node);
+		server_client_cleanup(server, client);
+	}
+
+	list_free(&server->client_list);
 	if (server->must_free) {
 		free(server);
 	}
@@ -133,6 +142,8 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 		return;
 	}
 
+	list_push_back(&server->client_list, &client->node);
+
 	INFO("accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
 
 	ev_io_init(&client->io_read, client_io_avail, client->fd, EV_READ|EV_WRITE);
@@ -173,8 +184,6 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	int report_read = 0;
 
 	if (client->client_drop) {
-		ev_io_stop(server->io_loop, &client->io_read);
-		close(client->fd);
 		server_client_cleanup(server, client);
 		return;
 	}
@@ -312,6 +321,9 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
  */
 void server_client_cleanup(server_t* server, client_t* client)
 {
+	ev_io_stop(server->io_loop, &client->io_read);
+	list_erase(&server->client_list, &client->node);
+	close(client->fd);
 	buffer_free(&client->read_buffer);
 	buffer_free(&client->write_buffer);
 	server->drop_cb(client, server);

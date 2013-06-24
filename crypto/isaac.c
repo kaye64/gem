@@ -36,8 +36,8 @@ isaac_t* isaac_create(isaac_t* isaac, uint32_t* seed, int seed_len)
 		isaac->must_free = false;
 	}
 	// Init to zero
-	memset(&isaac->results, 0, 256);
-	memset(&isaac->state, 0, 256);
+	memset(&isaac->results, 0, 256*sizeof(uint32_t));
+	memset(&isaac->state, 0, 256*sizeof(uint32_t));
 	isaac->result_idx = 0;
 	isaac->state_a = 0;
 	isaac->state_b = 0;
