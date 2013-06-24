@@ -36,14 +36,17 @@ void player_free(player_t* player) {
 void player_logic_update(player_t* player)
 {
 	mob_t* mob = &player->mob;
-	region_t old_region = mob->region;
+	region_t current_region = mob->region;
 	if (mob->running) {
 		mob_update_path(mob);
 	}
 	mob_update_path(mob);
-	region_t new_region = origin_region(mob->pos);
-	int delta_x = abs(new_region.x - old_region.x);
-	int delta_y = abs(new_region.y - old_region.y);
+	// Rebase the region on the player's location
+	region_t new_region = center_region_on(mob->pos);
+	int delta_x = abs(new_region.base.x - current_region.base.x);
+	int delta_y = abs(new_region.base.y - current_region.base.y);
+	// If they've moved more than 5 sectors in any direction,
+	// rebase the region in the client
 	if (delta_x >= 5 || delta_y >= 5) {
 		mob->update_flags |= MOB_FLAG_REGION_UPDATE;
 		mob->region = new_region;

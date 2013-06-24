@@ -28,10 +28,10 @@ void packet_walk(player_t* player, packet_t* packet)
 		path[i][1] = wpY;
 	}
 	int originY = codec_get16fp(&packet->payload, NULL, CODEC_LITTLE);
-	location_t origin = { .x = originX, .y = originY, .z = 0 };
+	location_t origin = absolute_coord(originX, originY, 0);
 	waypoint_queue_push(&mob->waypoint_queue, origin);
 	for (int i = 0; i < waypoint_count; i++) {
-		location_t loc = { .x = path[i][0] + originX, .y = path[i][1] + originY, .z = 0 };
+		location_t loc = absolute_coord(path[i][0] + originX, path[i][1] + originY, 0);
 		waypoint_queue_push(&mob->waypoint_queue, loc);
 	}
 	/* This byte is set to 1 when the player holds control,

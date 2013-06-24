@@ -156,7 +156,7 @@ int game_process_login(game_service_t* game_service, client_t* client, player_t*
 int player_load(game_service_t* game_service, player_t* player)
 {
 	player->rights = PLAYER_RIGHTS_SUPER;
-	location_t new_location = { .x = 3200, .y = 3200, .z = 0 };
+	location_t new_location = absolute_coord(3200, 3200, 0);
 	mob_warp_to(&player->mob, new_location);
 	player->mob.update_flags |= MOB_FLAG_APPEARANCE_UPDATE;
 	return LOGIN_OKAY;

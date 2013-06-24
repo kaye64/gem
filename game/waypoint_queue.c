@@ -50,7 +50,7 @@ location_t waypoint_queue_tick(waypoint_queue_t* queue, location_t current_locat
 		free(next_waypoint);
 		return waypoint_queue_tick(queue, current_location);
 	}
-	location_t next_position = { .x = interpolate_coord(current_location.x, next_waypoint->point.x), .y = interpolate_coord(current_location.y, next_waypoint->point.y), .z = current_location.z };
+	location_t next_position = absolute_coord(interpolate_coord(current_location.x, next_waypoint->point.x), interpolate_coord(current_location.y, next_waypoint->point.y), current_location.z);
 	return next_position;
 }
 

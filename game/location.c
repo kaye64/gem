@@ -1,43 +1,63 @@
 #include <game/location.h>
 
-int local_x(location_t loc)
+/**
+ * absolute_coord
+ *
+ * Constructs a location_t from absolute x, y, and z
+ *  - x, y, z: The absolute coordinates
+ * returns: The location
+ */
+location_t absolute_coord(int x, int y, int z)
 {
-	return loc.x - (8 * origin_region_x(loc));
+	location_t location = { .x = x, .y = y, .z = z };
+	sector_t sector = { .x = location.x / AREA_GRANULARITY, .y = location.y / AREA_GRANULARITY };
+	location.sector = sector;
+	return location;
 }
 
-int local_y(location_t loc)
+/**
+ * to_absolute_coord
+ *
+ * Converts region local coordinates to absolute coordinates
+ *  - local: The region local coordinates
+ * returns: The absolute coordinates
+ */
+location_t to_absolute_coord(region_local_t local)
 {
-	return loc.y - (8 * origin_region_y(loc));
+	int x = local.x + (AREA_GRANULARITY * local.region.base.x);
+	int y = local.y + (AREA_GRANULARITY * local.region.base.y);
+	return absolute_coord(x, y, local.z);
 }
 
-int origin_region_x(location_t loc)
+/**
+ * center_region_on
+ *
+ * Calculates the region with it's center at a given location
+ *  - location: The absolute coords of the center
+ * returns: The region
+ */
+region_t center_region_on(location_t location)
 {
-	return region_x(loc) - 6;
-}
-
-int origin_region_y(location_t loc)
-{
-	return region_y(loc) - 6;
-}
-
-int region_x(location_t loc)
-{
-	return loc.x / 8;
-}
-
-int region_y(location_t loc)
-{
-	return loc.y / 8;
-}
-
-region_t origin_region(location_t loc)
-{
-	region_t region = { .x = origin_region_x(loc), .y = origin_region_y(loc) };
+	region_t region;
+	region.base.x = location.sector.x - ((REGION_GRANULARITY - 1) / 2);
+	region.base.y = location.sector.y - ((REGION_GRANULARITY - 1) / 2);
 	return region;
 }
 
-region_t region(location_t loc)
+/**
+ * local_coord
+ *
+ * Calculates local coords of a location, relative to a region
+ *  - location: The absolute coords
+ *  - region: The region
+ * returns: The region local coords
+ */
+region_local_t local_coord(location_t location, region_t region)
 {
-	region_t region = { .x = region_x(loc), .y = region_y(loc) };
-	return region;
+	region_local_t local;
+	local.x = location.x - (AREA_GRANULARITY * region.base.x);
+	local.y = location.y - (AREA_GRANULARITY * region.base.y);
+	local.z = location.z;
+	local.region = region;
+	return local;
 }

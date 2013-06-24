@@ -37,14 +37,15 @@ void build_movement_block(player_t* player, stream_codec_t* codec)
 	if (mob->update_flags) {
 		codec_put_bits(codec, 1, 1); // We want to update this player
 		if (mob->update_flags & MOB_FLAG_REGION_UPDATE) { // We need to load a new region
-			location_t* location = &mob->pos;
+			location_t location = mob->pos;
+			region_local_t local = local_coord(location, mob->region);
 			bool discard_walk_queue = waypoint_queue_empty(&mob->waypoint_queue);
 			codec_put_bits(codec, 2, 3); // Update type 3 = warp to location
-			codec_put_bits(codec, 2, location->z);
+			codec_put_bits(codec, 2, local.z);
 			codec_put_bits(codec, 1, (discard_walk_queue ? 1 : 0)); // discard walking queue
 			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
-			codec_put_bits(codec, 7, local_y(*location));
-			codec_put_bits(codec, 7, local_x(*location));
+			codec_put_bits(codec, 7, local.y);
+			codec_put_bits(codec, 7, local.x);
 		} else if (mob->update_flags & MOB_FLAG_RUN_UPDATE) {
 			codec_put_bits(codec, 2, 2); // Update type 2 = running
 			codec_put_bits(codec, 3, mob->last_direction);
