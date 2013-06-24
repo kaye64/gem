@@ -32,8 +32,13 @@ struct game_client {
 	queue_t packet_queue_in;
 	queue_t packet_queue_out;
 	stream_codec_t codec;
+	/* misc */
+	bool must_free;
 };
 typedef struct game_client game_client_t;
+
+game_client_t* game_client_create(game_client_t* game_client);
+void game_client_free(game_client_t* client);
 
 void game_client_logic_update(game_client_t* game_client);
 void game_client_enqueue_packet(game_client_t* game_client, packet_t* packet);

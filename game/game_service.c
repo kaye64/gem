@@ -74,13 +74,26 @@ void game_free(game_service_t* game)
  */
 void* game_service_accept(service_client_t* service_client)
 {
-	game_client_t* client = (game_client_t*)malloc(sizeof(game_client_t));
-	codec_create(&client->codec);
-	queue_create(&client->packet_queue_in);
-	queue_create(&client->packet_queue_out);
-	mob_create(&client->mob);
+	game_client_t* client = game_client_create(NULL);
 	client->login_stage = STAGE_INIT;
 	return client;
+}
+
+/**
+ * game_service_drop
+ *
+ * Called to perform any client cleanup
+ *  - service_client: The service client
+ */
+void game_service_drop(service_client_t* service_client)
+{
+	game_service_t* game_service = container_of(service_client->service, game_service_t, service);
+	game_client_t* game_client = (game_client_t*)service_client->attrib;
+	if (game_client->login_stage == STAGE_COMPLETE) {
+		game_player_logout(game_service, game_client);
+	}
+	game_client_free(game_client);
+	service_client->attrib = NULL;
 }
 
 /**
@@ -212,26 +225,6 @@ void game_service_write(service_client_t* service_client)
 			queue_push(&game_client->packet_queue_out, &packet->node);
 		}
 	}
-}
-
-/**
- * game_service_drop
- *
- * Called to perform any client cleanup
- *  - service_client: The service client
- */
-void game_service_drop(service_client_t* service_client)
-{
-	game_service_t* game_service = container_of(service_client->service, game_service_t, service);
-	game_client_t* game_client = (game_client_t*)service_client->attrib;
-	if (game_client->login_stage == STAGE_COMPLETE) {
-		game_player_logout(game_service, game_client);
-	}
-	mob_free(&game_client->mob);
-	queue_free(&game_client->packet_queue_out);
-	queue_free(&game_client->packet_queue_in);
-	codec_free(&game_client->codec);
-	free(game_client);
 }
 
 /**

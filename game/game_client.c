@@ -2,6 +2,31 @@
 
 #include <math.h>
 
+game_client_t* game_client_create(game_client_t* client)
+{
+	if (client == NULL) {
+		client = (game_client_t*)malloc(sizeof(game_client_t));
+		client->must_free = true;
+	} else {
+		client->must_free = false;
+	}
+	codec_create(&client->codec);
+	queue_create(&client->packet_queue_in);
+	queue_create(&client->packet_queue_out);
+	mob_create(&client->mob);
+	return client;
+}
+
+void game_client_free(game_client_t* client) {
+	mob_free(&client->mob);
+	queue_free(&client->packet_queue_out);
+	queue_free(&client->packet_queue_in);
+	codec_free(&client->codec);
+	if (client->must_free) {
+		free(client);
+	}
+}
+
 /**
  * game_client_logic_update
  *
