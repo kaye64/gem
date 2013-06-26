@@ -17,6 +17,7 @@ player_t* player_create(player_t* player)
 	return player;
 }
 
+
 void player_free(player_t* player) {
 	mob_free(&player->mob);
 	queue_free(&player->packet_queue_out);

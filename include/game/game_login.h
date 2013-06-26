@@ -8,6 +8,8 @@
 #define STAGE_HANDSHAKE 1
 #define STAGE_SECURE_BLOCK 2
 #define STAGE_COMPLETE 3
+#define STAGE_EXITING 4
+#define STAGE_CLEANUP 5
 
 /* Login responses */
 #define LOGIN_PENDING 0

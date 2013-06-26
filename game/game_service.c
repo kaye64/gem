@@ -87,12 +87,12 @@ void* game_service_accept(service_client_t* service_client)
  */
 void game_service_drop(service_client_t* service_client)
 {
-	game_service_t* game_service = container_of(service_client->service, game_service_t, service);
 	player_t* player = (player_t*)service_client->attrib;
 	if (player->login_stage == STAGE_COMPLETE) {
-		player_logout(game_service, player);
+		player->login_stage = STAGE_EXITING;
+	} else {
+		player->login_stage = STAGE_CLEANUP;
 	}
-	player_free(player);
 	service_client->attrib = NULL;
 }
 
@@ -259,33 +259,44 @@ void player_sync(game_service_t* game_service)
 	list_node_t* player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
 		player_t* player = container_of(player_node, player_t, node);
+		player_node = player_node->next;
 
 		player_logic_update(player);
-
-		player_node = player_node->next;
 	}
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
 		player_t* player = container_of(player_node, player_t, node);
+		player_node = player_node->next;
 
-		// Check if the client has changed region
-		if (player->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
-			player_enqueue_packet(player, packet_build_region_update(player));
+		if (player->login_stage == STAGE_COMPLETE) {
+			/* todo: we need to remove the player from other player's local lists in the update packet when stage is STAGE_EXITING */
+			// Check if the client has changed region
+			if (player->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
+				player_enqueue_packet(player, packet_build_region_update(player));
+			}
+			player_enqueue_packet(player, packet_build_player_update(player));
 		}
-		player_enqueue_packet(player, packet_build_player_update(player));
 
-		player_node = player_node->next;
+	  	if (player->login_stage == STAGE_EXITING) {
+			// We've hopefully removed the player from everyone's local list now, log them out properly.
+			player->login_stage = STAGE_CLEANUP;
+		}
 	}
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
 		player_t* player = container_of(player_node, player_t, node);
+		player_node = player_node->next;
+
+		if (player->login_stage == STAGE_CLEANUP) {
+  			player_logout(game_service, player);
+			player_free(player);
+			continue;
+		}
 
 		// Clear the client's update flags
 		player->mob.update_flags = 0;
-
-		player_node = player_node->next;
 	}
 
 }
