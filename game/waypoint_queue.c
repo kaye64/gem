@@ -18,6 +18,7 @@ waypoint_queue_t* waypoint_queue_create(waypoint_queue_t* queue)
 
 void waypoint_queue_free(waypoint_queue_t* queue)
 {
+	waypoint_queue_clear(queue);
 	queue_free(&queue->waypoints);
 	if (queue->must_free) {
 		free(queue);
@@ -26,7 +27,11 @@ void waypoint_queue_free(waypoint_queue_t* queue)
 
 void waypoint_queue_clear(waypoint_queue_t* queue)
 {
-	queue_clear(&queue->waypoints);
+	while (!queue_empty(&queue->waypoints)) {
+		list_node_t* node = queue_pop(&queue->waypoints);
+		waypoint_t* waypoint = container_of(node, waypoint_t, node);
+		free(waypoint);
+	}
 }
 
 void waypoint_queue_push(waypoint_queue_t* queue, location_t point)
