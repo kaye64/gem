@@ -42,6 +42,7 @@ server_t* server_create(server_t* server, const char* addr, int port, uint8_t fl
 	server->port = port;
 	server->fd = -1;
 	server->buf_size = DEFAULT_BUFFER_SIZE;
+	server->buffer = (unsigned char*)malloc(server->buf_size);
 	server->io_loop = 0;
 	server->flags = flags;
 	list_create(&server->client_list);
@@ -64,6 +65,7 @@ void server_free(server_t* server)
 	}
 
 	list_free(&server->client_list);
+	free(server->buffer);
 	if (server->must_free) {
 		free(server);
 	}
@@ -180,8 +182,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	}
 
 	server_t* server = client->server;
-	unsigned char buffer[server->buf_size];	// todo: work out a better place to put this buffer
-	int report_read = 0;
+	bool report_read = false;
 
 	if (client->client_drop) {
 		server_client_cleanup(server, client);
@@ -189,7 +190,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 	}
 
 	if (revents & EV_READ) {
-		int read_avail = recv(client->fd, buffer, server->buf_size, 0);
+		int read_avail = recv(client->fd, server->buffer, server->buf_size, 0);
 
 		// Check for read error
 		if (read_avail < 0) {
@@ -212,14 +213,14 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 			return;
 		}
 
-		int buffered = buffer_write(&client->read_buffer, buffer, read_avail);
+		int buffered = buffer_write(&client->read_buffer, server->buffer, read_avail);
 		if (buffered != read_avail) {
 			WARN("buffer overflow. dropping %i bytes", read_avail-buffered);
 		}
 
 
 		if (client->handshake_stage == HANDSHAKE_ACCEPTED) {
-			report_read = 1;
+			report_read = true;
 		}
 	}
 
@@ -228,10 +229,10 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 			server->write_cb(client, server);
 		}
 
-		size_t write_avail = buffer_read(&client->write_buffer, buffer, server->buf_size);
+		size_t write_avail = buffer_read(&client->write_buffer, server->buffer, server->buf_size);
 		size_t write_caret = 0;
 		while (write_avail > write_caret) {
-			ssize_t sent = send(client->fd, buffer+write_caret, write_avail, 0);
+			ssize_t sent = send(client->fd, server->buffer+write_caret, write_avail, 0);
 
 			// Check for write error
 			if (sent < 0) {
@@ -269,7 +270,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		case HANDSHAKE_ACCEPTED:
 			// Notify client of any buffered data
 			if (buffer_read_avail(&client->read_buffer) > 0) {
-				report_read = 1;
+				report_read = true;
 			}
 			break;
 		}
@@ -279,7 +280,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		buffer_read_avail(&client->read_buffer) > 0 &&
 		server->flags & SF_PARTIAL_READ) {
 		// re-report previously buffered but un-processed data
-		report_read = 1;
+		report_read = true;
 	}
 
 	if (report_read) {

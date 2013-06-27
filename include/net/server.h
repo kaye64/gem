@@ -40,6 +40,7 @@ struct server {
 	int port;
 	int fd;
 	int buf_size;
+	unsigned char* buffer;
 	/* libev stuff */
 	struct ev_loop* io_loop;
 	struct ev_io io_accept;
