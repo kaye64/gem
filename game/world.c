@@ -48,7 +48,19 @@ world_sector_t* world_get_sector(world_t* world, sector_t sector)
 
 void world_gc(world_t* world)
 {
-
+	for (int x = 0; x < NUM_SECTORS_X; x++) {
+		for (int y = 0; y < NUM_SECTORS_Y; y++) {
+			for (int z = 0; z < 4; z++) {
+				world_sector_t* sector = world->sectors[x][y][z];
+				if (sector != (world_sector_t*)NULL) {
+					if (list_empty(&sector->players)) {
+						sector_free(sector);
+						world->sectors[x][y][z] = (world_sector_t*)NULL;
+					}
+				}
+			}
+		}
+	}
 }
 
 
