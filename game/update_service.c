@@ -177,8 +177,9 @@ void update_service_write(service_client_t* service_client)
 		if (!cache_get(cache, request->cache_id, request->file_id, request->payload)) {
 			WARN("unable to serve request for %d:%d. dropping", request->cache_id, request->file_id);
 			free(request->payload);
-			free(request);
-			return;
+			/* Just serve a null file */
+			request->file_size = 0;
+			request->payload = (unsigned char*)malloc(1);
 		}
 
 		update_client->current_request = request;
