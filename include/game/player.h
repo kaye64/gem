@@ -13,8 +13,12 @@
 #define PLAYER_RIGHTS_ADMIN 2
 #define PLAYER_RIGHTS_SUPER 3
 
+typedef struct world world_t;
+typedef struct game_service game_service_t;
+
 struct player {
-	list_node_t node;
+	list_node_t service_node;
+	list_node_t world_node;
 	/* client state */
 	uint32_t client_uid;
 	char username[32];
@@ -40,7 +44,10 @@ typedef struct player player_t;
 player_t* player_create(player_t* player);
 void player_free(player_t* player);
 
-void player_logic_update(player_t* player);
+void player_logic_update(world_t* world, player_t* player);
 void player_enqueue_packet(player_t* player, packet_t* packet);
+
+void player_login(game_service_t* game_service, player_t* player);
+void player_logout(game_service_t* game_service, player_t* player);
 
 #endif /* _GAME_CLIENT_H_ */

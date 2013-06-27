@@ -32,6 +32,7 @@ struct mob {
 	uint16_t update_flags;
 	location_t pos;
 	region_t region;
+	sector_t sector;
 	waypoint_queue_t waypoint_queue;
 	bool running;
 	int direction;

@@ -42,6 +42,7 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache)
 	uint32_t seed = 0; // Not particularly important
 	isaac_create(&game->rand_gen, &seed, 1);
 	list_create(&game->player_list);
+	world_create(&game->world);
 	game->service.accept_cb = (service_accept_t)&game_service_accept;
 	game->service.handshake_cb = (service_handshake_t)&game_service_handshake;
 	game->service.read_cb = (service_read_t)&game_service_read;
@@ -58,6 +59,7 @@ game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache)
  */
 void game_free(game_service_t* game)
 {
+	world_free(&game->world);
 	list_free(&game->player_list);
 	isaac_free(&game->rand_gen);
 	if (game->must_free) {
@@ -237,7 +239,7 @@ void game_process_io(game_service_t* game)
 {
 	list_node_t* player_node = list_front(&game->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, node);
+		player_t* player = container_of(player_node, player_t, service_node);
 		while (!queue_empty(&player->packet_queue_in)) {
 			list_node_t* packet_node = queue_pop(&player->packet_queue_in);
 			packet_t* packet = container_of(packet_node, packet_t, node);
@@ -258,15 +260,15 @@ void player_sync(game_service_t* game_service)
 {
 	list_node_t* player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, node);
+		player_t* player = container_of(player_node, player_t, service_node);
 		player_node = player_node->next;
 
-		player_logic_update(player);
+		player_logic_update(&game_service->world, player);
 	}
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, node);
+		player_t* player = container_of(player_node, player_t, service_node);
 		player_node = player_node->next;
 
 		if (player->login_stage == STAGE_COMPLETE) {
@@ -286,7 +288,7 @@ void player_sync(game_service_t* game_service)
 
 	player_node = list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, node);
+		player_t* player = container_of(player_node, player_t, service_node);
 		player_node = player_node->next;
 
 		if (player->login_stage == STAGE_CLEANUP) {

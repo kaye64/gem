@@ -6,6 +6,7 @@
 #include <util/queue.h>
 
 #include <stdlib.h>
+#include <assert.h>
 
 /**
  * queue_create
@@ -49,6 +50,7 @@ void queue_free(queue_t* queue)
  */
 void queue_push(queue_t* queue, list_node_t* item)
 {
+	assert(item != NULL);
 	list_push_front(&queue->list, item);
 }
 
@@ -62,6 +64,7 @@ void queue_push(queue_t* queue, list_node_t* item)
 list_node_t* queue_pop(queue_t* queue)
 {
 	list_node_t* node = list_back(&queue->list);
+	assert(node != NULL);
 	list_erase(&queue->list, node);
 	return node;
 }
@@ -76,6 +79,7 @@ list_node_t* queue_pop(queue_t* queue)
 list_node_t* queue_peek(queue_t* queue)
 {
 	list_node_t* node = list_back(&queue->list);
+	assert(node != NULL);
 	return node;
 }
 

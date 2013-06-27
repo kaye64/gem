@@ -10,6 +10,7 @@
 struct sector {
 	int x;
 	int y;
+	int z;
 };
 typedef struct sector sector_t;
 

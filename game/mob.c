@@ -61,6 +61,7 @@ void mob_warp_to(mob_t* mob, location_t position)
 	mob->update_flags |= MOB_FLAG_REGION_UPDATE;
 	mob->pos = position;
 	mob->region = center_region_on(mob->pos);
+	mob->sector = position.sector;
 	waypoint_queue_clear(&mob->waypoint_queue);
 }
 
