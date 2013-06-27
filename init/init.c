@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	sig_install(cleanup);
 	parse_args(argc, argv);
 
-	/* load our rsa private key, generating one if necessary */
+	/* load our rsa private key */
 	rsa_create(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
 
 	/* open the cache */
@@ -150,6 +150,8 @@ void io_tick()
  *  - forceful: How quickly we need to shutdown. SIGINT/SIGTERM = false, SIGQUIT = true
  */
 void cleanup(bool forceful) {
+	/* todo: Ideally, in the !forceful event, we should just set a flag
+	 * in the services which allows them to cleanly shut down. */
 	if (!forceful) {
 		INFO("Cleaning up for shutdown");
 		server_stop(&instance.jag_server->io_server);

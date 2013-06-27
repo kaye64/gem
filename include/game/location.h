@@ -52,6 +52,7 @@ typedef struct region_local region_local_t;
 
 location_t absolute_coord(int x, int y, int z);
 location_t to_absolute_coord(region_local_t local);
+sector_t sector(int x, int y, int z);
 region_t center_region_on(location_t loc);
 region_local_t local_coord(location_t loc, region_t region);
 

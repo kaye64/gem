@@ -324,10 +324,10 @@ void server_client_cleanup(server_t* server, client_t* client)
 {
 	ev_io_stop(server->io_loop, &client->io_read);
 	list_erase(&server->client_list, &client->node);
-	close(client->fd);
 	buffer_free(&client->read_buffer);
 	buffer_free(&client->write_buffer);
 	server->drop_cb(client, server);
+	close(client->fd);
 }
 
 /**

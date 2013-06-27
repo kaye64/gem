@@ -10,8 +10,7 @@
 location_t absolute_coord(int x, int y, int z)
 {
 	location_t location = { .x = x, .y = y, .z = z };
-	sector_t sector = { .x = location.x / AREA_GRANULARITY, .y = location.y / AREA_GRANULARITY, .z = z };
-	location.sector = sector;
+	location.sector = sector(location.x / AREA_GRANULARITY, location.y / AREA_GRANULARITY, z);
 	return location;
 }
 
@@ -27,6 +26,12 @@ location_t to_absolute_coord(region_local_t local)
 	int x = local.x + (AREA_GRANULARITY * local.region.base.x);
 	int y = local.y + (AREA_GRANULARITY * local.region.base.y);
 	return absolute_coord(x, y, local.z);
+}
+
+sector_t sector(int x, int y, int z)
+{
+	sector_t sector = { .x = x, .y = y, .z = z };
+	return sector;
 }
 
 /**
