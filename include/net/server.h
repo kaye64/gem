@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include <util/config.h>
+#include <util/object.h>
 #include <util/list.h>
 #include <net/buffer.h>
 
@@ -19,22 +20,22 @@
 // in a previous iteration.
 #define SF_PARTIAL_READ (1 << 0)
 
-// forward declarations
-struct server;
-struct client;
+typedef struct server server_t;
+typedef struct client client_t;
 
 // client_t* client_accept(int fd, struct in_addr addr, server_t* server);
-typedef struct client*(*client_accept_t)(int, struct in_addr, struct server*);
+typedef struct client*(*client_accept_t)(int, struct in_addr, server_t*);
 // int client_handshake(client_t* client, server_t* server);
-typedef int(*client_handshake_t)(struct client*, struct server*);
+typedef int(*client_handshake_t)(client_t*, server_t*);
 // void client_read(client_t* client, server_t* server);
-typedef void(*client_read_t)(struct client*, struct server*);
+typedef void(*client_read_t)(client_t*, server_t*);
 // void client_write(client_t* client, server_t* server);
-typedef void(*client_write_t)(struct client*, struct server*);
+typedef void(*client_write_t)(client_t*, server_t*);
 // void client_drop(client_t* client, server_t* server);
-typedef void(*client_drop_t)(struct client*, struct server*);
+typedef void(*client_drop_t)(client_t*, server_t*);
 
 struct server {
+	object_t object;
 	/* net stuff */
 	char addr[16];
 	int port;
@@ -53,9 +54,9 @@ struct server {
 	/* misc stuff */
 	list_t client_list;
 	uint8_t flags;
-	bool must_free;
 };
-typedef struct server server_t;
+
+extern object_proto_t server_proto;
 
 struct client {
 	server_t* server;
@@ -69,10 +70,8 @@ struct client {
 	buffer_t read_buffer;
 	buffer_t write_buffer;
 };
-typedef struct client client_t;
 
-server_t* server_create(server_t* server, const char* addr, int port, uint8_t flags);
-void server_free(server_t* server);
+void server_config(server_t* server, const char* addr, int port, uint8_t flags);
 bool server_start(server_t* server, struct ev_loop* loop);
 void server_stop(server_t* server);
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr);

@@ -3,19 +3,19 @@
 
 #include <stdbool.h>
 
-/* There's a naming conflict with something in signal.h that I can't
-   be bothered to fix properly right now */
-struct _stack {
+#include <util/object.h>
+
+typedef struct int_stack int_stack_t;
+
+struct int_stack {
+	object_t object;
 	int stack[32];
 	int bottom;
-	bool must_free;
 };
-typedef struct _stack _stack_t;
 
-_stack_t* stack_create(_stack_t* _stack);
-void stack_free(_stack_t* _stack);
+extern object_proto_t int_stack_proto;
 
-bool stack_push(_stack_t* _stack, int i);
-int stack_pop(_stack_t* _stack);
+bool stack_push(int_stack_t* _stack, int i);
+int stack_pop(int_stack_t* _stack);
 
 #endif /* _STACK_H_ */

@@ -1,3 +1,8 @@
+/**
+ * game_login.c
+ *
+ * Defines the player login process
+ */
 #include <game/game_login.h>
 
 #include <util/log.h>
@@ -7,12 +12,7 @@
 int player_load(game_service_t* game_service, player_t* player);
 
 /**
- * game_process_login
- *
  * Performs the login sequence
- *  - game_service: The game service
- *  - client: The client
- *  - player: The player
  * returns: The login response
  */
 int game_process_login(game_service_t* game_service, client_t* client, player_t* player)
@@ -104,16 +104,16 @@ int game_process_login(game_service_t* game_service, client_t* client, player_t*
 			WARN("Client modified server isaac seed");
 			return LOGIN_REJECTED;
 		}
-		uint32_t isaac_seed[4];
-		isaac_seed[0] = player->client_isaac_seed >> 32;
-		isaac_seed[1] = player->client_isaac_seed;
-		isaac_seed[2] = player->server_isaac_seed >> 32;
-		isaac_seed[3] = player->server_isaac_seed;
-		isaac_create(&player->isaac_in, isaac_seed, 4);
+		uint32_t seed[4];
+		seed[0] = player->client_isaac_seed >> 32;
+		seed[1] = player->client_isaac_seed;
+		seed[2] = player->server_isaac_seed >> 32;
+		seed[3] = player->server_isaac_seed;
+		isaac_seed(&player->isaac_in, seed, 4);
 		for (int i = 0; i < 4; i++) {
-			isaac_seed[i] += 50;
+			seed[i] += 50;
 		}
-		isaac_create(&player->isaac_out, isaac_seed, 4);
+		isaac_seed(&player->isaac_out, seed, 4);
 
 		player->client_uid = codec_get32(&player->codec);
 		codec_gets(&player->codec, player->username, 32, CODEC_JSTRING);
@@ -127,6 +127,10 @@ int game_process_login(game_service_t* game_service, client_t* client, player_t*
 	return LOGIN_PENDING;
 }
 
+/**
+ * Loads a player's profile
+ * returns: A login response
+ */
 int player_load(game_service_t* game_service, player_t* player)
 {
 	player->rights = PLAYER_RIGHTS_SUPER;

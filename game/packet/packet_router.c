@@ -28,11 +28,7 @@ packet_handler_t routing_table[] = {
 };
 
 /**
- * packet_dispatch
- *
  * Looks up a packet in the routing table and dispatches it if possible
- *  - client: The originating client
- *  - packet: The packet
  */
 void packet_dispatch(player_t* player, packet_t* packet)
 {

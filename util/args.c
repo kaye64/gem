@@ -20,11 +20,7 @@ static struct option program_options[] = {
 };
 
 /**
- * parse_args
- *
  * Parses command line arguments into inst_args
- *  - argc: The number of arguments
- *  - argv: The value of each argument
  */
 void parse_args(int argc, char **argv)
 {

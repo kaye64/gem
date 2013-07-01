@@ -12,7 +12,7 @@
 #include <util/log.h>
 #include <util/container_of.h>
 #include <game/dispatcher.h>
-#include <net/stream_codec.h>
+#include <net/codec.h>
 #include <runite/util/byte_order.h>
 
 #define LOG_TAG "update"
@@ -24,63 +24,48 @@ void update_service_write(service_client_t* service_client);
 void update_service_drop(service_client_t* service_client);
 
 /**
- * update_create
- *
- * Allocates and creates an update_service_t
- *  - update: Some preallocated memory, or null to put on heap
- *  - cache: The cache to serve
- * returns: The update_service_t
+ * Initializes an update_service_t
  */
-update_service_t* update_create(update_service_t* update, cache_t* cache)
+static void update_service_init(update_service_t* update)
 {
-	if (update == NULL) {
-		update = (update_service_t*)malloc(sizeof(update_service_t));
-		update->must_free = true;
-	} else {
-		update->must_free = false;
-	}
-	update->cache = cache;
 	update->service.accept_cb = (service_accept_t)&update_service_accept;
 	update->service.handshake_cb = (service_handshake_t)&update_service_handshake;
 	update->service.read_cb = (service_read_t)&update_service_read;
 	update->service.write_cb = (service_write_t)&update_service_write;
 	update->service.drop_cb = (service_drop_t)&update_service_drop;
-	return update;
 }
 
 /**
- * update_free
- *
  * Properly frees the update service
- *  - update: The service to free
  */
-void update_free(update_service_t* update)
+void update_service_free(update_service_t* update)
 {
-	if (update->must_free) {
-		free(update);
-	}
+
 }
 
 /**
- * update_service_accept
- *
+ * Configures an update service
+ * - cache: The cache to serve
+ */
+void update_config(update_service_t* update, cache_t* cache)
+{
+	update->cache = cache;
+}
+
+/**
  * Validates a new service_client_t
- *  - service_client: The service client
  * returns: An item to use as the service_client's attribute
  */
 void* update_service_accept(service_client_t* service_client)
 {
 	update_client_t* client = (update_client_t*)malloc(sizeof(update_client_t));
 	client->current_request = (update_request_t*)NULL;
-	queue_create(&client->request_queue);
+	object_init(queue, &client->request_queue);
 	return client;
 }
 
 /**
- * update_service_handshake
- *
  * Performs any handshake routines between the client/server
- *  - service_client: The service client
  * returns: One of HANDSHAKE_{DENIED,PENDING,ACCEPTED}
  */
 int update_service_handshake(service_client_t* service_client)
@@ -100,10 +85,7 @@ int update_service_handshake(service_client_t* service_client)
 }
 
 /**
- * update_service_read
- *
  * Called when data is available to be read by the client
- *  - service_client: The service client
  */
 void update_service_read(service_client_t* service_client)
 {
@@ -111,12 +93,12 @@ void update_service_read(service_client_t* service_client)
 	update_client_t* update_client = (update_client_t*)service_client->attrib;
 	client_t* client = &service_client->client;
 	cache_t* cache = update_service->cache;
-	stream_codec_t codec;
-	codec_create(&codec);
+	codec_t codec;
+	object_init(codec, &codec);
 
 	// Read the request
 	if (!codec_buffer_read(&codec, &client->read_buffer, 4)) {
-		return;
+		goto exit;
 	}
 
 	update_request_t* req = (update_request_t*)malloc(sizeof(update_request_t));
@@ -128,11 +110,11 @@ void update_service_read(service_client_t* service_client)
 	// Validate it
 	if (req->cache_id > cache->num_indices) {
 		WARN("request for invalid cache id %d", req->cache_id);
-		return;
+		goto exit;
 	}
 	if (req->file_id > cache->num_files[req->cache_id]) {
 		WARN("request for invalid file id %d in cache %d", req->file_id, req->cache_id);
-		return;
+		goto exit;
 	}
 	switch (req->priority) {
 	case PRIORITY_URGENT:
@@ -141,18 +123,18 @@ void update_service_read(service_client_t* service_client)
 		break;
 	default:
 		WARN("request with invalid priority %d", req->priority);
-		return;
+		goto exit;
 	}
 
 	// Queue it
 	queue_push(&update_client->request_queue, &req->list_node);
+
+exit:
+	object_free(&codec);
 }
 
 /**
- * client_write
- *
  * Called to signal that we can write to the client
- *  - service_client: The service client
  */
 void update_service_write(service_client_t* service_client)
 {
@@ -194,8 +176,8 @@ void update_service_write(service_client_t* service_client)
 	int ofs = request->next_chunk*500;
 	int chunk_size = min(500, request->file_size-ofs);
 
-	stream_codec_t codec;
-	codec_create(&codec);
+	codec_t codec;
+	object_init(codec, &codec);
 	codec_put8(&codec, chunk.cache_id);
 	codec_put16(&codec, chunk.file_id);
 	codec_put16(&codec, chunk.file_size);
@@ -205,6 +187,8 @@ void update_service_write(service_client_t* service_client)
 	if (!codec_buffer_write(&codec, &client->write_buffer)) {
 		return;
 	}
+
+	object_free(&codec);
 
 	request->next_chunk++;
 
@@ -219,10 +203,7 @@ void update_service_write(service_client_t* service_client)
 }
 
 /**
- * client_drop
- *
  * Called to perform any client cleanup
- *  - service_client: The service client
  */
 void update_service_drop(service_client_t* service_client)
 {
@@ -233,6 +214,11 @@ void update_service_drop(service_client_t* service_client)
 		free(request->payload);
 		free(request);
 	}
-	queue_free(&update_client->request_queue);
+	object_free(&update_client->request_queue);
 	free(update_client);
 }
+
+object_proto_t update_service_proto = {
+	.init = (object_init_t)update_service_init,
+	.free = (object_free_t)update_service_free
+};

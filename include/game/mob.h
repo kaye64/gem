@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#include <game/waypoint_queue.h>
 #include <stdbool.h>
 
+#include <util/object.h>
 #include <game/location.h>
 #include <game/waypoint_queue.h>
 
@@ -28,7 +28,10 @@
 #define MOB_DIR_NORTH_WEST 0
 #define MOB_DIR_NONE -1
 
+typedef struct mob mob_t;
+
 struct mob {
+	object_t object;
 	uint16_t update_flags;
 	location_t pos;
 	region_t region;
@@ -37,12 +40,9 @@ struct mob {
 	bool running;
 	int direction;
 	int last_direction;
-	bool must_free;
 };
-typedef struct mob mob_t;
 
-mob_t* mob_create(mob_t* mob);
-void mob_free(mob_t* mob);
+extern object_proto_t mob_proto;
 
 void mob_warp_to(mob_t* mob, location_t position);
 void mob_update_path(mob_t* mob);

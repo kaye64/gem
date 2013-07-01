@@ -7,19 +7,23 @@
 
 #include <util/stack.h>
 
+#include <util/object.h>
+
+typedef struct buffer buffer_t;
+
 /* A circular buffer designed for use in network IO. */
 struct buffer {
+	object_t object;
 	unsigned char* data;
 	int read_ptr;
 	int read_avail;
-	_stack_t ptr_stack;
+	int_stack_t ptr_stack;
 	size_t real_size;
-	bool must_free;
 };
-typedef struct buffer buffer_t;
 
-buffer_t* buffer_create(buffer_t* buffer, size_t size);
-void buffer_free(buffer_t* buffer);
+extern object_proto_t buffer_proto;
+
+void buffer_realloc(buffer_t* buffer, size_t size);
 
 size_t buffer_read_avail(buffer_t* buffer);
 size_t buffer_write_avail(buffer_t* buffer);

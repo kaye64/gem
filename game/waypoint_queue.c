@@ -1,30 +1,34 @@
+/**
+ * waypoint_queue.c
+ *
+ * Defines a mob's waypoint queue
+ */
 #include <game/waypoint_queue.h>
 
 #include <util/container_of.h>
 
 int interpolate_coord(int i, int y);
 
-waypoint_queue_t* waypoint_queue_create(waypoint_queue_t* queue)
+/**
+ * Initializes a waypoint queue
+ */
+static void waypoint_queue_init(waypoint_queue_t* queue)
 {
-	if (queue != NULL) {
-		queue->must_free = false;
-	} else {
-		queue = (waypoint_queue_t*)malloc(sizeof(waypoint_queue_t));
-		queue->must_free = true;
-	}
-	queue_create(&queue->waypoints);
-	return queue;
+	object_init(queue, &queue->waypoints);
 }
 
-void waypoint_queue_free(waypoint_queue_t* queue)
+/**
+ * Frees a waypoint queue
+ */
+static void waypoint_queue_free(waypoint_queue_t* queue)
 {
 	waypoint_queue_clear(queue);
-	queue_free(&queue->waypoints);
-	if (queue->must_free) {
-		free(queue);
-	}
+	object_free(&queue->waypoints);
 }
 
+/**
+ * Clears a waypoint queue
+ */
 void waypoint_queue_clear(waypoint_queue_t* queue)
 {
 	while (!queue_empty(&queue->waypoints)) {
@@ -34,6 +38,9 @@ void waypoint_queue_clear(waypoint_queue_t* queue)
 	}
 }
 
+/**
+ * Adds a point to a waypoint queue
+ */
 void waypoint_queue_push(waypoint_queue_t* queue, location_t point)
 {
 	waypoint_t* waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
@@ -41,6 +48,10 @@ void waypoint_queue_push(waypoint_queue_t* queue, location_t point)
 	queue_push(&queue->waypoints, &waypoint->node);
 }
 
+/**
+ * Advances the waypoint queue
+ * returns: The mob's next position
+ */
 location_t waypoint_queue_tick(waypoint_queue_t* queue, location_t current_location)
 {
 	if (queue_empty(&queue->waypoints)) {
@@ -59,11 +70,17 @@ location_t waypoint_queue_tick(waypoint_queue_t* queue, location_t current_locat
 	return next_position;
 }
 
+/**
+ * Empties a waypoint queue
+ */
 bool waypoint_queue_empty(waypoint_queue_t* queue)
 {
 	return queue_empty(&queue->waypoints);
 }
 
+/**
+ * Interpolates between two points
+ */
 int interpolate_coord(int i, int y) {
 	if (i == y) {
 		return i;
@@ -74,3 +91,8 @@ int interpolate_coord(int i, int y) {
 	}
 	return 0;
 }
+
+object_proto_t waypoint_queue_proto = {
+	.init = (object_init_t)waypoint_queue_init,
+	.free = (object_free_t)waypoint_queue_free
+};

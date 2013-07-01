@@ -4,21 +4,23 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-struct list_node {
-	struct list_node* prev;
-	struct list_node* next;
-};
-typedef struct list_node list_node_t;
+#include <util/object.h>
 
-struct list {
-	list_node_t* top;
-	list_node_t* bottom;
-	bool must_free;
-};
+typedef struct list_node list_node_t;
 typedef struct list list_t;
 
-list_t* list_create(list_t* list);
-void list_free(list_t* list);
+struct list_node {
+	list_node_t* prev;
+	list_node_t* next;
+};
+
+struct list {
+	object_t object;
+	list_node_t* top;
+	list_node_t* bottom;
+};
+
+extern object_proto_t list_proto;
 
 bool list_empty(list_t* list);
 

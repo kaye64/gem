@@ -1,5 +1,13 @@
+/**
+ * packet_region_update.c
+ *
+ * Defines the region update packet builder
+ */
 #include <game/packet/builder/packet_region_update.h>
 
+/**
+ * Constructs a region update packet
+ */
 packet_t* packet_build_region_update(player_t* player)
 {
 	location_t location = player->mob.pos;

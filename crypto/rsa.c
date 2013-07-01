@@ -1,3 +1,8 @@
+/**
+ * rsa.c
+ *
+ * Defines the rsa encryption algorithm
+ */
 #include <crypto/rsa.h>
 
 #include <stdio.h>
@@ -7,30 +12,37 @@
 
 #define LOG_TAG "rsa"
 
-rsa_t* rsa_create(rsa_t* rsa, const char* modulus, const char* public_exp, const char* private_exp)
+/**
+ * Initializes an rsa_t
+ */
+static void rsa_init(rsa_t* rsa)
 {
-	if (rsa == NULL) {
-		rsa = (rsa_t*)malloc(sizeof(rsa_t));
-		rsa->must_free = true;
-	} else {
-		rsa->must_free = false;
-	}
-	mpz_init_set_str(rsa->modulus, modulus, 10);
-	mpz_init_set_str(rsa->public_exp, public_exp, 10);
-	mpz_init_set_str(rsa->private_exp, private_exp, 10);
-	return rsa;
+
 }
 
-void rsa_free(rsa_t* rsa)
+/**
+ * Properly frees an rsa_t
+ */
+static void rsa_free(rsa_t* rsa)
 {
-	if (rsa->must_free) {
-		free(rsa);
-	}
 	mpz_clear(rsa->modulus);
 	mpz_clear(rsa->public_exp);
 	mpz_clear(rsa->private_exp);
 }
 
+/**
+ * Initializes the RSA keypair
+ */
+void rsa_load_key(rsa_t* rsa, const char* modulus, const char* public_exp, const char* private_exp)
+{
+	mpz_init_set_str(rsa->modulus, modulus, 10);
+	mpz_init_set_str(rsa->public_exp, public_exp, 10);
+	mpz_init_set_str(rsa->private_exp, private_exp, 10);
+}
+
+/**
+ * Encrypts an rsa block
+ */
 void rsa_encrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len)
 {
 #ifdef RSA_DISABLE
@@ -49,6 +61,9 @@ void rsa_encrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, 
 #endif
 }
 
+/**
+ * Decrypts an rsa block
+ */
 void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len)
 {
 #ifdef RSA_DISABLE
@@ -66,3 +81,8 @@ void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, 
 	mpz_clear(message);
 #endif
 }
+
+object_proto_t rsa_proto = {
+	.init = (object_init_t)rsa_init,
+	.free = (object_free_t)rsa_free
+};

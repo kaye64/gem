@@ -1,3 +1,8 @@
+/**
+ * mob.c
+ *
+ * Defines a movable entity (mob)
+ */
 #include <game/mob.h>
 
 #include <math.h>
@@ -13,47 +18,27 @@ int mob_dir_map[3][3] = {
 };
 
 /**
- * mob_create
- *
  * Creates and initializes a mob_t
- *  - mob: The mob, or NULL to put on heap
- * returns: The mob
  */
-mob_t* mob_create(mob_t* mob)
+static void mob_init(mob_t* mob)
 {
-	if (mob != NULL) {
-		mob->must_free = false;
-	} else {
-		mob = (mob_t*)malloc(sizeof(mob_t));
-		mob->must_free = true;
-	}
-	waypoint_queue_create(&mob->waypoint_queue);
+	object_init(waypoint_queue, &mob->waypoint_queue);
 	mob->direction = mob->last_direction = MOB_DIR_NONE;
 	mob->running = false;
 	mob->update_flags = 0;
 	mob_warp_to(mob, absolute_coord(0, 0, 0));
-	return mob;
 }
 
 /**
- * mob_free
- *
  * Frees a mob_t
- *  - mob: The mob
  */
-void mob_free(mob_t* mob)
+static void mob_free(mob_t* mob)
 {
-	waypoint_queue_free(&mob->waypoint_queue);
-	if (mob->must_free) {
-		free(mob);
-	}
+	object_free(&mob->waypoint_queue);
 }
 
 /**
- * mob_warp_to
- *
  * Changes the mob's position, clearing the walk queue
- *  - mob: The mob
  *  - position: The location to warp to
  */
 void mob_warp_to(mob_t* mob, location_t position)
@@ -66,10 +51,7 @@ void mob_warp_to(mob_t* mob, location_t position)
 }
 
 /**
- * mob_update_path
- *
  * Advances a mob's walk queue by one step. Call twice in one cycle for running
- *  - mob: The mob
  */
 void mob_update_path(mob_t* mob)
 {
@@ -92,3 +74,8 @@ void mob_update_path(mob_t* mob)
 		mob->update_flags |= MOB_FLAG_WALK_UPDATE;
 	}
 }
+
+object_proto_t mob_proto = {
+	.init = (object_init_t)mob_init,
+	.free = (object_free_t)mob_free
+};

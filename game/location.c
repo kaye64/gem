@@ -1,11 +1,12 @@
+/**
+ * location.c
+ *
+ * Defines the various coordinate systems
+ */
 #include <game/location.h>
 
 /**
- * absolute_coord
- *
  * Constructs a location_t from absolute x, y, and z
- *  - x, y, z: The absolute coordinates
- * returns: The location
  */
 location_t absolute_coord(int x, int y, int z)
 {
@@ -15,11 +16,7 @@ location_t absolute_coord(int x, int y, int z)
 }
 
 /**
- * to_absolute_coord
- *
  * Converts region local coordinates to absolute coordinates
- *  - local: The region local coordinates
- * returns: The absolute coordinates
  */
 location_t to_absolute_coord(region_local_t local)
 {
@@ -28,6 +25,9 @@ location_t to_absolute_coord(region_local_t local)
 	return absolute_coord(x, y, local.z);
 }
 
+/**
+ * Constructs a sector_t from sector x, y and z
+ */
 sector_t sector(int x, int y, int z)
 {
 	sector_t sector = { .x = x, .y = y, .z = z };
@@ -35,11 +35,8 @@ sector_t sector(int x, int y, int z)
 }
 
 /**
- * center_region_on
- *
  * Calculates the region with it's center at a given location
  *  - location: The absolute coords of the center
- * returns: The region
  */
 region_t center_region_on(location_t location)
 {
@@ -51,12 +48,7 @@ region_t center_region_on(location_t location)
 }
 
 /**
- * local_coord
- *
  * Calculates local coords of a location, relative to a region
- *  - location: The absolute coords
- *  - region: The region
- * returns: The region local coords
  */
 region_local_t local_coord(location_t location, region_t region)
 {

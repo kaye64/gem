@@ -1,17 +1,18 @@
+/**
+ * packet_player_update.c
+ *
+ * Defines the player update packet builder
+ */
 #include <game/packet/builder/packet_player_update.h>
 
 #include <util/jstring_encode.h>
 
 #define CL_FLAG_APPEARANCE_UPDATE (1 << 4)
 
-stream_codec_t* build_appearance_block(player_t* player);
+codec_t* build_appearance_block(player_t* player);
 
 /**
- * translate_update_flags
- *
  * Translates our server sided flags into the format the client wants
- *  - flags: Our server flags
- * returns: The client's flags
  */
 uint16_t translate_update_flags(uint16_t flags)
 {
@@ -23,14 +24,11 @@ uint16_t translate_update_flags(uint16_t flags)
 }
 
 /**
- * build_movement_block
- *
  * Builds a movement update block for a given client. Assumes that
  * the given codec is already in bit access mode
- *  - player: The client
  *  - codec: The codec to write to
  */
-void build_movement_block(player_t* player, stream_codec_t* codec)
+void build_movement_block(player_t* player, codec_t* codec)
 {
 	mob_t* mob = &player->mob;
 	uint16_t other_update_flags = (mob->update_flags & ~(MOB_FLAG_MOVEMENT_UPDATE));
@@ -64,13 +62,10 @@ void build_movement_block(player_t* player, stream_codec_t* codec)
 }
 
 /**
- * build_update_block
- *
  * Builds a player update block for a given client
- *  - player: The client
  *  - codec: The codec to write to
  */
-void build_update_block(player_t* player, stream_codec_t* codec)
+void build_update_block(player_t* player, codec_t* codec)
 {
 	mob_t* mob = &player->mob;
 	uint16_t flags = translate_update_flags(mob->update_flags);
@@ -85,23 +80,19 @@ void build_update_block(player_t* player, stream_codec_t* codec)
 	}
 
 	if (flags & CL_FLAG_APPEARANCE_UPDATE) {
-		stream_codec_t* appearance_block = build_appearance_block(player);
+		codec_t* appearance_block = build_appearance_block(player);
 		codec_put8(codec, -codec_len(appearance_block));
 		codec_concat(codec, appearance_block);
-		codec_free(appearance_block);
+		object_free(appearance_block);
 	}
 }
 
 /**
- * build_appearance_block
- *
  * Builds an appearance update block for a given player
- *  - player: The client
- * returns: A codec containing the appearance block
  */
-stream_codec_t* build_appearance_block(player_t* player)
+codec_t* build_appearance_block(player_t* player)
 {
-	stream_codec_t* appearance_block = codec_create(NULL);
+	codec_t* appearance_block = object_new(codec);
 
 	codec_put8(appearance_block, 0); // gender
 	codec_put8(appearance_block, 0); // head icon
@@ -161,16 +152,12 @@ stream_codec_t* build_appearance_block(player_t* player)
 }
 
 /**
- * packet_build_player_update
- *
- * Builds the periodic player update block for a given player
- *  - player: The client
- * returns: The completed packet
+ * Constructs a periodic player update block for a given player
  */
 packet_t* packet_build_player_update(player_t* player)
 {
 	packet_t* player_update = packet_create(packet_lookup(PACKET_TYPE_OUT, PKT_CL_PLAYER_UPDATE));
-	stream_codec_t* update_block = codec_create(NULL);
+	codec_t* update_block = object_new(codec);
 	codec_set_bit_access_mode(&player_update->payload, true);
 
 	build_movement_block(player, &player_update->payload);
@@ -181,6 +168,6 @@ packet_t* packet_build_player_update(player_t* player)
 
 	codec_set_bit_access_mode(&player_update->payload, false);
 	codec_concat(&player_update->payload, update_block);
-	codec_free(update_block);
+	object_free(update_block);
 	return player_update;
 }

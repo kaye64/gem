@@ -10,10 +10,7 @@
 #define LOG_FORMAT "%s/%s: %s\n"
 
 /**
- * log_error
- *
  * Produces a log message prefixed with the 'E' tag
- *  - tag: The tag to use. Typically the name of a subsystem
  */
 void log_error(const char *tag, const char *fmt, ...)
 {
@@ -29,10 +26,7 @@ void log_error(const char *tag, const char *fmt, ...)
 }
 
 /**
- * log_warn
- *
  * Produces a log message prefixed with the 'W' tag
- *  - tag: The tag to use. Typically the name of a subsystem
  */
 void log_warn(const char *tag, const char *fmt, ...)
 {
@@ -48,10 +42,7 @@ void log_warn(const char *tag, const char *fmt, ...)
 }
 
 /**
- * log_info
- *
  * Produces a log message prefixed with the 'I' tag
- *  - tag: The tag to use. Typically the name of a subsystem
  */
 void log_info(const char *tag, const char *fmt, ...)
 {
@@ -67,10 +58,7 @@ void log_info(const char *tag, const char *fmt, ...)
 }
 
 /**
- * log_debug
- *
  * Produces a log message prefixed with the 'D' tag
- *  - tag: The tag to use. Typically the name of a subsystem
  */
 void log_debug(const char *tag, const char *fmt, ...)
 {

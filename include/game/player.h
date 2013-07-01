@@ -1,9 +1,10 @@
 #ifndef _GAME_CLIENT_H_
 #define _GAME_CLIENT_H_
 
+#include <util/object.h>
 #include <util/list.h>
 #include <util/queue.h>
-#include <net/stream_codec.h>
+#include <net/codec.h>
 #include <game/mob.h>
 #include <game/packet/packet.h>
 #include <crypto/isaac.h>
@@ -15,8 +16,10 @@
 
 typedef struct world world_t;
 typedef struct game_service game_service_t;
+typedef struct player player_t;
 
 struct player {
+	object_t object;
 	list_node_t service_node;
 	list_node_t world_node;
 	/* client state */
@@ -35,14 +38,10 @@ struct player {
 	/* net */
 	queue_t packet_queue_in;
 	queue_t packet_queue_out;
-	stream_codec_t codec;
-	/* misc */
-	bool must_free;
+	codec_t codec;
 };
-typedef struct player player_t;
 
-player_t* player_create(player_t* player);
-void player_free(player_t* player);
+extern object_proto_t player_proto;
 
 void player_logic_update(world_t* world, player_t* player);
 void player_enqueue_packet(player_t* player, packet_t* packet);

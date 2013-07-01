@@ -1,6 +1,7 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 
+#include <util/object.h>
 #include <util/list.h>
 #include <game/location.h>
 
@@ -20,20 +21,20 @@
 #define LOCAL_SECTOR_SE 8
 
 typedef struct player player_t;
+typedef struct world_sector world_sector_t;
+typedef struct world world_t;
 
 struct world_sector {
 	sector_t sector;
 	list_t players;
 };
-typedef struct world_sector world_sector_t;
 
 struct world {
+	object_t object;
 	world_sector_t* sectors[NUM_SECTORS_X][NUM_SECTORS_Y][4];
 };
-typedef struct world world_t;
 
-void world_create(world_t* world);
-void world_free(world_t* world);
+extern object_proto_t world_proto;
 
 world_sector_t** world_get_local_sectors(world_t* world, sector_t center);
 world_sector_t* world_get_sector(world_t* world, sector_t sector);

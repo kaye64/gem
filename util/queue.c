@@ -9,44 +9,23 @@
 #include <assert.h>
 
 /**
- * queue_create
- *
  * Initializes a new queue
- *  - queue: Some preallocated memory, or null to put on heap
- * returns: The initialized queue
  */
-queue_t* queue_create(queue_t* queue)
+static void queue_init(queue_t* queue)
 {
-	if (queue == NULL) {
-		queue = (queue_t*)malloc(sizeof(queue_t));
-		queue->must_free = true;
-	} else {
-		queue->must_free = false;
-	}
-	list_create(&queue->list);
-	return queue;
+	object_init(list, &queue->list);
 }
 
 /**
- * queue_free
- *
  * Properly frees a queue_t
- *  - queue: The queue
  */
-void queue_free(queue_t* queue)
+static void queue_free(queue_t* queue)
 {
-	list_free(&queue->list);
-	if (queue->must_free) {
-		free(queue);
-	}
+	object_free(&queue->list);
 }
 
 /**
- * queue_push
- *
  * Pushes a new item onto a queue
- *  - queue: The queue
- *  - item: The item
  */
 void queue_push(queue_t* queue, list_node_t* item)
 {
@@ -55,11 +34,7 @@ void queue_push(queue_t* queue, list_node_t* item)
 }
 
 /**
- * queue_pop
- *
  * Pops an item from the queue
- *  - queue: The queue
- * returns: The item
  */
 list_node_t* queue_pop(queue_t* queue)
 {
@@ -70,11 +45,7 @@ list_node_t* queue_pop(queue_t* queue)
 }
 
 /**
- * queue_peek
- *
  * Returns the next item in the queue without removing it
- *  - queue: The queue
- * returns: The item
  */
 list_node_t* queue_peek(queue_t* queue)
 {
@@ -84,11 +55,7 @@ list_node_t* queue_peek(queue_t* queue)
 }
 
 /**
- * queue_empty
- *
  * Checks if a queue is empty
- *  - queue: The queue
- * returns: Whether the queue is empty
  */
 bool queue_empty(queue_t* queue)
 {
@@ -96,10 +63,7 @@ bool queue_empty(queue_t* queue)
 }
 
 /**
- * queue_clear
- *
  * Empties a queue
- *  - queue: The queue to clear
  */
 void queue_clear(queue_t* queue)
 {
@@ -107,3 +71,8 @@ void queue_clear(queue_t* queue)
 		queue_pop(queue);
 	}
 }
+
+object_proto_t queue_proto = {
+	.init = (object_init_t)queue_init,
+	.free = (object_free_t)queue_free
+};

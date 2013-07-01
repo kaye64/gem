@@ -1,3 +1,8 @@
+/**
+ * player.c
+ *
+ * Defines a player
+ */
 #include <game/player.h>
 
 #include <math.h>
@@ -8,37 +13,33 @@
 
 #define LOG_TAG "player"
 
-player_t* player_create(player_t* player)
+/**
+ * Initializes a player
+ */
+static void player_init(player_t* player)
 {
-	if (player == NULL) {
-		player = (player_t*)malloc(sizeof(player_t));
-		player->must_free = true;
-	} else {
-		player->must_free = false;
-	}
-	codec_create(&player->codec);
-	queue_create(&player->packet_queue_in);
-	queue_create(&player->packet_queue_out);
-	mob_create(&player->mob);
-	return player;
-}
-
-
-void player_free(player_t* player) {
-	mob_free(&player->mob);
-	queue_free(&player->packet_queue_out);
-	queue_free(&player->packet_queue_in);
-	codec_free(&player->codec);
-	if (player->must_free) {
-		free(player);
-	}
+	object_init(codec, &player->codec);
+	object_init(queue, &player->packet_queue_in);
+	object_init(queue, &player->packet_queue_out);
+	object_init(isaac, &player->isaac_in);
+	object_init(isaac, &player->isaac_out);
+	object_init(mob, &player->mob);
 }
 
 /**
- * player_logic_update
- *
+ * Frees a player
+ */
+static void player_free(player_t* player) {
+	object_free(&player->mob);
+	object_free(&player->isaac_out);
+	object_free(&player->isaac_in);
+	object_free(&player->packet_queue_out);
+	object_free(&player->packet_queue_in);
+	object_free(&player->codec);
+}
+
+/**
  * Performs player logic updates (processing the walking queue etc.)
- *  - player: The player
  */
 void player_logic_update(world_t* world, player_t* player)
 {
@@ -74,11 +75,7 @@ void player_logic_update(world_t* world, player_t* player)
 }
 
 /**
- * player_enqueue_packet
- *
  * Queues an outgoing packet for a given player
- *  - player: The player
- *  - packet: The packet
  */
 void player_enqueue_packet(player_t* player, packet_t* packet)
 {
@@ -86,11 +83,7 @@ void player_enqueue_packet(player_t* player, packet_t* packet)
 }
 
 /**
- * player_login
- *
  * Called when a new player successfully logs in
- *  - game_service: The game service
- *  - player: The player
  */
 void player_login(game_service_t* game_service, player_t* player)
 {
@@ -102,11 +95,7 @@ void player_login(game_service_t* game_service, player_t* player)
 }
 
 /**
- * player_logout
- *
  * Called when a new player logs out
- *  - game_service: The game service
- *  - player: The player
  */
 void player_logout(game_service_t* game_service, player_t* player)
 {
@@ -116,3 +105,8 @@ void player_logout(game_service_t* game_service, player_t* player)
 	list_erase(&game_service->player_list, &player->service_node);
 	INFO("Player logout: %s", player->username);
 }
+
+object_proto_t player_proto = {
+	.init = (object_init_t)player_init,
+	.free = (object_free_t)player_free
+};

@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 	parse_args(argc, argv);
 
 	/* load our rsa private key */
-	rsa_create(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
+	object_init(rsa, &instance.rsa);
+	rsa_load_key(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
 
 	/* open the cache */
 	instance.cache = cache_open_dir(instance.cache, inst_args.cache_dir);
@@ -61,16 +62,22 @@ int main(int argc, char **argv)
 	}
 
 	/* create the archive server */
-	instance.jag_server = jaggrab_create(instance.cache, inst_args.bind_addr);
+	instance.jag_server = object_new(archive_server);
 	assert(instance.jag_server != 0);
+	jaggrab_config(instance.jag_server, instance.cache, inst_args.bind_addr);
 
 	/* create the world dispatcher */
-	instance.game_service = game_create(NULL, &instance.rsa, instance.cache);
-	instance.update_service = update_create(NULL, instance.cache);
-	instance.world_dispatcher = dispatcher_create(inst_args.bind_addr, (service_t*)instance.game_service, (service_t*)instance.update_service);
+	instance.game_service = object_new(game_service);
+	instance.update_service = object_new(update_service);
 	assert(instance.game_service != 0);
 	assert(instance.update_service != 0);
+
+	game_config(instance.game_service, &instance.rsa, instance.cache);
+	update_config(instance.update_service, instance.cache);
+
+	instance.world_dispatcher = object_new(dispatcher);
 	assert(instance.world_dispatcher != 0);
+	dispatcher_config(instance.world_dispatcher, inst_args.bind_addr, &instance.game_service->service, &instance.update_service->service);
 
 	/* create the main game threads */
 	pthread_create(&instance.io_thread, NULL, (void*)io_thread, (void*)NULL);
@@ -163,13 +170,15 @@ void cleanup(bool forceful) {
 		ev_break(instance.engine_loop, EVBREAK_ALL);
 	}
 
-	dispatcher_free(instance.world_dispatcher);
-	game_free(instance.game_service);
-	update_free(instance.update_service);
+	pthread_detach(instance.io_thread);
+	pthread_detach(instance.engine_thread);
 
-	jaggrab_free(instance.jag_server);
-
+	object_free(instance.world_dispatcher);
+	object_free(instance.game_service);
+	object_free(instance.update_service);
+	object_free(instance.jag_server);
 	cache_free(instance.cache);
+	object_free(&instance.rsa);
 
 	exit(EXIT_SUCCESS);
 }

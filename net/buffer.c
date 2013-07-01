@@ -9,53 +9,44 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <util/config.h>
 #include <util/math.h>
 
 /**
- * buffer_create
- *
  * Initializes a new buffer
- *  - buffer: Some preallocated memory, or null to put on heap
- *  - size: The size of the buffer
- * returns: The initialized buffer
  */
-buffer_t* buffer_create(buffer_t* buffer, size_t size)
+static void buffer_init(buffer_t* buffer)
 {
-	if (buffer == NULL) {
-		buffer = (buffer_t*)malloc(sizeof(buffer_t));
-		buffer->must_free = true;
-	} else {
-		buffer->must_free = false;
-	}
+	buffer->data = (unsigned char*)malloc(sizeof(unsigned char)*DEFAULT_BUFFER_SIZE);
+	buffer->real_size = DEFAULT_BUFFER_SIZE;
+	buffer->read_ptr = 0;
+	buffer->read_avail = 0;
+	object_init(int_stack, &buffer->ptr_stack);
+}
+
+/**
+ * Properly frees a buffer
+ */
+static void buffer_free(buffer_t* buffer)
+{
+	free(buffer->data);
+	object_free(&buffer->ptr_stack);
+}
+
+/**
+ * Reallocates the internal buffer to a new size
+ */
+void buffer_realloc(buffer_t* buffer, size_t size)
+{
+	free(buffer->data);
 	buffer->data = (unsigned char*)malloc(sizeof(unsigned char)*size);
 	buffer->real_size = size;
 	buffer->read_ptr = 0;
 	buffer->read_avail = 0;
-	stack_create(&buffer->ptr_stack);
-	return buffer;
 }
 
 /**
- * buffer_free
- *
- * Properly frees a buffer
- *  - buffer: The buffer to free
- */
-void buffer_free(buffer_t* buffer)
-{
-	free(buffer->data);
-	stack_free(&buffer->ptr_stack);
-	if (buffer->must_free) {
-		free(buffer);
-	}
-}
-
-/**
- * buffer_read_avail
- *
  * Returns the number of bytes available to read in a buffer
- *  - buffer: The buffer
- * returns: The number of bytes
  */
 size_t buffer_read_avail(buffer_t* buffer)
 {
@@ -63,11 +54,7 @@ size_t buffer_read_avail(buffer_t* buffer)
 }
 
 /**
- * buffer_write_avail
- *
  * Returns the number of bytes available to write in a buffer
- *  - buffer: The buffer
- * returns: The number of bytes
  */
 size_t buffer_write_avail(buffer_t* buffer)
 {
@@ -75,12 +62,7 @@ size_t buffer_write_avail(buffer_t* buffer)
 }
 
 /**
- * buffer_read
- *
  * Reads up to a given number of bytes into a local buffer
- *  - buffer: The buffer to read from
- *  - buf: The local buffer to read the data into
- *  - len: The amount of bytes to read up to
  * returns: The amount of bytes read
  */
 size_t buffer_read(buffer_t* buffer, unsigned char* buf, size_t len)
@@ -95,12 +77,7 @@ size_t buffer_read(buffer_t* buffer, unsigned char* buf, size_t len)
 }
 
 /**
- * buffer_write
- *
  * Writes up to a given number of bytes from a local buffer
- *  - buffer: The buffer to write to
- *  - buf: The local buffer to write the data from
- *  - len: The amount of bytes to write up to
  * returns: The amount of bytes written
  */
 size_t buffer_write(buffer_t* buffer, const unsigned char* buf, size_t len)
@@ -115,10 +92,7 @@ size_t buffer_write(buffer_t* buffer, const unsigned char* buf, size_t len)
 }
 
 /**
- * buffer_print
- *
  * Print debugging info for a given buffer
- *  - buffer: The buffer
  */
 void buffer_print(buffer_t* buffer)
 {
@@ -127,10 +101,7 @@ void buffer_print(buffer_t* buffer)
 }
 
 /**
- * buffer_pushp
- *
  * Stores the current read and write pointers
- *  - buffer: The buffer
  */
 void buffer_pushp(buffer_t* buffer)
 {
@@ -139,10 +110,7 @@ void buffer_pushp(buffer_t* buffer)
 }
 
 /**
- * buffer_popp
- *
  * Restores the stored read and write pointers
- *  - buffer: The buffer
  */
 void buffer_popp(buffer_t* buffer)
 {
@@ -151,13 +119,15 @@ void buffer_popp(buffer_t* buffer)
 }
 
 /**
- * buffer_dropp
- *
  * Drops the previous set of read and write pointers
- *  - buffer: The buffer
  */
 void buffer_dropp(buffer_t* buffer)
 {
 	stack_pop(&buffer->ptr_stack);
 	stack_pop(&buffer->ptr_stack);
 }
+
+object_proto_t buffer_proto = {
+	.init = (object_init_t)buffer_init,
+	.free = (object_free_t)buffer_free
+};

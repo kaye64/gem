@@ -1,14 +1,14 @@
 #ifndef _PACKET_H_
 #define _PACKET_H_
 
-#include <net/stream_codec.h>
+#include <net/codec.h>
 #include <game/packet/packet_def.h>
 #include <util/list.h>
 
 struct packet {
 	packet_def_t def;
 	int len;
-	stream_codec_t payload;
+	codec_t payload;
 	list_node_t node;
 };
 typedef struct packet packet_t;

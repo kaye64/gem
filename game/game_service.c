@@ -23,69 +23,53 @@ void game_service_write(service_client_t* service_client);
 void game_service_drop(service_client_t* service_client);
 
 /**
- * game_create
- *
- * Allocates and creates an game_service_t
- *  - update: Some preallocated memory, or null to put on heap
- *  - cache: The cache to serve
- * returns: The game_service_t
+ * Initializes a game_service_t
  */
-game_service_t* game_create(game_service_t* game, rsa_t* rsa, cache_t* cache)
+static void game_init(game_service_t* game)
 {
-	if (game == NULL) {
-		game = (game_service_t*)malloc(sizeof(game_service_t));
-		game->must_free = true;
-	} else {
-		game->must_free = false;
-	}
-	game->rsa = rsa;
-	uint32_t seed = 0; // Not particularly important
-	isaac_create(&game->rand_gen, &seed, 1);
-	list_create(&game->player_list);
-	world_create(&game->world);
+	object_init(isaac, &game->rand_gen);
+	object_init(list, &game->player_list);
+	object_init(world, &game->world);
 	game->service.accept_cb = (service_accept_t)&game_service_accept;
 	game->service.handshake_cb = (service_handshake_t)&game_service_handshake;
 	game->service.read_cb = (service_read_t)&game_service_read;
 	game->service.write_cb = (service_write_t)&game_service_write;
 	game->service.drop_cb = (service_drop_t)&game_service_drop;
-	return game;
 }
 
 /**
- * game_free
- *
- * Properly frees the update service
- *  - game: The service to free
+ * Properly frees the game service
  */
-void game_free(game_service_t* game)
+static void game_free(game_service_t* game)
 {
-	world_free(&game->world);
-	list_free(&game->player_list);
-	isaac_free(&game->rand_gen);
-	if (game->must_free) {
-		free(game);
-	}
+	object_free(&game->world);
+	object_free(&game->player_list);
+	object_free(&game->rand_gen);
 }
 
 /**
- * game_service_accept
- *
+ * Configures the game service
+ *  - rsa: The RSA keypair to use
+ *  - cache: The cache to serve
+ */
+void game_config(game_service_t* game, rsa_t* rsa, cache_t* cache)
+{
+	game->rsa = rsa;
+}
+
+/**
  * Validates a new service_client_t
- *  - service_client: The service client
  * returns: An item to use as the service_client's attribute
  */
 void* game_service_accept(service_client_t* service_client)
 {
-	player_t* player = player_create(NULL);
+	player_t* player = object_new(player);
 	player->login_stage = STAGE_INIT;
 	return player;
 }
 
 /**
- * game_service_drop
- *
  * Called to perform any client cleanup
- *  - service_client: The service client
  */
 void game_service_drop(service_client_t* service_client)
 {
@@ -99,10 +83,7 @@ void game_service_drop(service_client_t* service_client)
 }
 
 /**
- * game_service_handshake
- *
  * Performs any handshake routines between the client/server
- *  - service_client: The service client
  * returns: One of HANDSHAKE_{DENIED,PENDING,ACCEPTED}
  */
 int game_service_handshake(service_client_t* service_client)
@@ -132,10 +113,7 @@ int game_service_handshake(service_client_t* service_client)
 }
 
 /**
- * game_service_read
- *
  * Called when data is available to be read by the client
- *  - service_client: The service client
  */
 void game_service_read(service_client_t* service_client)
 {
@@ -193,10 +171,7 @@ void game_service_read(service_client_t* service_client)
 }
 
 /**
- * game_service_write
- *
  * Called to signal that we can write to the client
- *  - service_client: The service client
  */
 void game_service_write(service_client_t* service_client)
 {
@@ -230,10 +205,7 @@ void game_service_write(service_client_t* service_client)
 }
 
 /**
- * game_process_io
- *
  * Dispatches packets in the packet queue to their handler routines
- *  - game: The game service
  */
 void game_process_io(game_service_t* game)
 {
@@ -251,10 +223,7 @@ void game_process_io(game_service_t* game)
 }
 
 /**
- * player_sync
- *
  * Syncs players, mobs, items etc. between clients
- *  - game_service: The game service
  */
 void player_sync(game_service_t* game_service)
 {
@@ -293,12 +262,16 @@ void player_sync(game_service_t* game_service)
 
 		if (player->login_stage == STAGE_CLEANUP) {
   			player_logout(game_service, player);
-			player_free(player);
+			object_free(player);
 			continue;
 		}
 
 		// Clear the client's update flags
 		player->mob.update_flags = 0;
 	}
-
 }
+
+object_proto_t game_service_proto = {
+	.init = (object_init_t)game_init,
+	.free = (object_free_t)game_free
+};

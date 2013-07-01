@@ -21,41 +21,21 @@ void accept_cb(struct ev_loop* loop, struct ev_io* watcher, int revents);
 void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents);
 
 /**
- * server_create
- *
  * Initializes a new server
- *  - server: Some preallocated memory, or null to put on heap
- *  - addr: The address to bind to
- *  - port: The port to bind to
- *  - flags: Server flags. One of SF_*. See server.h
- * returns: The initialized server
  */
-server_t* server_create(server_t* server, const char* addr, int port, uint8_t flags)
+static void server_init(server_t* server)
 {
-	if (server == NULL) {
-		server = (server_t*)malloc(sizeof(server_t));
-		server->must_free = true;
-	} else {
-		server->must_free = false;
-	}
-	strcpy(server->addr, addr);
-	server->port = port;
 	server->fd = -1;
 	server->buf_size = DEFAULT_BUFFER_SIZE;
-	server->buffer = (unsigned char*)malloc(server->buf_size);
 	server->io_loop = 0;
-	server->flags = flags;
-	list_create(&server->client_list);
-	return server;
+	server->buffer = NULL;
+	object_init(list, &server->client_list);
 }
 
 /**
- * server_free
- *
  * Properly frees a server_t
- *  - server: The server
  */
-void server_free(server_t* server)
+static void server_free(server_t* server)
 {
 	/* force a cleanup of each client */
 	while (!list_empty(&server->client_list)) {
@@ -64,18 +44,27 @@ void server_free(server_t* server)
 		server_client_cleanup(server, client);
 	}
 
-	list_free(&server->client_list);
+	object_free(&server->client_list);
 	free(server->buffer);
-	if (server->must_free) {
-		free(server);
-	}
 }
 
 /**
- * server_start
- *
+ * Configures a server
+ */
+void server_config(server_t* server, const char* addr, int port, uint8_t flags)
+{
+	strcpy(server->addr, addr);
+	server->port = port;
+	server->fd = -1;
+	server->buf_size = DEFAULT_BUFFER_SIZE;
+	server->buffer = (unsigned char*)malloc(server->buf_size);
+	server->io_loop = 0;
+	server->flags = flags;
+	object_init(list, &server->client_list);
+}
+
+/**
  * Starts a server io loop
- *  - server: The server
  *  - loop: The loop to run on
  * returns: true on success
  */
@@ -113,12 +102,7 @@ bool server_start(server_t* server, struct ev_loop* loop)
 }
 
 /**
- * accept_cb
- *
  * The ev client accept callback
- *  - loop: The event loop
- *  - accept_io: The io handler
- *  - revents: Event flags
  */
 void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 {
@@ -153,11 +137,7 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 }
 
 /**
- * server_client_drop
- *
  * Cleanly disconnects a client
- *  - server: The server
- *  - client: The client
  */
 void server_client_drop(server_t* server, client_t* client)
 {
@@ -165,12 +145,7 @@ void server_client_drop(server_t* server, client_t* client)
 }
 
 /**
- * client_io_avail
- *
  * The ev client io callback
- *  - loop: The event loop
- *  - accept_io: The io handler
- *  - revents: Event flags
  */
 void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 {
@@ -289,13 +264,9 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 }
 
 /**
- * server_client_init
- *
  * Initializes a client
- *  - server: The server
  *  - fd: The file descriptor of the client
  *  - addr: The address of the client
- * returns: An initialized client
  */
 client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 {
@@ -308,36 +279,36 @@ client_t* server_client_init(server_t* server, int fd, struct in_addr addr)
 	client->server = server;
 	client->handshake_stage = HANDSHAKE_PENDING;
 	client->client_drop = false;
-	buffer_create(&client->read_buffer, server->buf_size);
-	buffer_create(&client->write_buffer, server->buf_size);
+	object_init(buffer, &client->read_buffer);
+	object_init(buffer, &client->write_buffer);
+	buffer_realloc(&client->read_buffer, server->buf_size);
+	buffer_realloc(&client->write_buffer, server->buf_size);
 	return client;
 }
 
 /**
- * server_client_cleanup
- *
  * Cleans up a client for exit
- *  - server: The server
- *  - client: The client
  */
 void server_client_cleanup(server_t* server, client_t* client)
 {
 	ev_io_stop(server->io_loop, &client->io_read);
 	list_erase(&server->client_list, &client->node);
-	buffer_free(&client->read_buffer);
-	buffer_free(&client->write_buffer);
+	object_free(&client->read_buffer);
+	object_free(&client->write_buffer);
 	server->drop_cb(client, server);
 	close(client->fd);
 }
 
 /**
- * server_stop
- *
  * Stops the server io loop
- *  - server: The server
  */
 void server_stop(server_t* server)
 {
 	ev_io_stop(server->io_loop, &server->io_accept);
 	close(server->fd);
 }
+
+object_proto_t server_proto = {
+	.init = (object_init_t)server_init,
+	.free = (object_free_t)server_free
+};

@@ -530,12 +530,9 @@ packet_def_t packet_table_in[] = {
 };
 
 /**
- * packet_lookup
- *
  * Performs a lookup of a packet definition in either the server or
  * client packet tables.
  *  - type: One of PACKET_TYPE_{IN,OUT}
- *  - opcode: The opcode of the packet to lookup
  * returns: The packet definition, or a definition with opcode = PKT_NULL
  */
 packet_def_t packet_lookup(int type, int opcode)

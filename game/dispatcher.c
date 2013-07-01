@@ -19,61 +19,54 @@ void dispatcher_write(service_client_t* client);
 void dispatcher_drop(service_client_t* client);
 
 /**
- * dispatcher_create
- *
- * Allocates and creates an dispatcher_t
- *  - cache: The cache to serve
- *  - addr: The address to bind to
- * returns: The dispatcher_t
+ * Initializes a dispatcher
  */
-dispatcher_t* dispatcher_create(const char* addr, service_t* game, service_t* update)
+static void dispatcher_init(dispatcher_t* dispatcher)
 {
-	dispatcher_t* dispatcher = (dispatcher_t*)malloc(sizeof(dispatcher_t));
 	server_t* base_server = &dispatcher->server;
-	server_create(base_server, addr, 43594, SF_PARTIAL_READ);
+	object_init(server, base_server);
 	base_server->accept_cb = (client_accept_t)&dispatcher_accept;
 	base_server->handshake_cb = (client_handshake_t)&dispatcher_handshake;
 	base_server->read_cb = (client_read_t)&dispatcher_read;
 	base_server->write_cb = (client_write_t)&dispatcher_write;
 	base_server->drop_cb = (client_drop_t)&dispatcher_drop;
+}
+
+/**
+ * Properly frees a dispatcher
+ */
+static void dispatcher_free(dispatcher_t* dispatcher)
+{
+	object_free(&dispatcher->server);
+}
+
+/**
+ * Configures a dispatcher
+ *  - cache: The cache to serve
+ */
+void dispatcher_config(dispatcher_t* dispatcher, const char* addr, service_t* game, service_t* update)
+{
+	server_t* base_server = &dispatcher->server;
+	server_config(base_server, addr, 43594, SF_PARTIAL_READ);
 	dispatcher->game_service = game;
 	dispatcher->update_service = update;
-	return dispatcher;
 }
 
 /**
- * jaggrab_free
- *
- * Properly frees the jaggrab server
- *  - dispatcher: The dispatcher to free
- */
-void dispatcher_free(dispatcher_t* dispatcher)
-{
-	server_free(&dispatcher->server);
-	free(dispatcher);
-}
-
-/**
- * dispatcher_start
- *
  * Starts the server loop
- *  - dispatcher: The dispatcher to start
  *  - loop: The event loop to listen on
  */
 void dispatcher_start(dispatcher_t* dispatcher, struct ev_loop* loop)
 {
-	server_t* base_server = (server_t*)dispatcher;
+	server_t* base_server = &dispatcher->server;
 	server_start(base_server, loop);
 	INFO("Listening on %s:%d", base_server->addr, base_server->port);
 }
 
 /**
- * dispatcher_accept
- *
  * Validates/initializes a new client_t
  *  - fd: The client's file descriptor
  *  - addr: The client's address
- *  - dispatcher: The accepting dispatcher
  * returns: A properly allocated client_t, NULL on client denied
  */
 client_t* dispatcher_accept(int fd, struct in_addr addr, dispatcher_t* dispatcher)
@@ -85,11 +78,7 @@ client_t* dispatcher_accept(int fd, struct in_addr addr, dispatcher_t* dispatche
 }
 
 /**
- * dispatcher_set_service
- *
  * Sets up a service_client to be handled by a given service
- *  - dispatcher: The dispatcher
- *  - service_client: The service client
  *  - service_type: The service to assign to the client
  */
 void dispatcher_set_service(dispatcher_t* dispatcher, service_client_t* service_client, int service_type)
@@ -116,10 +105,7 @@ void dispatcher_set_service(dispatcher_t* dispatcher, service_client_t* service_
 }
 
 /**
- * dispatcher_handshake
- *
  * Performs any handshake routines between the client/server
- *  - service_client: The service_client
  * returns: One of HANDSHAKE_{DENIED,PENDING,ACCEPTED}
  */
 int dispatcher_handshake(service_client_t* service_client)
@@ -150,10 +136,7 @@ int dispatcher_handshake(service_client_t* service_client)
 }
 
 /**
- * dispatcher_read
- *
  * Called when data is available to be read by the client
- *  - service_client: The service_client
  */
 void dispatcher_read(service_client_t* service_client)
 {
@@ -165,10 +148,7 @@ void dispatcher_read(service_client_t* service_client)
 }
 
 /**
- * dispatcher_write
- *
  * Called to signal that we can write to the client
- *  - service_client: The service_client
  */
 void dispatcher_write(service_client_t* service_client)
 {
@@ -180,10 +160,7 @@ void dispatcher_write(service_client_t* service_client)
 }
 
 /**
- * dispatcher_drop
- *
  * Called to perform any client cleanup
- *  - service_client: The service_client
  */
 void dispatcher_drop(service_client_t* service_client)
 {
@@ -192,4 +169,10 @@ void dispatcher_drop(service_client_t* service_client)
 		return;
 	}
 	service->drop_cb(service_client);
+	free(service_client);
 }
+
+object_proto_t dispatcher_proto = {
+	.init = (object_init_t)dispatcher_init,
+	.free = (object_free_t)dispatcher_free
+};

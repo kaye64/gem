@@ -1,3 +1,8 @@
+/**
+ * jstring_encode.c
+ *
+ * Defines the jagex string coding method
+ */
 #include <util/jstring_encode.h>
 
 #include <string.h>
@@ -8,12 +13,8 @@ char enc_table[] = {'_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
 					'3', '4', '5', '6', '7', '8', '9'};
 
 /**
- * jstring_encode
- *
  * Encodes a string up to 12 chars to a long using jagex'
  * encoding method.
- *  - s: The string to encode
- * returns: The encoded long
  */
 long jstring_encode(char* s) {
 	long encoded = 0;
@@ -34,12 +35,8 @@ long jstring_encode(char* s) {
 }
 
 /**
- * jstring_decode
- *
  * Decodes a string up to 12 chars from a long using jagex'
  * encoding method.
- *  - l: The encoded long
- *  - buf: The output buffer
  */
 void jstring_decode(long l, char* buf) {
 	if (l <= 0 || l >= 0x5b5b57f8a98a5dd1) { // Why this max?

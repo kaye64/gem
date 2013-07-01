@@ -1,3 +1,8 @@
+/**
+ * isaac.c
+ *
+ * Defines the isaac cipher
+ */
 #include <crypto/isaac.h>
 
 #include <stdlib.h>
@@ -15,26 +20,14 @@
 		g ^= h >> 9; b += g; h += a;			\
 	}											\
 
-void isaac_init(isaac_t* isaac);
+void isaac_init_cipher(isaac_t* isaac);
 void isaac_generate_set(isaac_t* isaac);
 
 /**
- * isaac_create
- *
  * Initializes a new isaac cipher
- *	- isaac: Some preallocated memory, or null to put on heap
- *	- seed: A set of values to seed the cipher
- *	- seed_len: The length of the seed values
- * returns: The initialized isaac cipher
  */
-isaac_t* isaac_create(isaac_t* isaac, uint32_t* seed, int seed_len)
+static void isaac_init(isaac_t* isaac)
 {
-	if (isaac == NULL) {
-		isaac = (isaac_t*)malloc(sizeof(isaac_t));
-		isaac->must_free = true;
-	} else {
-		isaac->must_free = false;
-	}
 	// Init to zero
 	memset(&isaac->results, 0, 256*sizeof(uint32_t));
 	memset(&isaac->state, 0, 256*sizeof(uint32_t));
@@ -42,37 +35,34 @@ isaac_t* isaac_create(isaac_t* isaac, uint32_t* seed, int seed_len)
 	isaac->state_a = 0;
 	isaac->state_b = 0;
 	isaac->state_c = 0;
+}
 
+/**
+ * Properly frees an isaac cipher
+ */
+static void isaac_free(isaac_t* isaac)
+{
+
+}
+
+/**
+ * Seeds an isaac cipher
+ */
+void isaac_seed(isaac_t* isaac, uint32_t* seed, int seed_len)
+{
 	// Seed
 	for (int i = 0; i < seed_len; i++) {
 		isaac->results[i] = seed[i];
 	}
 
 	// Generate first result set
-	isaac_init(isaac);
-	return isaac;
+	isaac_init_cipher(isaac);
 }
 
 /**
- * isaac_free
- *
- * Properly frees an isaac cipher
- *	- isaac: The isaac cipher
- */
-void isaac_free(isaac_t* isaac)
-{
-	if (isaac->must_free) {
-		free(isaac);
-	}
-}
-
-/**
- * isaac_init
- *
  * Initializes the cipher and generates the first 256 values
- *	- isaac: The isaac cipher
  */
-void isaac_init(isaac_t* isaac)
+void isaac_init_cipher(isaac_t* isaac)
 {
 	uint32_t a, b, c, d, e, f, g, h;
 	a = b = c = d = e = f = g = h = 0x9e3779b9;
@@ -128,10 +118,7 @@ void isaac_init(isaac_t* isaac)
 }
 
 /**
- * isaac_generate_set
- *
  * Generates a set of 256 values
- *	- isaac: The isaac cipher
  */
 void isaac_generate_set(isaac_t* isaac)
 {
@@ -152,11 +139,7 @@ void isaac_generate_set(isaac_t* isaac)
 }
 
 /**
- * isaac_next
- *
  * Returns the next value, generating a new set if necessary
- *	- isaac: The isaac cipher
- * returns: The next cipher value
  */
 uint32_t isaac_next(isaac_t* isaac)
 {
@@ -166,3 +149,8 @@ uint32_t isaac_next(isaac_t* isaac)
 	}
 	return isaac->results[isaac->result_idx];
 }
+
+object_proto_t isaac_proto = {
+	.init = (object_init_t)isaac_init,
+	.free = (object_free_t)isaac_free
+};

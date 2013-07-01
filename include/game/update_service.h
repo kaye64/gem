@@ -3,21 +3,28 @@
 
 #include <stdbool.h>
 
+#include <util/object.h>
+#include <util/queue.h>
 #include <net/server.h>
 #include <game/service.h>
-#include <util/queue.h>
 #include <runite/cache.h>
 
 #define PRIORITY_URGENT 2
 #define PRIORITY_PRELOAD 1
 #define PRIORITY_BACKGROUND 0
 
+typedef struct update_service update_service_t;
+typedef struct update_request update_request_t;
+typedef struct update_response update_response_t;
+typedef struct update_client update_client_t;
+
 struct update_service {
+	object_t object;
 	service_t service;
 	cache_t* cache;
-	bool must_free;
 };
-typedef struct update_service update_service_t;
+
+extern object_proto_t update_service_proto;
 
 struct update_request {
 	uint8_t cache_id;
@@ -28,7 +35,6 @@ struct update_request {
 	unsigned char* payload;
 	list_node_t list_node;
 } __attribute__((packed));
-typedef struct update_request update_request_t;
 
 struct update_response {
 	uint8_t cache_id;
@@ -36,15 +42,12 @@ struct update_response {
 	uint16_t file_size;
 	uint8_t chunk_num;
 } __attribute__((packed));
-typedef struct update_response update_response_t;
 
 struct update_client {
 	queue_t request_queue;
 	update_request_t* current_request;
 };
-typedef struct update_client update_client_t;
 
-update_service_t* update_create(update_service_t* update, cache_t* cache);
-void update_free(update_service_t* update);
+void update_config(update_service_t* update, cache_t* cache);
 
 #endif /* _UPDATE_SERVICE_H_ */

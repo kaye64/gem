@@ -9,6 +9,9 @@
 
 #define LOG_TAG "packet_walk"
 
+/**
+ * Acts on the player walk packets
+ */
 void packet_walk(player_t* player, packet_t* packet)
 {
 	// The map walk packet appends 14 extra bytes

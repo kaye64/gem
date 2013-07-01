@@ -3,17 +3,18 @@
 
 #include <stdbool.h>
 
+#include <util/object.h>
 #include <util/container_of.h>
 #include <util/list.h>
 
-struct queue {
-	list_t list;
-	bool must_free;
-};
 typedef struct queue queue_t;
 
-queue_t* queue_create(queue_t* queue);
-void queue_free(queue_t* queue);
+struct queue {
+	object_t object;
+	list_t list;
+};
+
+extern object_proto_t queue_proto;
 
 void queue_push(queue_t* queue, list_node_t* item);
 list_node_t* queue_pop(queue_t* queue);

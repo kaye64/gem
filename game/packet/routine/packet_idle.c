@@ -9,6 +9,9 @@
 
 #define LOG_TAG "packet_idle"
 
+/**
+ * Acts on the player idle packet
+ */
 void packet_idle(player_t* player, packet_t* packet)
 {
 
