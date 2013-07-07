@@ -24,6 +24,7 @@ struct player {
 	list_node_t world_node;
 	/* client state */
 	uint32_t client_uid;
+	uint32_t index;
 	char username[32];
 	char password[32]; // We should just validate on login and remove this from memory
 	bool high_memory;

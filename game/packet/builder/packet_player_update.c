@@ -35,7 +35,7 @@ void build_movement_block(player_t* player, codec_t* codec)
 	if (mob->update_flags) {
 		codec_put_bits(codec, 1, 1); // We want to update this player
 		if (mob->update_flags & MOB_FLAG_REGION_UPDATE) { // We need to load a new region
-			location_t location = mob->pos;
+			location_t location = mob_position(mob);
 			region_local_t local = local_coord(location, mob->region);
 			bool discard_walk_queue = waypoint_queue_empty(&mob->waypoint_queue);
 			codec_put_bits(codec, 2, 3); // Update type 3 = warp to location

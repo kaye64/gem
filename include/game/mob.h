@@ -2,12 +2,12 @@
 #define _MOB_H_
 
 #include <stdint.h>
-
 #include <stdbool.h>
 
 #include <util/object.h>
 #include <game/location.h>
 #include <game/waypoint_queue.h>
+#include <game/entity.h>
 
 /* update flags */
 #define MOB_FLAG_REGION_UPDATE (1 << 0)
@@ -33,9 +33,8 @@ typedef struct mob mob_t;
 struct mob {
 	object_t object;
 	uint16_t update_flags;
-	location_t pos;
+	entity_t entity;
 	region_t region;
-	sector_t sector;
 	waypoint_queue_t waypoint_queue;
 	bool running;
 	int direction;
@@ -46,5 +45,6 @@ extern object_proto_t mob_proto;
 
 void mob_warp_to(mob_t* mob, location_t position);
 void mob_update_path(mob_t* mob);
+location_t mob_position(mob_t* mob);
 
 #endif /* _MOB_H_ */

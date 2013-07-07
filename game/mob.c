@@ -23,6 +23,7 @@ int mob_dir_map[3][3] = {
 static void mob_init(mob_t* mob)
 {
 	object_init(waypoint_queue, &mob->waypoint_queue);
+	object_init(entity, &mob->entity);
 	mob->direction = mob->last_direction = MOB_DIR_NONE;
 	mob->running = false;
 	mob->update_flags = 0;
@@ -34,19 +35,18 @@ static void mob_init(mob_t* mob)
  */
 static void mob_free(mob_t* mob)
 {
+	object_free(&mob->entity);
 	object_free(&mob->waypoint_queue);
 }
 
 /**
  * Changes the mob's position, clearing the walk queue
- *  - position: The location to warp to
  */
 void mob_warp_to(mob_t* mob, location_t position)
 {
 	mob->update_flags |= MOB_FLAG_REGION_UPDATE;
-	mob->pos = position;
-	mob->region = center_region_on(mob->pos);
-	mob->sector = position.sector;
+	entity_warp_to(&mob->entity, position);
+	mob->region = center_region_on(mob->entity.position);
 	waypoint_queue_clear(&mob->waypoint_queue);
 }
 
@@ -55,24 +55,33 @@ void mob_warp_to(mob_t* mob, location_t position)
  */
 void mob_update_path(mob_t* mob)
 {
-	location_t next_step = waypoint_queue_tick(&mob->waypoint_queue, mob->pos);
+	location_t position = mob_position(mob);
+	location_t next_step = waypoint_queue_tick(&mob->waypoint_queue, position);
 	if (next_step.x == -1 && next_step.y == -1) {
 		return;
 	}
-	int delta_x = mob->pos.x - next_step.x;
-	int delta_y = mob->pos.y - next_step.y;
+	int delta_x = position.x - next_step.x;
+	int delta_y = position.y - next_step.y;
 	if (abs(delta_x) > 1 || abs(delta_y) > 1) {
 		return;
 	}
 	mob->last_direction = mob->direction;
 	mob->direction = mob_dir_map[delta_x+1][delta_y+1];
-	mob->pos = next_step;
+	mob->entity.position = next_step;
 	if (mob->update_flags & MOB_FLAG_WALK_UPDATE) { // Called twice in one cycle
 		mob->update_flags &= ~MOB_FLAG_WALK_UPDATE;
 		mob->update_flags |= MOB_FLAG_RUN_UPDATE;
 	} else {
 		mob->update_flags |= MOB_FLAG_WALK_UPDATE;
 	}
+}
+
+/**
+ * Returns the mob's position
+ */
+location_t mob_position(mob_t* mob)
+{
+	return entity_position(&mob->entity);
 }
 
 object_proto_t mob_proto = {

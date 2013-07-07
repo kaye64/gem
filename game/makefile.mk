@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix game/,dispatcher.o game_service.o update_service.o game_login.o mob.o player.o world.o location.o waypoint_queue.o)
+OBJECTS += $(addprefix game/,dispatcher.o game_service.o update_service.o game_login.o entity.o mob.o player.o world.o location.o waypoint_queue.o)
