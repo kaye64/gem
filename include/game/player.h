@@ -20,7 +20,6 @@ typedef struct player player_t;
 
 struct player {
 	object_t object;
-	list_node_t service_node;
 	list_node_t world_node;
 	/* client state */
 	uint32_t client_uid;
@@ -43,6 +42,9 @@ struct player {
 };
 
 extern object_proto_t player_proto;
+
+player_t* player_for_entity(entity_t* entity);
+player_t* player_for_mob(mob_t* mob);
 
 void player_logic_update(world_t* world, player_t* player);
 void player_enqueue_packet(player_t* player, packet_t* packet);

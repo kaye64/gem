@@ -28,7 +28,7 @@ void game_service_drop(service_client_t* service_client);
 static void game_init(game_service_t* game)
 {
 	object_init(isaac, &game->rand_gen);
-	object_init(list, &game->player_list);
+	object_init(entity_list, &game->player_list);
 	object_init(world, &game->world);
 	game->service.accept_cb = (service_accept_t)&game_service_accept;
 	game->service.handshake_cb = (service_handshake_t)&game_service_handshake;
@@ -209,16 +209,16 @@ void game_service_write(service_client_t* service_client)
  */
 void game_process_io(game_service_t* game)
 {
-	list_node_t* player_node = list_front(&game->player_list);
+	entity_list_node_t* player_node = entity_list_front(&game->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, service_node);
+		player_t* player = player_for_entity(player_node->entity);
 		while (!queue_empty(&player->packet_queue_in)) {
 			list_node_t* packet_node = queue_pop(&player->packet_queue_in);
 			packet_t* packet = container_of(packet_node, packet_t, node);
 			packet_dispatch(player, packet);
 			packet_free(packet);
 		}
-		player_node = player_node->next;
+		player_node = entity_next(player_node);
 	}
 }
 
@@ -227,18 +227,18 @@ void game_process_io(game_service_t* game)
  */
 void player_sync(game_service_t* game_service)
 {
-	list_node_t* player_node = list_front(&game_service->player_list);
+	entity_list_node_t* player_node = entity_list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, service_node);
-		player_node = player_node->next;
+		player_t* player = player_for_entity(player_node->entity);
+		player_node = entity_next(player_node);
 
 		player_logic_update(&game_service->world, player);
 	}
 
-	player_node = list_front(&game_service->player_list);
+	player_node = entity_list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, service_node);
-		player_node = player_node->next;
+		player_t* player = player_for_entity(player_node->entity);
+		player_node = entity_next(player_node);
 
 		if (player->login_stage == STAGE_COMPLETE) {
 			/* todo: we need to remove the player from other player's local lists in the update packet when stage is STAGE_EXITING */
@@ -255,10 +255,11 @@ void player_sync(game_service_t* game_service)
 		}
 	}
 
-	player_node = list_front(&game_service->player_list);
+	player_node = entity_list_front(&game_service->player_list);
 	while (player_node != NULL) {
-		player_t* player = container_of(player_node, player_t, service_node);
-		player_node = player_node->next;
+		player_t* player = player_for_entity(player_node->entity);
+		player_node = player_node;
+		player_node = entity_next(player_node);
 
 		if (player->login_stage == STAGE_CLEANUP) {
   			player_logout(game_service, player);

@@ -7,10 +7,12 @@
 #include <game/location.h>
 
 typedef struct entity entity_t;
+typedef uint16_t entity_index;
+#define ENTITY_INDEX_MAX UINT16_MAX // (65k)
 
 struct entity {
 	object_t object;
-	uint32_t index;
+	entity_index index;
 	location_t position;
 	sector_t known_sector;
 };

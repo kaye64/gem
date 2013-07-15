@@ -15,6 +15,7 @@
 #include <game/packet/packet.h>
 #include <game/player.h>
 #include <game/world.h>
+#include <game/entity_list.h>
 
 typedef struct game_service game_service_t;
 
@@ -23,7 +24,7 @@ struct game_service {
 	service_t service;
 	isaac_t rand_gen;
 	rsa_t* rsa;
-	list_t player_list;
+	entity_list_t player_list;
 	world_t world;
 };
 

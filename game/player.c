@@ -91,8 +91,10 @@ void player_login(game_service_t* game_service, player_t* player)
 	world_t* world = &game_service->world;
 	world_sector_t* sector = world_get_sector(world, player->mob.entity.known_sector);
 	sector_register_player(sector, player);
-	list_push_back(&game_service->player_list, &player->service_node);
-	INFO("Player login: %s", player->username);
+	if (!entity_list_add(&game_service->player_list, &player->mob.entity)) {
+		ERROR("Ran out of entity indices. Probably a bug..");
+	}
+	INFO("Player login: %s, index: %d", player->username, player->mob.entity.index);
 }
 
 /**
@@ -103,8 +105,26 @@ void player_logout(game_service_t* game_service, player_t* player)
 	world_t* world = &game_service->world;
 	world_sector_t* sector = world_get_sector(world, player->mob.entity.known_sector);
 	sector_unregister_player(sector, player);
-	list_erase(&game_service->player_list, &player->service_node);
+	entity_list_remove(&game_service->player_list, &player->mob.entity);
 	INFO("Player logout: %s", player->username);
+}
+
+/**
+ * Gets a player_t* for an entity_t*
+ */
+player_t* player_for_entity(entity_t* entity)
+{
+	mob_t* mob = container_of(entity, mob_t, entity);
+	return player_for_mob(mob);
+}
+
+/**
+ * Gets a player_t* for a mob_t*
+ */
+player_t* player_for_mob(mob_t* mob)
+{
+	player_t* player = container_of(mob, player_t, mob);
+	return player;
 }
 
 object_proto_t player_proto = {
