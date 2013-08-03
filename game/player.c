@@ -7,6 +7,7 @@
 
 #include <math.h>
 
+#include <game/game_login.h>
 #include <game/world.h>
 #include <game/game_service.h>
 #include <util/log.h>
@@ -24,12 +25,14 @@ static void player_init(player_t* player)
 	object_init(isaac, &player->isaac_in);
 	object_init(isaac, &player->isaac_out);
 	object_init(mob, &player->mob);
+	object_init(entity_tracker, &player->known_players);
 }
 
 /**
  * Frees a player
  */
 static void player_free(player_t* player) {
+	object_free(&player->known_players);
 	object_free(&player->mob);
 	object_free(&player->isaac_out);
 	object_free(&player->isaac_in);
@@ -41,7 +44,7 @@ static void player_free(player_t* player) {
 /**
  * Performs player logic updates (processing the walking queue etc.)
  */
-void player_logic_update(world_t* world, player_t* player)
+void player_tick_before(world_t* world, player_t* player)
 {
 	mob_t* mob = &player->mob;
 	region_t current_region = mob->region;
@@ -70,9 +73,40 @@ void player_logic_update(world_t* world, player_t* player)
 		world_sector_t* old_world_sector = world_get_sector(world, mob->entity.known_sector);
 		world_sector_t* new_world_sector = world_get_sector(world, sector);
 		mob->entity.known_sector = sector;
-		sector_unregister_player(old_world_sector, player);
-		sector_register_player(new_world_sector, player);
+		sector_unregister_player(world, old_world_sector, player);
+		sector_register_player(world, new_world_sector, player);
 	}
+
+	sector_t our_sector = mob->entity.known_sector;
+
+	/* remove any players we're no longer observing */
+	entity_tracker_t* tracker = &player->known_players;
+	list_node_t* node_iter = list_front(&tracker->entities);
+	entity_list_node_t* node = NULL;
+	while (node_iter != NULL) {
+		node = container_of(node_iter, entity_list_node_t, node);
+		node_iter = node_iter->next;
+		
+		entity_t* entity = node->entity;
+		player_t* other_player = player_for_entity(entity);
+		if (entity == entity_for_player(player)) {
+			continue;
+		}
+		sector_t sector = entity->position.sector;
+		int sector_delta_x = abs(our_sector.x - sector.x);
+		int sector_delta_y = abs(our_sector.y - sector.y);
+		if (sector_delta_x > 1 || sector_delta_y > 1 || other_player->login_stage == STAGE_EXITING) {
+			entity_tracker_remove(tracker, entity); 
+		}
+	}
+}
+
+/**
+ * Performs post player update tick stuff
+ */
+void player_tick_after(world_t* world, player_t* player)
+{
+	entity_tracker_tick(&player->known_players);
 }
 
 /**
@@ -90,7 +124,7 @@ void player_login(game_service_t* game_service, player_t* player)
 {
 	world_t* world = &game_service->world;
 	world_sector_t* sector = world_get_sector(world, player->mob.entity.known_sector);
-	sector_register_player(sector, player);
+	sector_register_player(world, sector, player);
 	if (!entity_list_add(&game_service->player_list, &player->mob.entity)) {
 		ERROR("Ran out of entity indices. Probably a bug..");
 	}
@@ -104,7 +138,7 @@ void player_logout(game_service_t* game_service, player_t* player)
 {
 	world_t* world = &game_service->world;
 	world_sector_t* sector = world_get_sector(world, player->mob.entity.known_sector);
-	sector_unregister_player(sector, player);
+	sector_unregister_player(world, sector, player);
 	entity_list_remove(&game_service->player_list, &player->mob.entity);
 	INFO("Player logout: %s", player->username);
 }
@@ -125,6 +159,21 @@ player_t* player_for_mob(mob_t* mob)
 {
 	player_t* player = container_of(mob, player_t, mob);
 	return player;
+}
+
+/**
+ * Gets a mob_t* for a player_t*
+ */
+mob_t* mob_for_player(player_t* player) {
+	return &player->mob;
+}
+
+/**
+ * Gets an entity_t* for a player_t*
+ */
+entity_t* entity_for_player(player_t* player)
+{
+	return entity_for_mob(mob_for_player(player));
 }
 
 object_proto_t player_proto = {

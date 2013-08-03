@@ -8,6 +8,8 @@
  */
 #include <game/world.h>
 
+#include <math.h>
+
 #include <game/player.h>
 
 world_sector_t* sector_create(sector_t sector);
@@ -45,7 +47,8 @@ static void world_free(world_t* world)
 }
 
 /**
- * Returns the 8 sectors surrounding a center sector.
+ * Returns all observed sectors
+ * Observed sectors include the center sector, and the 8 sectors surrounding it. (9 in total)
  *  - center: The center sector
  * returns: An array of sectors. Indices are LOCAL_SECTOR_*
  */
@@ -119,16 +122,38 @@ void sector_free(world_sector_t* sector)
 /**
  * Registers a player to a sector
  */
-void sector_register_player(world_sector_t* sector, player_t* player)
+void sector_register_player(world_t* world, world_sector_t* sector, player_t* player)
 {
+	sector_t our_sector = sector->sector;
+	world_sector_t** local_sectors = world_get_local_sectors(world, our_sector);
+
+	/* Notify the player of all other players in the surrounding sectors. */
+	/* also notify other players in the sector of the player */
+	for (int i = 0; i < 9; i++) {
+		world_sector_t* local_sector = local_sectors[i];
+
+		list_node_t* node_iter = list_front(&local_sector->players);
+		player_t* other_player = NULL;
+		while (node_iter != NULL) {
+			other_player = container_of(node_iter, player_t, world_node);
+			node_iter = node_iter->next;
+			if (other_player == player || entity_tracker_is_tracking(&player->known_players, entity_for_player(other_player))) {
+				continue;
+			}
+			entity_tracker_add(&player->known_players, entity_for_player(other_player));
+			entity_tracker_add(&other_player->known_players, entity_for_player(player));
+		}
+	}
+	/* register the player */
 	list_push_back(&sector->players, &player->world_node);
 }
 
 /**
  * Unregisters a player from a sector
  */
-void sector_unregister_player(world_sector_t* sector, player_t* player)
+void sector_unregister_player(world_t* world, world_sector_t* sector, player_t* player)
 {
+	/* Unregister the player from the sector list */
 	list_erase(&sector->players, &player->world_node);
 }
 
@@ -136,3 +161,13 @@ object_proto_t world_proto = {
 	.init = (object_init_t)world_init,
 	.free = (object_free_t)world_free
 };
+
+
+
+
+
+
+
+
+
+

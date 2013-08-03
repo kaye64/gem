@@ -40,7 +40,7 @@ world_sector_t** world_get_local_sectors(world_t* world, sector_t center);
 world_sector_t* world_get_sector(world_t* world, sector_t sector);
 void world_gc(world_t* world);
 
-void sector_register_player(world_sector_t* sector, player_t* player);
-void sector_unregister_player(world_sector_t* sector, player_t* player);
+void sector_register_player(world_t* world, world_sector_t* sector, player_t* player);
+void sector_unregister_player(world_t* world, world_sector_t* sector, player_t* player);
 
 #endif /* _WORLD_H_ */

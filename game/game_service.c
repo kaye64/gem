@@ -232,7 +232,7 @@ void player_sync(game_service_t* game_service)
 		player_t* player = player_for_entity(player_node->entity);
 		player_node = entity_next(player_node);
 
-		player_logic_update(&game_service->world, player);
+		player_tick_before(&game_service->world, player);
 	}
 
 	player_node = entity_list_front(&game_service->player_list);
@@ -260,6 +260,8 @@ void player_sync(game_service_t* game_service)
 		player_t* player = player_for_entity(player_node->entity);
 		player_node = player_node;
 		player_node = entity_next(player_node);
+
+		player_tick_after(&game_service->world, player);
 
 		if (player->login_stage == STAGE_CLEANUP) {
   			player_logout(game_service, player);

@@ -4,6 +4,7 @@
 #include <util/object.h>
 #include <util/list.h>
 #include <util/queue.h>
+#include <game/entity_tracker.h>
 #include <net/codec.h>
 #include <game/mob.h>
 #include <game/packet/packet.h>
@@ -30,6 +31,7 @@ struct player {
 	int rights;
 	int login_stage;
 	mob_t mob;
+	entity_tracker_t known_players;
 	/* cryption */
 	uint64_t server_isaac_seed;
 	uint64_t client_isaac_seed;
@@ -46,7 +48,11 @@ extern object_proto_t player_proto;
 player_t* player_for_entity(entity_t* entity);
 player_t* player_for_mob(mob_t* mob);
 
-void player_logic_update(world_t* world, player_t* player);
+mob_t* mob_for_player(player_t* player);
+entity_t* entity_for_player(player_t* player);
+
+void player_tick_before(world_t* world, player_t* player);
+void player_tick_after(world_t* world, player_t* player);
 void player_enqueue_packet(player_t* player, packet_t* packet);
 
 void player_login(game_service_t* game_service, player_t* player);

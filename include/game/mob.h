@@ -47,4 +47,6 @@ void mob_warp_to(mob_t* mob, location_t position);
 void mob_update_path(mob_t* mob);
 location_t mob_position(mob_t* mob);
 
+entity_t* entity_for_mob(mob_t* mob);
+
 #endif /* _MOB_H_ */

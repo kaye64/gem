@@ -31,6 +31,7 @@ void list_insert_after(list_t* list, list_node_t* other, list_node_t* node);
 
 list_node_t* list_back(list_t* list);
 list_node_t* list_front(list_t* list);
+int list_count(list_t* list);
 
 void list_erase(list_t* list, list_node_t* node);
 

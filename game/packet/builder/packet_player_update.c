@@ -28,13 +28,17 @@ uint16_t translate_update_flags(uint16_t flags)
  * the given codec is already in bit access mode
  *  - codec: The codec to write to
  */
-void build_movement_block(player_t* player, codec_t* codec)
+void build_movement_block(player_t* player, codec_t* codec, bool ignore_region_update)
 {
 	mob_t* mob = &player->mob;
-	uint16_t other_update_flags = (mob->update_flags & ~(MOB_FLAG_MOVEMENT_UPDATE));
-	if (mob->update_flags) {
+	uint16_t update_flags = mob->update_flags;
+	if (ignore_region_update) {
+		update_flags = update_flags & ~(MOB_FLAG_REGION_UPDATE);
+	}
+	uint16_t other_update_flags = (update_flags & ~(MOB_FLAG_MOVEMENT_UPDATE));
+	if (update_flags) {
 		codec_put_bits(codec, 1, 1); // We want to update this player
-		if (mob->update_flags & MOB_FLAG_REGION_UPDATE) { // We need to load a new region
+		if (update_flags & MOB_FLAG_REGION_UPDATE) { // We need to load a new region
 			location_t location = mob_position(mob);
 			region_local_t local = local_coord(location, mob->region);
 			bool discard_walk_queue = waypoint_queue_empty(&mob->waypoint_queue);
@@ -44,12 +48,12 @@ void build_movement_block(player_t* player, codec_t* codec)
 			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
 			codec_put_bits(codec, 7, local.y);
 			codec_put_bits(codec, 7, local.x);
-		} else if (mob->update_flags & MOB_FLAG_RUN_UPDATE) {
+		} else if (update_flags & MOB_FLAG_RUN_UPDATE) {
 			codec_put_bits(codec, 2, 2); // Update type 2 = running
 			codec_put_bits(codec, 3, mob->last_direction);
 			codec_put_bits(codec, 3, mob->direction);
 			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
-		} else if (mob->update_flags & MOB_FLAG_WALK_UPDATE) {
+		} else if (update_flags & MOB_FLAG_WALK_UPDATE) {
 			codec_put_bits(codec, 2, 1); // Update type 1 = walk
 			codec_put_bits(codec, 3, mob->direction);
 			codec_put_bits(codec, 1, (other_update_flags ? 1 : 0)); // Signals that this player will have an entry in the update block
@@ -65,10 +69,13 @@ void build_movement_block(player_t* player, codec_t* codec)
  * Builds a player update block for a given client
  *  - codec: The codec to write to
  */
-void build_update_block(player_t* player, codec_t* codec)
+void build_update_block(player_t* player, codec_t* codec, bool new_player)
 {
 	mob_t* mob = &player->mob;
 	uint16_t flags = translate_update_flags(mob->update_flags);
+	if (new_player) {
+		flags |= CL_FLAG_APPEARANCE_UPDATE;
+	}
 	if (!flags) {
 		return;
 	}
@@ -152,22 +159,81 @@ codec_t* build_appearance_block(player_t* player)
 }
 
 /**
+ * Adds a new player to the update block
+ */
+void add_new_player(player_t* this_player, player_t* new_player, codec_t* main_codec, codec_t* update_codec)
+{
+	codec_put_bits(main_codec, 11, new_player->mob.entity.index);
+	codec_put_bits(main_codec, 1, 1); // append update block
+	build_update_block(new_player, update_codec, true);
+	codec_put_bits(main_codec, 1, 1); // discard walking queue
+
+	location_t our_location = mob_position(mob_for_player(this_player));
+	location_t other_location = mob_position(mob_for_player(new_player));
+	int delta_x = other_location.x - our_location.x;
+	int delta_y = other_location.y - our_location.y;
+	if(delta_x < 0) delta_x += 32;
+	if(delta_y < 0) delta_y += 32;
+	codec_put_bits(main_codec, 5, delta_y);
+	codec_put_bits(main_codec, 5, delta_x);
+}
+
+/**
  * Constructs a periodic player update block for a given player
  */
 packet_t* packet_build_player_update(player_t* player)
 {
 	packet_t* player_update = packet_create(packet_lookup(PACKET_TYPE_OUT, PKT_CL_PLAYER_UPDATE));
+	codec_t* main_block = &player_update->payload;
 	codec_t* update_block = object_new(codec);
-	codec_set_bit_access_mode(&player_update->payload, true);
+	codec_set_bit_access_mode(main_block, true);
 
-	build_movement_block(player, &player_update->payload);
-	build_update_block(player, update_block);
+	build_movement_block(player, main_block, false);
+	build_update_block(player, update_block, false);
 
-	codec_put_bits(&player_update->payload, 8, 0); // The number of other players to update
-	codec_put_bits(&player_update->payload, 11, 2047); // Signals end of movement updates
+	entity_tracker_t* tracker = &player->known_players;
+	list_t* known_players = &tracker->entities;
+	list_t* new_players = &tracker->in_entities;
+	
+	uint8_t num_players = list_count(known_players);
 
-	codec_set_bit_access_mode(&player_update->payload, false);
-	codec_concat(&player_update->payload, update_block);
+	codec_put_bits(main_block, 8, num_players); // The number of other players to update
+
+	/* update all the observing players */
+	list_node_t* node_iter = list_front(known_players);
+	entity_list_node_t* node = NULL;
+	while (node_iter != NULL) {
+		node = container_of(node_iter, entity_list_node_t, node);
+		node_iter = node_iter->next;
+
+		if (entity_tracker_is_removing(tracker, node->entity)) {
+			codec_put_bits(main_block, 1, 1);
+			codec_put_bits(main_block, 2, 3);
+		} else {
+			player_t* this_player = player_for_entity(node->entity);
+			build_movement_block(this_player, main_block, true);
+			build_update_block(this_player, update_block, false);
+		}
+	}
+
+	/* add new players */
+	node_iter = list_front(new_players);
+	node = NULL;
+	while (node_iter != NULL) {
+		node = container_of(node_iter, entity_list_node_t, node);
+		node_iter = node_iter->next;
+		
+		player_t* this_player = player_for_entity(node->entity);
+		add_new_player(player, this_player, main_block, update_block);
+	}
+
+	if (codec_len(update_block) > 0) {
+		codec_put_bits(main_block, 11, 2047); // Signals end of movement updates
+		codec_set_bit_access_mode(main_block, false);
+		codec_concat(main_block, update_block);
+	} else {
+		codec_set_bit_access_mode(main_block, false);
+	}
 	object_free(update_block);
 	return player_update;
 }

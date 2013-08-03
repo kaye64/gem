@@ -111,6 +111,20 @@ list_node_t* list_front(list_t* list)
 }
 
 /**
+ * Returns the count of the elements in the list
+ */
+int list_count(list_t* list)
+{
+	list_node_t* node = list_front(list);
+	int count = 0;
+	while (node != 0) {
+		count++;
+		node = node->next;
+	}
+	return count;
+}
+
+/**
  * Erases a node from the list
  */
 void list_erase(list_t* list, list_node_t* node)

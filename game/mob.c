@@ -84,6 +84,14 @@ location_t mob_position(mob_t* mob)
 	return entity_position(&mob->entity);
 }
 
+/**
+ * Gets an entity_t* for a mob_t*
+ */
+entity_t* entity_for_mob(mob_t* mob)
+{
+	return &mob->entity;
+}
+
 object_proto_t mob_proto = {
 	.init = (object_init_t)mob_init,
 	.free = (object_free_t)mob_free
