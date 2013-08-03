@@ -30,13 +30,3 @@ entity_list_node_t* entity_tracker_front(entity_tracker_t* tracker);
 entity_list_node_t* entity_tracker_front_out(entity_tracker_t* tracker);
 
 #endif /* _ENTITY_TRACKER_H_ */
-
-
-
-
-
-
-
-
-
-

@@ -31,7 +31,8 @@ static void player_init(player_t* player)
 /**
  * Frees a player
  */
-static void player_free(player_t* player) {
+static void player_free(player_t* player)
+{
 	object_free(&player->known_players);
 	object_free(&player->mob);
 	object_free(&player->isaac_out);
@@ -164,7 +165,8 @@ player_t* player_for_mob(mob_t* mob)
 /**
  * Gets a mob_t* for a player_t*
  */
-mob_t* mob_for_player(player_t* player) {
+mob_t* mob_for_player(player_t* player)
+{
 	return &player->mob;
 }
 

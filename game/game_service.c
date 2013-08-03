@@ -241,7 +241,6 @@ void player_sync(game_service_t* game_service)
 		player_node = entity_next(player_node);
 
 		if (player->login_stage == STAGE_COMPLETE) {
-			/* todo: we need to remove the player from other player's local lists in the update packet when stage is STAGE_EXITING */
 			// Check if the client has changed region
 			if (player->mob.update_flags & MOB_FLAG_REGION_UPDATE) {
 				player_enqueue_packet(player, packet_build_region_update(player));

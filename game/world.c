@@ -161,13 +161,3 @@ object_proto_t world_proto = {
 	.init = (object_init_t)world_init,
 	.free = (object_free_t)world_free
 };
-
-
-
-
-
-
-
-
-
-

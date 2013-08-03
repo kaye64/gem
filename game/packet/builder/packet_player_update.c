@@ -9,12 +9,12 @@
 
 #define CL_FLAG_APPEARANCE_UPDATE (1 << 4)
 
-codec_t* build_appearance_block(player_t* player);
+static codec_t* build_appearance_block(player_t* player);
 
 /**
  * Translates our server sided flags into the format the client wants
  */
-uint16_t translate_update_flags(uint16_t flags)
+static uint16_t translate_update_flags(uint16_t flags)
 {
 	uint16_t new_flags = 0;
 	if (flags & MOB_FLAG_APPEARANCE_UPDATE) {
@@ -28,7 +28,7 @@ uint16_t translate_update_flags(uint16_t flags)
  * the given codec is already in bit access mode
  *  - codec: The codec to write to
  */
-void build_movement_block(player_t* player, codec_t* codec, bool ignore_region_update)
+static void build_movement_block(player_t* player, codec_t* codec, bool ignore_region_update)
 {
 	mob_t* mob = &player->mob;
 	uint16_t update_flags = mob->update_flags;
@@ -69,7 +69,7 @@ void build_movement_block(player_t* player, codec_t* codec, bool ignore_region_u
  * Builds a player update block for a given client
  *  - codec: The codec to write to
  */
-void build_update_block(player_t* player, codec_t* codec, bool new_player)
+static void build_update_block(player_t* player, codec_t* codec, bool new_player)
 {
 	mob_t* mob = &player->mob;
 	uint16_t flags = translate_update_flags(mob->update_flags);
@@ -97,7 +97,7 @@ void build_update_block(player_t* player, codec_t* codec, bool new_player)
 /**
  * Builds an appearance update block for a given player
  */
-codec_t* build_appearance_block(player_t* player)
+static codec_t* build_appearance_block(player_t* player)
 {
 	codec_t* appearance_block = object_new(codec);
 
@@ -161,7 +161,7 @@ codec_t* build_appearance_block(player_t* player)
 /**
  * Adds a new player to the update block
  */
-void add_new_player(player_t* this_player, player_t* new_player, codec_t* main_codec, codec_t* update_codec)
+static void add_new_player(player_t* this_player, player_t* new_player, codec_t* main_codec, codec_t* update_codec)
 {
 	codec_put_bits(main_codec, 11, new_player->mob.entity.index);
 	codec_put_bits(main_codec, 1, 1); // append update block
