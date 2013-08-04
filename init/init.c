@@ -3,6 +3,7 @@
  *
  * Performs Gem startup routine
  */
+#include <version.h>
 #include <init/signal.h>
 #include <util/args.h>
 #include <util/config.h>
@@ -46,7 +47,7 @@ void engine_thread();
 
 int main(int argc, char **argv)
 {
-	INFO("Starting up...");
+	INFO("Geilinor Emulator v%d.%d.%d (gem)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	sig_install(cleanup);
 	parse_args(argc, argv);
 
