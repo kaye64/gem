@@ -524,7 +524,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN246 246
 #define PKT_CL_UNKNOWN247 247
 #define PKT_CL_UNKNOWN248 248
-#define PKT_CL_UNKNOWN249 249
+#define PKT_CL_PLAYER_INIT 249
 #define PKT_CL_UNKNOWN250 250
 #define PKT_CL_UNKNOWN251 251
 #define PKT_CL_UNKNOWN252 252
