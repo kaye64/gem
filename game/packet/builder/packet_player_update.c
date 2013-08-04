@@ -8,6 +8,7 @@
 #include <util/jstring_encode.h>
 
 #define CL_FLAG_APPEARANCE_UPDATE (1 << 4)
+#define CL_FLAG_CHAT_UPDATE (1 << 7)
 
 static codec_t* build_appearance_block(player_t* player);
 
@@ -20,6 +21,9 @@ static uint16_t translate_update_flags(uint16_t flags)
 	if (flags & MOB_FLAG_APPEARANCE_UPDATE) {
 		new_flags |= CL_FLAG_APPEARANCE_UPDATE;
 	}
+	if (flags & MOB_FLAG_CHAT_UPDATE) {
+		new_flags |= CL_FLAG_CHAT_UPDATE;
+	}
 	return new_flags;
 }
 
@@ -28,13 +32,9 @@ static uint16_t translate_update_flags(uint16_t flags)
  * the given codec is already in bit access mode
  *  - codec: The codec to write to
  */
-static void build_movement_block(player_t* player, codec_t* codec, bool ignore_region_update)
+static void build_movement_block(player_t* player, codec_t* codec, uint16_t update_flags)
 {
 	mob_t* mob = &player->mob;
-	uint16_t update_flags = mob->update_flags;
-	if (ignore_region_update) {
-		update_flags = update_flags & ~(MOB_FLAG_REGION_UPDATE);
-	}
 	uint16_t other_update_flags = (update_flags & ~(MOB_FLAG_MOVEMENT_UPDATE));
 	if (update_flags) {
 		codec_put_bits(codec, 1, 1); // We want to update this player
@@ -69,26 +69,32 @@ static void build_movement_block(player_t* player, codec_t* codec, bool ignore_r
  * Builds a player update block for a given client
  *  - codec: The codec to write to
  */
-static void build_update_block(player_t* player, codec_t* codec, bool new_player)
+static void build_update_block(player_t* player, codec_t* codec, uint16_t update_flags)
 {
 	mob_t* mob = &player->mob;
-	uint16_t flags = translate_update_flags(mob->update_flags);
-	if (new_player) {
-		flags |= CL_FLAG_APPEARANCE_UPDATE;
-	}
-	if (!flags) {
+	if (!update_flags) {
 		return;
 	}
-	if (flags >= 256) {
-		flags |= 64;
-		codec_put16f(codec, flags, CODEC_LITTLE);
+	if (update_flags >= 256) {
+		update_flags |= 64;
+		codec_put16f(codec, update_flags, CODEC_LITTLE);
 	} else {
-		codec_put8(codec, flags);
+		codec_put8(codec, update_flags);
 	}
 
-	if (flags & CL_FLAG_APPEARANCE_UPDATE) {
+	if (update_flags & CL_FLAG_CHAT_UPDATE) {
+		chat_message_t* message = mob->chat_message;
+		codec_put16f(codec, ((message->color & 0xFF) << 8) + (message->effects & 0xFF), CODEC_LITTLE);
+		codec_put8(codec, 0);
+		codec_put8f(codec, message->length, CODEC_NEGATIVE);
+		for (int i = message->length-1; i >= 0; i--) {
+			codec_put8(codec, message->message[i]);
+		}
+	}
+
+	if (update_flags & CL_FLAG_APPEARANCE_UPDATE) {
 		codec_t* appearance_block = build_appearance_block(player);
-		codec_put8(codec, -codec_len(appearance_block));
+		codec_put8f(codec, codec_len(appearance_block), CODEC_NEGATIVE);
 		codec_concat(codec, appearance_block);
 		object_free(appearance_block);
 	}
@@ -163,9 +169,10 @@ static codec_t* build_appearance_block(player_t* player)
  */
 static void add_new_player(player_t* this_player, player_t* new_player, codec_t* main_codec, codec_t* update_codec)
 {
+	uint16_t update_flags = translate_update_flags(new_player->mob.update_flags | MOB_FLAG_APPEARANCE_UPDATE); // force an appearence update for new players
 	codec_put_bits(main_codec, 11, new_player->mob.entity.index);
 	codec_put_bits(main_codec, 1, 1); // append update block
-	build_update_block(new_player, update_codec, true);
+	build_update_block(new_player, update_codec, update_flags);
 	codec_put_bits(main_codec, 1, 1); // discard walking queue
 
 	location_t our_location = mob_position(mob_for_player(this_player));
@@ -192,8 +199,9 @@ packet_t* packet_build_player_update(player_t* player)
 	codec_t* update_block = object_new(codec);
 	codec_set_bit_access_mode(main_block, true);
 
-	build_movement_block(player, main_block, false);
-	build_update_block(player, update_block, false);
+	uint16_t self_update_flags = translate_update_flags(player->mob.update_flags & ~(MOB_FLAG_CHAT_UPDATE));
+	build_movement_block(player, main_block, player->mob.update_flags & ~(MOB_FLAG_CHAT_UPDATE));
+	build_update_block(player, update_block, self_update_flags);
 
 	entity_tracker_t* tracker = &player->known_players;
 	list_t* known_players = &tracker->entities;
@@ -215,8 +223,9 @@ packet_t* packet_build_player_update(player_t* player)
 			codec_put_bits(main_block, 2, 3);
 		} else {
 			player_t* this_player = player_for_entity(node->entity);
-			build_movement_block(this_player, main_block, true);
-			build_update_block(this_player, update_block, false);
+			uint16_t update_flags = translate_update_flags(this_player->mob.update_flags);
+			build_movement_block(this_player, main_block, this_player->mob.update_flags & ~(MOB_FLAG_REGION_UPDATE));
+			build_update_block(this_player, update_block, update_flags);
 		}
 	}
 
