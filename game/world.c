@@ -93,7 +93,7 @@ void world_gc(world_t* world)
 					}
 				}
 			}
-x		}
+		}
 	}
 }
 
