@@ -9,6 +9,7 @@
 
 /* packet handlers */
 #include <game/packet/routine/packet_idle.h>
+#include <game/packet/routine/packet_chat.h>
 #include <game/packet/routine/packet_walk.h>
 
 #define LOG_TAG "packet_router"
@@ -21,6 +22,7 @@ typedef struct packet_handler packet_handler_t;
 
 packet_handler_t routing_table[] = {
 	{ .opcode = PKT_SV_IDLE, .callback = packet_idle },
+	{ .opcode = PKT_SV_CHAT_MESSAGE, .callback = packet_chat },
 	{ .opcode = PKT_SV_WALK_GAME, .callback = packet_walk },
 	{ .opcode = PKT_SV_WALK_MAP, .callback = packet_walk },
 	{ .opcode = PKT_SV_WALK_ENTITY, .callback = packet_walk },

@@ -131,6 +131,7 @@ void player_tick_before(world_t* world, player_t* player)
  */
 void player_tick_after(world_t* world, player_t* player)
 {
+	mob_set_chat_message(mob_for_player(player), NULL);
 	entity_tracker_tick(&player->known_players);
 }
 
