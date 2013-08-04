@@ -107,11 +107,16 @@ void player_tick_before(world_t* world, player_t* player)
 	/* remove any players we're no longer observing */
 	entity_tracker_t* tracker = &player->known_players;
 	list_node_t* node_iter = list_front(&tracker->entities);
-	entity_list_node_t* node = NULL;
+	tracked_entity_t* tracked_entity = NULL;
 	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
+		tracked_entity = container_of(node_iter, tracked_entity_t, node);
 		node_iter = node_iter->next;
-		entity_t* entity = node->entity;
+
+		if (tracked_entity_is_removing(tracked_entity) || tracked_entity_is_adding(tracked_entity)) {
+			continue;
+		}
+
+		entity_t* entity = tracked_entity->entity;
 		player_t* other_player = player_for_entity(entity);
 
 		location_t our_location = mob_position(mob_for_player(player));

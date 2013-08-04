@@ -204,25 +204,24 @@ packet_t* packet_build_player_update(player_t* player)
 	build_update_block(player, update_block, self_update_flags);
 
 	entity_tracker_t* tracker = &player->known_players;
-	list_t* known_players = &tracker->entities;
-	list_t* new_players = &tracker->in_entities;
+	list_t* observed_players = &tracker->entities;
 	
-	uint8_t num_players = list_count(known_players);
+	uint8_t num_players = entity_tracker_count_known(tracker);
 
 	codec_put_bits(main_block, 8, num_players); // The number of other players to update
 
 	/* update all the observing players */
-	list_node_t* node_iter = list_front(known_players);
-	entity_list_node_t* node = NULL;
+	list_node_t* node_iter = list_front(observed_players);
+	tracked_entity_t* tracked_entity = NULL;
 	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
+		tracked_entity = container_of(node_iter, tracked_entity_t, node);
 		node_iter = node_iter->next;
 
-		if (entity_tracker_is_removing(tracker, node->entity)) {
+		if (tracked_entity_is_removing(tracked_entity)) {
 			codec_put_bits(main_block, 1, 1);
 			codec_put_bits(main_block, 2, 3);
-		} else {
-			player_t* this_player = player_for_entity(node->entity);
+		} else if (!tracked_entity_is_adding(tracked_entity)) {
+			player_t* this_player = player_for_entity(tracked_entity->entity);
 			uint16_t update_flags = translate_update_flags(this_player->mob.update_flags);
 			build_movement_block(this_player, main_block, this_player->mob.update_flags & ~(MOB_FLAG_REGION_UPDATE));
 			build_update_block(this_player, update_block, update_flags);
@@ -230,18 +229,20 @@ packet_t* packet_build_player_update(player_t* player)
 	}
 
 	/* add new players */
-	node_iter = list_front(new_players);
-	node = NULL;
+	node_iter = list_front(observed_players);
+	tracked_entity = NULL;
 	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
+		tracked_entity = container_of(node_iter, tracked_entity_t, node);
 		node_iter = node_iter->next;
-		
-		player_t* this_player = player_for_entity(node->entity);
-		add_new_player(player, this_player, main_block, update_block);
+
+		if (tracked_entity_is_adding(tracked_entity)) {
+			player_t* this_player = player_for_entity(tracked_entity->entity);
+			add_new_player(player, this_player, main_block, update_block);
+		}
 	}
 
 	if (codec_len(update_block) > 0) {
-		codec_put_bits(main_block, 11, 2047); // Signals end of movement updates
+		codec_put_bits(main_block, 11, 2047); // Signals no more players to add
 		codec_set_bit_access_mode(main_block, false);
 		codec_concat(main_block, update_block);
 	} else {
