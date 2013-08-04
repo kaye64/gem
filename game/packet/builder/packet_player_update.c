@@ -172,8 +172,12 @@ static void add_new_player(player_t* this_player, player_t* new_player, codec_t*
 	location_t other_location = mob_position(mob_for_player(new_player));
 	int delta_x = other_location.x - our_location.x;
 	int delta_y = other_location.y - our_location.y;
-	if(delta_x < 0) delta_x += 32;
-	if(delta_y < 0) delta_y += 32;
+	if(delta_x < 0) {
+		delta_x += 32;
+	}
+	if(delta_y < 0) {
+		delta_y += 32;
+	}
 	codec_put_bits(main_codec, 5, delta_y);
 	codec_put_bits(main_codec, 5, delta_x);
 }

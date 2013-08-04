@@ -48,22 +48,20 @@ static void world_free(world_t* world)
 
 /**
  * Returns all observed sectors
- * Observed sectors include the center sector, and the 8 sectors surrounding it. (9 in total)
+ * Observed sectors include the center sector, and the 19 sectors surrounding it. (20 in total)
  *  - center: The center sector
- * returns: An array of sectors. Indices are LOCAL_SECTOR_*
+ * returns: An array of sectors. NUM_OBSERVED_SECTORS in size. 
+ * todo: find a way to guarantee an order based on distance from the center.
  */
-world_sector_t** world_get_local_sectors(world_t* world, sector_t center)
+world_sector_t** world_get_observed_sectors(world_t* world, sector_t center)
 {
-	world_sector_t** local_sectors = malloc(sizeof(world_sector_t*)*9);
-	local_sectors[LOCAL_SECTOR_NW] = world_get_sector(world, sector(center.x-1, center.y+1, center.z));
-	local_sectors[LOCAL_SECTOR_N] = world_get_sector(world, sector(center.x, center.y+1, center.z));
-	local_sectors[LOCAL_SECTOR_NE] = world_get_sector(world, sector(center.x+1, center.y+1, center.z));
-	local_sectors[LOCAL_SECTOR_W] = world_get_sector(world, sector(center.x-1, center.y, center.z));
-	local_sectors[LOCAL_SECTOR_C] = world_get_sector(world, center);
-	local_sectors[LOCAL_SECTOR_E] = world_get_sector(world, sector(center.x+1, center.y, center.z));
-	local_sectors[LOCAL_SECTOR_SW] = world_get_sector(world, sector(center.x-1, center.y-1, center.z));
-	local_sectors[LOCAL_SECTOR_S] = world_get_sector(world, sector(center.x, center.y-1, center.z));
-	local_sectors[LOCAL_SECTOR_SE] = world_get_sector(world, sector(center.x+1, center.y-1, center.z));
+	world_sector_t** local_sectors = malloc(sizeof(world_sector_t*)*NUM_OBSERVED_SECTORS);
+	int i = 0;
+	for (int x = 0; x < 5; x++) {
+		for (int y = 0; y < 5; y++) {
+			local_sectors[i++] = world_get_sector(world, sector(center.x+(x-2), center.y+(y-2), center.z));
+		}
+	}
 	return local_sectors;
 }
 
@@ -95,7 +93,7 @@ void world_gc(world_t* world)
 					}
 				}
 			}
-		}
+x		}
 	}
 }
 
@@ -124,26 +122,6 @@ void sector_free(world_sector_t* sector)
  */
 void sector_register_player(world_t* world, world_sector_t* sector, player_t* player)
 {
-	sector_t our_sector = sector->sector;
-	world_sector_t** local_sectors = world_get_local_sectors(world, our_sector);
-
-	/* Notify the player of all other players in the surrounding sectors. */
-	/* also notify other players in the sector of the player */
-	for (int i = 0; i < 9; i++) {
-		world_sector_t* local_sector = local_sectors[i];
-
-		list_node_t* node_iter = list_front(&local_sector->players);
-		player_t* other_player = NULL;
-		while (node_iter != NULL) {
-			other_player = container_of(node_iter, player_t, world_node);
-			node_iter = node_iter->next;
-			if (other_player == player || entity_tracker_is_tracking(&player->known_players, entity_for_player(other_player))) {
-				continue;
-			}
-			entity_tracker_add(&player->known_players, entity_for_player(other_player));
-			entity_tracker_add(&other_player->known_players, entity_for_player(player));
-		}
-	}
 	/* register the player */
 	list_push_back(&sector->players, &player->world_node);
 }

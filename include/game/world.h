@@ -9,16 +9,7 @@
 #define NUM_SECTORS_X 60*8
 #define NUM_SECTORS_Y 162*8
 
-/* These are the indices of the array returned by world_get_local_sectors */
-#define LOCAL_SECTOR_NW 0
-#define LOCAL_SECTOR_N 1
-#define LOCAL_SECTOR_NE 2
-#define LOCAL_SECTOR_W 3
-#define LOCAL_SECTOR_C 4
-#define LOCAL_SECTOR_E 5
-#define LOCAL_SECTOR_SW 6
-#define LOCAL_SECTOR_S 7
-#define LOCAL_SECTOR_SE 8
+#define NUM_OBSERVED_SECTORS 25
 
 typedef struct player player_t;
 typedef struct world_sector world_sector_t;
@@ -36,7 +27,7 @@ struct world {
 
 extern object_proto_t world_proto;
 
-world_sector_t** world_get_local_sectors(world_t* world, sector_t center);
+world_sector_t** world_get_observed_sectors(world_t* world, sector_t center);
 world_sector_t* world_get_sector(world_t* world, sector_t sector);
 void world_gc(world_t* world);
 

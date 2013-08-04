@@ -78,7 +78,31 @@ void player_tick_before(world_t* world, player_t* player)
 		sector_register_player(world, new_world_sector, player);
 	}
 
-	sector_t our_sector = mob->entity.known_sector;
+	/* add any new players */
+	world_sector_t** local_sectors = world_get_observed_sectors(world, sector);
+
+	/* Notify the player of all other players in the surrounding sectors. */
+	for (int i = 0; i < NUM_OBSERVED_SECTORS; i++) {
+		world_sector_t* local_sector = local_sectors[i];
+
+		list_node_t* node_iter = list_front(&local_sector->players);
+		player_t* other_player = NULL;
+		while (node_iter != NULL) {
+			other_player = container_of(node_iter, player_t, world_node);
+			node_iter = node_iter->next;
+
+			bool already_tracking = entity_tracker_is_tracking(&player->known_players, entity_for_player(other_player));
+			location_t our_location = mob_position(mob_for_player(player));
+			location_t other_location = mob_position(mob_for_player(other_player));
+			int delta_x = abs(other_location.x - our_location.x);
+			int delta_y = abs(other_location.y - our_location.y);
+			bool within_range = (delta_x < ENTITY_OBSERVE_RADIUS && delta_y < ENTITY_OBSERVE_RADIUS);
+			if (other_player == player || already_tracking || !within_range) {
+				continue;
+			}
+			entity_tracker_add(&player->known_players, entity_for_player(other_player));
+		}
+	}
 
 	/* remove any players we're no longer observing */
 	entity_tracker_t* tracker = &player->known_players;
@@ -87,18 +111,18 @@ void player_tick_before(world_t* world, player_t* player)
 	while (node_iter != NULL) {
 		node = container_of(node_iter, entity_list_node_t, node);
 		node_iter = node_iter->next;
-		
 		entity_t* entity = node->entity;
 		player_t* other_player = player_for_entity(entity);
-		if (entity == entity_for_player(player)) {
+
+		location_t our_location = mob_position(mob_for_player(player));
+		location_t other_location = mob_position(mob_for_player(other_player));
+		int delta_x = abs(other_location.x - our_location.x);
+		int delta_y = abs(other_location.y - our_location.y);
+		bool within_range = (delta_x < ENTITY_OBSERVE_RADIUS && delta_y < ENTITY_OBSERVE_RADIUS);
+		if (other_player->login_stage != STAGE_EXITING && within_range) {
 			continue;
 		}
-		sector_t sector = entity->position.sector;
-		int sector_delta_x = abs(our_sector.x - sector.x);
-		int sector_delta_y = abs(our_sector.y - sector.y);
-		if (sector_delta_x > 1 || sector_delta_y > 1 || other_player->login_stage == STAGE_EXITING) {
-			entity_tracker_remove(tracker, entity); 
-		}
+		entity_tracker_remove(tracker, entity);
 	}
 }
 

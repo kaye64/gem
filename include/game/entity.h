@@ -10,6 +10,8 @@ typedef struct entity entity_t;
 typedef uint16_t entity_index;
 #define ENTITY_INDEX_MAX UINT16_MAX // (65k)
 
+#define ENTITY_OBSERVE_RADIUS 15
+
 struct entity {
 	object_t object;
 	entity_index index;
