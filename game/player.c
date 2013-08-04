@@ -7,6 +7,7 @@
 
 #include <math.h>
 
+#include <game/packet/builders.h>
 #include <game/game_login.h>
 #include <game/world.h>
 #include <game/game_service.h>
@@ -159,6 +160,7 @@ void player_login(game_service_t* game_service, player_t* player)
 	if (!entity_list_add(&game_service->player_list, &player->mob.entity)) {
 		ERROR("Ran out of entity indices. Probably a bug..");
 	}
+	player_enqueue_packet(player, packet_build_player_init(player));
 	INFO("Player login: %s, index: %d", player->username, player->mob.entity.index);
 }
 
