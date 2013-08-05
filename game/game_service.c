@@ -246,6 +246,13 @@ void player_sync(game_service_t* game_service)
 				player_enqueue_packet(player, packet_build_region_update(player));
 			}
 			player_enqueue_packet(player, packet_build_player_update(player));
+
+			// Check if we need to update tabs
+			if (player->update_flags & PLAYER_FLAG_TAB_UPDATE) {
+				for (int i = 0; i < 14; i++) {
+					player_enqueue_packet(player, packet_build_tab_update(player, i));
+				}
+			}
 		}
 
 	  	if (player->login_stage == STAGE_EXITING) {
@@ -270,6 +277,7 @@ void player_sync(game_service_t* game_service)
 
 		// Clear the client's update flags
 		player->mob.update_flags = 0;
+		player->update_flags = 0;
 	}
 }
 

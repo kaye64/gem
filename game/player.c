@@ -154,7 +154,26 @@ void player_login(game_service_t* game_service, player_t* player)
 	if (!entity_list_add(&game_service->player_list, &player->mob.entity)) {
 		ERROR("Ran out of entity indices. Probably a bug..");
 	}
+
 	player_enqueue_packet(player, packet_build_player_init(player));
+
+	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
+	/* these should be set from the scripting language when it arrives */
+	player->tab_interfaces[0] = 2423;
+	player->tab_interfaces[1] = 3917;
+	player->tab_interfaces[2] = 638;
+	player->tab_interfaces[3] = 3213;
+	player->tab_interfaces[4] = 1644;
+	player->tab_interfaces[5] = 5608;
+	player->tab_interfaces[6] = 1151;
+	player->tab_interfaces[7] = -1;
+	player->tab_interfaces[8] = 5065;
+	player->tab_interfaces[9] = 5715;
+	player->tab_interfaces[10] = 2449;
+	player->tab_interfaces[11] = 4445;
+	player->tab_interfaces[12] = 147; 
+	player->tab_interfaces[13] = 6299;
+
 	INFO("Player login: %s, index: %d", player->username, player->mob.entity.index);
 }
 
@@ -168,6 +187,15 @@ void player_logout(game_service_t* game_service, player_t* player)
 	sector_unregister_player(world, sector, player);
 	entity_list_remove(&game_service->player_list, &player->mob.entity);
 	INFO("Player logout: %s", player->username);
+}
+
+/**
+ * Sets an interface in a player's client tab
+ */
+void player_set_tab_interface(player_t* player, int tab_id, int interface_id)
+{
+	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
+	player->tab_interfaces[tab_id] = interface_id;
 }
 
 /**

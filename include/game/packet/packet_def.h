@@ -346,7 +346,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN68 68
 #define PKT_CL_UNKNOWN69 69
 #define PKT_CL_UNKNOWN70 70
-#define PKT_CL_UNKNOWN71 71
+#define PKT_CL_TAB_UPDATE 71
 #define PKT_CL_UNKNOWN72 72
 #define PKT_CL_REGION_UPDATE 73
 #define PKT_CL_UNKNOWN74 74
