@@ -86,12 +86,9 @@ void player_tick_before(world_t* world, player_t* player)
 	for (int i = 0; i < NUM_OBSERVED_SECTORS; i++) {
 		world_sector_t* local_sector = local_sectors[i];
 
-		list_node_t* node_iter = list_front(&local_sector->players);
 		player_t* other_player = NULL;
-		while (node_iter != NULL) {
-			other_player = container_of(node_iter, player_t, world_node);
-			node_iter = node_iter->next;
-
+		list_for_each(&local_sector->players) {
+			list_for_get(other_player);
 			bool already_tracking = entity_tracker_is_tracking(&player->known_players, entity_for_player(other_player));
 			location_t our_location = mob_position(mob_for_player(player));
 			location_t other_location = mob_position(mob_for_player(other_player));
@@ -107,17 +104,14 @@ void player_tick_before(world_t* world, player_t* player)
 
 	/* remove any players we're no longer observing */
 	entity_tracker_t* tracker = &player->known_players;
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-
-		if (tracked_entity_is_removing(tracked_entity) || tracked_entity_is_adding(tracked_entity)) {
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		if (tracked_entity_is_removing(item) || tracked_entity_is_adding(item)) {
 			continue;
 		}
 
-		entity_t* entity = tracked_entity->entity;
+		entity_t* entity = item->entity;
 		player_t* other_player = player_for_entity(entity);
 
 		location_t our_location = mob_position(mob_for_player(player));

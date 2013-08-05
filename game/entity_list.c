@@ -97,24 +97,22 @@ void entity_list_remove(entity_list_t* list, entity_t* entity)
 {
 	/* find the entity in our list */
 	list_t* real_list = &list->entities;
-	list_node_t* node_iter = list_front(real_list);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
+	entity_list_node_t* item = NULL;
+	list_for_each(real_list) {
+		list_for_get(item);
 
-		if (node->entity == entity) {
+		if (item->entity == entity) {
 			break;
 		}
-		node = NULL;
+		item = NULL;
 	}
 
-	if (node == NULL) {
+	if (item == NULL) {
 		ERROR("tried to remove non-existant entity with index %d", entity->index);
 		return;
 	}
 
-	list_erase(real_list, &node->node);
+	list_erase(real_list, &item->node);
 }
 
 object_proto_t entity_list_proto = {

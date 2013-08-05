@@ -35,4 +35,9 @@ int list_count(list_t* list);
 
 void list_erase(list_t* list, list_node_t* node);
 
+#define list_for_each(list)										\
+	for (list_node_t* node_iter = list_front(list); node_iter != NULL; node_iter = node_iter->next)
+
+#define list_for_get(item) item = container_of(node_iter, typeof(*item), node)
+
 #endif /* _LIST_H_ */
