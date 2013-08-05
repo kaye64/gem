@@ -43,21 +43,18 @@ void entity_tracker_add(entity_tracker_t* tracker, entity_t* entity)
  */
 void entity_tracker_remove(entity_tracker_t* tracker, entity_t* entity)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-		
-		entity_t* this_entity = tracked_entity->entity;
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);		
+		entity_t* this_entity = item->entity;
 		if (this_entity == entity) {
-			switch (tracked_entity->state) {
+			switch (item->state) {
 			case TRACK_STATE_INCOMING:
-				list_erase(&tracker->entities, &tracked_entity->node);
-				free(tracked_entity);
+				list_erase(&tracker->entities, &item->node);
+				free(item);
 				break;
 			case TRACK_STATE_TRACKING:
-				tracked_entity->state = TRACK_STATE_OUTGOING;
+				item->state = TRACK_STATE_OUTGOING;
 				break;
 			}
 			return;
@@ -71,21 +68,18 @@ void entity_tracker_remove(entity_tracker_t* tracker, entity_t* entity)
  */
 void entity_tracker_clear(entity_tracker_t* tracker)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		
-		switch (tracked_entity->state) {
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		switch (item->state) {
 		case TRACK_STATE_INCOMING:
-			list_erase(&tracker->entities, &tracked_entity->node);
-			free(tracked_entity);
+			list_erase(&tracker->entities, &item->node);
+			free(item);
 			break;
 		case TRACK_STATE_TRACKING:
-			tracked_entity->state = TRACK_STATE_OUTGOING;
+			item->state = TRACK_STATE_OUTGOING;
 			break;
 		}
-		node_iter = node_iter->next;
 	}
 }
 
@@ -94,19 +88,16 @@ void entity_tracker_clear(entity_tracker_t* tracker)
  */
 void entity_tracker_tick(entity_tracker_t* tracker)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-		
-		switch (tracked_entity->state) {
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		switch (item->state) {
 		case TRACK_STATE_INCOMING:
-			tracked_entity->state = TRACK_STATE_TRACKING;
+			item->state = TRACK_STATE_TRACKING;
 			break;
 		case TRACK_STATE_OUTGOING:
-			list_erase(&tracker->entities, &tracked_entity->node);
-			free(tracked_entity);
+			list_erase(&tracker->entities, &item->node);
+			free(item);
 			break;
 		}
 	}
@@ -118,13 +109,10 @@ void entity_tracker_tick(entity_tracker_t* tracker)
 int entity_tracker_count_known(entity_tracker_t* tracker)
 {
 	int count = 0;
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-		
-		if (tracked_entity->state == TRACK_STATE_TRACKING || tracked_entity->state == TRACK_STATE_OUTGOING) {
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		if (item->state == TRACK_STATE_TRACKING || item->state == TRACK_STATE_OUTGOING) {
 			count++;
 		}
 	}
@@ -136,14 +124,11 @@ int entity_tracker_count_known(entity_tracker_t* tracker)
  */
 bool entity_tracker_is_tracking(entity_tracker_t* tracker, entity_t* entity)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-		
-		if (tracked_entity->entity == entity) {
-			return !tracked_entity_is_removing(tracked_entity);
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);		
+		if (item->entity == entity) {
+			return !tracked_entity_is_removing(item);
 		}
 	}
 	return false;
@@ -154,14 +139,11 @@ bool entity_tracker_is_tracking(entity_tracker_t* tracker, entity_t* entity)
  */
 bool entity_tracker_is_removing(entity_tracker_t* tracker, entity_t* entity)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	tracked_entity_t* tracked_entity = NULL;
-	while (node_iter != NULL) {
-		tracked_entity = container_of(node_iter, tracked_entity_t, node);
-		node_iter = node_iter->next;
-		
-		if (tracked_entity->entity == entity) {
-			return tracked_entity_is_removing(tracked_entity);
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		if (item->entity == entity) {
+			return tracked_entity_is_removing(item);
 		}
 	}
 	return false;

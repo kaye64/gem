@@ -21,7 +21,7 @@ typedef struct player player_t;
 
 struct player {
 	object_t object;
-	list_node_t world_node;
+	list_node_t node;
 	/* client state */
 	uint32_t client_uid;
 	uint32_t index;
