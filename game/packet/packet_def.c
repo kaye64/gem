@@ -184,7 +184,7 @@ packet_def_t packet_table_out[] = {
 	{ .opcode = PKT_CL_UNKNOWN173, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN174, .type = PACKET_LEN_FIXED, .len = 5},
 	{ .opcode = PKT_CL_UNKNOWN175, .type = PACKET_LEN_FIXED, .len = 0},
-	{ .opcode = PKT_CL_UNKNOWN176, .type = PACKET_LEN_FIXED, .len = 10},
+	{ .opcode = PKT_CL_LOGIN_WINDOW, .type = PACKET_LEN_FIXED, .len = 10},
 	{ .opcode = PKT_CL_UNKNOWN177, .type = PACKET_LEN_FIXED, .len = 6},
 	{ .opcode = PKT_CL_UNKNOWN178, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN179, .type = PACKET_LEN_FIXED, .len = 0},

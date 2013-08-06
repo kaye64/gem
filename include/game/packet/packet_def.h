@@ -451,7 +451,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN173 173
 #define PKT_CL_UNKNOWN174 174
 #define PKT_CL_UNKNOWN175 175
-#define PKT_CL_UNKNOWN176 176
+#define PKT_CL_LOGIN_WINDOW 176
 #define PKT_CL_UNKNOWN177 177
 #define PKT_CL_UNKNOWN178 178
 #define PKT_CL_UNKNOWN179 179
