@@ -29,7 +29,9 @@ extern object_proto_t codec_proto;
 #define CODEC_INV128   (1 << 1)
 #define CODEC_OFS128   (1 << 2)
 #define CODEC_LITTLE   (1 << 3)
-#define CODEC_JSTRING  (1 << 4)
+#define CODEC_MIDDLE_A  (1 << 4)
+#define CODEC_MIDDLE_B  (1 << 5)
+#define CODEC_JSTRING  (1 << 6)
 
 void codec_seek(codec_t* codec, size_t caret);
 size_t codec_len(codec_t* codec);

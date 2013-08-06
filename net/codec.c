@@ -354,6 +354,20 @@ void codec_put32f(codec_t* codec, uint32_t i, uint8_t flags)
 		val[1] = ((unsigned char*)&tmp)[2];
 		val[2] = ((unsigned char*)&tmp)[1];
 		val[3] = ((unsigned char*)&tmp)[0];
+	} else if (flags & CODEC_MIDDLE_A) {
+		/* This is essentially PDP-endian */
+		uint32_t tmp = i;
+		val[0] = ((unsigned char*)&tmp)[1];
+		val[1] = ((unsigned char*)&tmp)[0];
+		val[2] = ((unsigned char*)&tmp)[3];
+		val[3] = ((unsigned char*)&tmp)[2];
+	} else if (flags & CODEC_MIDDLE_B) {
+		/* The reverse of MIXED_A */
+		uint32_t tmp = i;
+		val[0] = ((unsigned char*)&tmp)[2];
+		val[1] = ((unsigned char*)&tmp)[3];
+		val[2] = ((unsigned char*)&tmp)[0];
+		val[3] = ((unsigned char*)&tmp)[1];
 	}
 
 	codec->data[codec->caret++] = val[3];
@@ -629,6 +643,18 @@ uint32_t codec_get32fp(codec_t* codec, uint32_t* i, uint8_t flags)
 		val[1] = ((unsigned char*)&tmp)[2];
 		val[2] = ((unsigned char*)&tmp)[1];
 		val[3] = ((unsigned char*)&tmp)[0];
+	} else if (flags & CODEC_MIDDLE_A) {
+		uint32_t tmp = *i;
+		val[0] = ((unsigned char*)&tmp)[1];
+		val[1] = ((unsigned char*)&tmp)[0];
+		val[2] = ((unsigned char*)&tmp)[3];
+		val[3] = ((unsigned char*)&tmp)[2];
+	} else if (flags & CODEC_MIDDLE_B) {
+		uint32_t tmp = *i;
+		val[0] = ((unsigned char*)&tmp)[2];
+		val[1] = ((unsigned char*)&tmp)[3];
+		val[2] = ((unsigned char*)&tmp)[0];
+		val[3] = ((unsigned char*)&tmp)[1];
 	}
 	if (flags & CODEC_NEGATIVE) {
 		val[0] = -val[0];
