@@ -174,6 +174,8 @@ void player_login(game_service_t* game_service, player_t* player)
 	player->tab_interfaces[12] = 147; 
 	player->tab_interfaces[13] = 6299;
 
+//	player_enqueue_packet(player, packet_build_login_window(player));	
+
 	INFO("Player login: %s, index: %d", player->username, player->mob.entity.index);
 }
 
