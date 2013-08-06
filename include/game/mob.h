@@ -8,12 +8,14 @@
 #include <game/location.h>
 #include <game/waypoint_queue.h>
 #include <game/entity.h>
+#include <game/chat_message.h>
 
 /* update flags */
 #define MOB_FLAG_REGION_UPDATE (1 << 0)
 #define MOB_FLAG_WALK_UPDATE (1 << 1)
 #define MOB_FLAG_RUN_UPDATE (1 << 2)
 #define MOB_FLAG_APPEARANCE_UPDATE (1 << 3)
+#define MOB_FLAG_CHAT_UPDATE (1 << 4)
 
 #define MOB_FLAG_MOVEMENT_UPDATE (MOB_FLAG_REGION_UPDATE | MOB_FLAG_WALK_UPDATE | MOB_FLAG_RUN_UPDATE)
 
@@ -39,12 +41,15 @@ struct mob {
 	bool running;
 	int direction;
 	int last_direction;
+	chat_message_t* chat_message;
 };
 
 extern object_proto_t mob_proto;
 
 void mob_warp_to(mob_t* mob, location_t position);
 void mob_update_path(mob_t* mob);
+void mob_set_chat_message(mob_t* mob, chat_message_t* message);
+
 location_t mob_position(mob_t* mob);
 
 entity_t* entity_for_mob(mob_t* mob);

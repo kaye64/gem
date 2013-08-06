@@ -28,6 +28,7 @@ static void mob_init(mob_t* mob)
 	mob->running = false;
 	mob->update_flags = 0;
 	mob_warp_to(mob, absolute_coord(0, 0, 0));
+	mob->chat_message = NULL;
 }
 
 /**
@@ -73,6 +74,21 @@ void mob_update_path(mob_t* mob)
 		mob->update_flags |= MOB_FLAG_RUN_UPDATE;
 	} else {
 		mob->update_flags |= MOB_FLAG_WALK_UPDATE;
+	}
+}
+
+/**
+ * Sets a mob's chat message
+ */
+void mob_set_chat_message(mob_t* mob, chat_message_t* message)
+{
+	if (mob->chat_message != NULL) {
+		object_free(mob->chat_message);
+		mob->chat_message = NULL;
+	}
+	if (message != NULL) {
+		mob->chat_message = message;
+		mob->update_flags |= MOB_FLAG_CHAT_UPDATE;
 	}
 }
 

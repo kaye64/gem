@@ -346,7 +346,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN68 68
 #define PKT_CL_UNKNOWN69 69
 #define PKT_CL_UNKNOWN70 70
-#define PKT_CL_UNKNOWN71 71
+#define PKT_CL_TAB_UPDATE 71
 #define PKT_CL_UNKNOWN72 72
 #define PKT_CL_REGION_UPDATE 73
 #define PKT_CL_UNKNOWN74 74
@@ -451,7 +451,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN173 173
 #define PKT_CL_UNKNOWN174 174
 #define PKT_CL_UNKNOWN175 175
-#define PKT_CL_UNKNOWN176 176
+#define PKT_CL_LOGIN_WINDOW 176
 #define PKT_CL_UNKNOWN177 177
 #define PKT_CL_UNKNOWN178 178
 #define PKT_CL_UNKNOWN179 179
@@ -524,7 +524,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_CL_UNKNOWN246 246
 #define PKT_CL_UNKNOWN247 247
 #define PKT_CL_UNKNOWN248 248
-#define PKT_CL_UNKNOWN249 249
+#define PKT_CL_PLAYER_INIT 249
 #define PKT_CL_UNKNOWN250 250
 #define PKT_CL_UNKNOWN251 251
 #define PKT_CL_UNKNOWN252 252

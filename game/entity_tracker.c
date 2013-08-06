@@ -15,9 +15,7 @@
  */
 static void entity_tracker_init(entity_tracker_t* entity_tracker)
 {
-	object_init(list, &entity_tracker->in_entities);
 	object_init(list, &entity_tracker->entities);
-	object_init(list, &entity_tracker->out_entities);
 }
 
 /**
@@ -25,92 +23,19 @@ static void entity_tracker_init(entity_tracker_t* entity_tracker)
  */
 static void entity_tracker_free(entity_tracker_t* entity_tracker)
 {
-	object_free(&entity_tracker->in_entities);
 	object_free(&entity_tracker->entities);
-	object_free(&entity_tracker->out_entities);
 }
 
-/**
- * Moves all entities from one list to another
- * if dest is null, the entities are freed instead
- */
-static void list_move_all(list_t* source, list_t* dest)
-{
-	list_node_t* node_iter = list_front(source);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-
-		list_erase(source, &node->node);
-		if (dest == NULL) {
-			free(node);
-		} else {
-			list_push_back(dest, &node->node);
-		}
-	}
-}
-
-/**
- * Removes an entity from a list
- */
-static void list_remove_entity(list_t* list, entity_t* entity)
-{
-	list_node_t* node_iter = list_front(list);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		
-		entity_t* this_entity = node->entity;
-		if (this_entity == entity) {
-			list_erase(list, node_iter);
-			free(node);
-			return;
-		}
-		node_iter = node_iter->next;
-	}
-}
-
-/**
- * Moves all known entities into the outgoing list, and clears the incoming list
- */
-void entity_tracker_clear(entity_tracker_t* tracker)
-{
-	list_move_all(&tracker->in_entities, NULL);
-	list_move_all(&tracker->entities, &tracker->out_entities);
-}
-
-/**
- * Processes the incoming and outgoing lists
- */
-void entity_tracker_tick(entity_tracker_t* tracker)
-{
-	/* move all incoming entities into the main entity list */
-	list_move_all(&tracker->in_entities, &tracker->entities);
-
-	/* remove all outgoing entities from the main entity list */
-	list_node_t* node_iter = list_front(&tracker->out_entities);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-
-		entity_t* entity = node->entity;
-		list_remove_entity(&tracker->entities, entity);
-	}
-
-	/* clear the outgoing list */
-	list_move_all(&tracker->out_entities, NULL);
-}
 
 /**
  * Adds an entity to the tracker
  */
 void entity_tracker_add(entity_tracker_t* tracker, entity_t* entity)
 {
-	entity_list_node_t* node = (entity_list_node_t*)malloc(sizeof(entity_list_node_t*));
-	node->entity = entity;
-	list_push_back(&tracker->in_entities, &node->node);
+	tracked_entity_t* tracked_entity = (tracked_entity_t*)malloc(sizeof(tracked_entity_t));
+	tracked_entity->entity = entity;
+	tracked_entity->state = TRACK_STATE_INCOMING;
+	list_push_back(&tracker->entities, &tracked_entity->node);
 }
 
 /**
@@ -118,45 +43,80 @@ void entity_tracker_add(entity_tracker_t* tracker, entity_t* entity)
  */
 void entity_tracker_remove(entity_tracker_t* tracker, entity_t* entity)
 {
-	/* find the entity in our list */
-	list_t* list = &tracker->entities;
-	list_node_t* node_iter = list_front(list);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-
-		if (node->entity == entity) {
-			/* found it. we can safely add it to the outgoing list */
-			entity_list_node_t* new_node = (entity_list_node_t*)malloc(sizeof(entity_list_node_t*));
-			new_node->entity = entity;
-			list_push_back(&tracker->out_entities, &new_node->node);
-			break;
-		}
-		node = NULL;
-	}
-
-	/* still haven't found it. search the incoming list, too.. */
-	if (node == NULL) {
-		list = &tracker->in_entities;
-		node_iter = list_front(list);
-		while (node_iter != NULL) {
-			node = container_of(node_iter, entity_list_node_t, node);
-			node_iter = node_iter->next;
-
-			if (node->entity == entity) {
-				list_erase(list, &node->node);
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);		
+		entity_t* this_entity = item->entity;
+		if (this_entity == entity) {
+			switch (item->state) {
+			case TRACK_STATE_INCOMING:
+				list_erase(&tracker->entities, &item->node);
+				free(item);
+				break;
+			case TRACK_STATE_TRACKING:
+				item->state = TRACK_STATE_OUTGOING;
 				break;
 			}
-			node = NULL;
+			return;
+		}
+	}	
+	DEBUG("tried to remove untracked entity");
+}
+
+/**
+ * Moves all known entities into the outgoing list, and clears the incoming list
+ */
+void entity_tracker_clear(entity_tracker_t* tracker)
+{
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		switch (item->state) {
+		case TRACK_STATE_INCOMING:
+			list_erase(&tracker->entities, &item->node);
+			free(item);
+			break;
+		case TRACK_STATE_TRACKING:
+			item->state = TRACK_STATE_OUTGOING;
+			break;
 		}
 	}
+}
 
-	if (node == NULL) {
-		/* doesn't exist */
-		ERROR("tried to remove non-existant entity");
-		return;
+/**
+ * Processes the incoming and outgoing lists
+ */
+void entity_tracker_tick(entity_tracker_t* tracker)
+{
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		switch (item->state) {
+		case TRACK_STATE_INCOMING:
+			item->state = TRACK_STATE_TRACKING;
+			break;
+		case TRACK_STATE_OUTGOING:
+			list_erase(&tracker->entities, &item->node);
+			free(item);
+			break;
+		}
 	}
+}
+
+/**
+ * Counts the number of known (non outgoing, non purging) entities
+ */
+int entity_tracker_count_known(entity_tracker_t* tracker)
+{
+	int count = 0;
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		if (item->state == TRACK_STATE_TRACKING || item->state == TRACK_STATE_OUTGOING) {
+			count++;
+		}
+	}
+	return count;
 }
 
 /**
@@ -164,28 +124,13 @@ void entity_tracker_remove(entity_tracker_t* tracker, entity_t* entity)
  */
 bool entity_tracker_is_tracking(entity_tracker_t* tracker, entity_t* entity)
 {
-	list_node_t* node_iter = list_front(&tracker->entities);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-		
-		if (node->entity == entity) {
-			return true;
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);		
+		if (item->entity == entity) {
+			return !tracked_entity_is_removing(item);
 		}
 	}
-
-	node_iter = list_front(&tracker->in_entities);
-	node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-		
-		if (node->entity == entity) {
-			return true;
-		}
-	}
-
 	return false;
 }
 
@@ -194,17 +139,30 @@ bool entity_tracker_is_tracking(entity_tracker_t* tracker, entity_t* entity)
  */
 bool entity_tracker_is_removing(entity_tracker_t* tracker, entity_t* entity)
 {
-	list_node_t* node_iter = list_front(&tracker->out_entities);
-	entity_list_node_t* node = NULL;
-	while (node_iter != NULL) {
-		node = container_of(node_iter, entity_list_node_t, node);
-		node_iter = node_iter->next;
-		
-		if (node->entity == entity) {
-			return true;
+	tracked_entity_t* item = NULL;
+	list_for_each(&tracker->entities) {
+		list_for_get(item);
+		if (item->entity == entity) {
+			return tracked_entity_is_removing(item);
 		}
 	}
 	return false;
+}
+
+/**
+ * Checks is a tracked_entity_t is incoming
+ */
+bool tracked_entity_is_adding(tracked_entity_t* entity)
+{
+	return entity->state == TRACK_STATE_INCOMING;
+}
+
+/**
+ * Checks is a tracked_entity_t is outgoing
+ */
+bool tracked_entity_is_removing(tracked_entity_t* entity)
+{
+	return entity->state == TRACK_STATE_OUTGOING;
 }
 
 object_proto_t entity_tracker_proto = {

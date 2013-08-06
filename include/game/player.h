@@ -15,13 +15,15 @@
 #define PLAYER_RIGHTS_ADMIN 2
 #define PLAYER_RIGHTS_SUPER 3
 
+#define PLAYER_FLAG_TAB_UPDATE (1 << 0) /* signals that a tab interface needs to be updated */
+
 typedef struct world world_t;
 typedef struct game_service game_service_t;
 typedef struct player player_t;
 
 struct player {
 	object_t object;
-	list_node_t world_node;
+	list_node_t node;
 	/* client state */
 	uint32_t client_uid;
 	uint32_t index;
@@ -32,6 +34,8 @@ struct player {
 	int login_stage;
 	mob_t mob;
 	entity_tracker_t known_players;
+	int tab_interfaces[14];
+	uint8_t update_flags;
 	/* cryption */
 	uint64_t server_isaac_seed;
 	uint64_t client_isaac_seed;
@@ -57,5 +61,7 @@ void player_enqueue_packet(player_t* player, packet_t* packet);
 
 void player_login(game_service_t* game_service, player_t* player);
 void player_logout(game_service_t* game_service, player_t* player);
+
+void player_set_tab_interface(player_t* player, int tab_id, int interface_id);
 
 #endif /* _GAME_CLIENT_H_ */

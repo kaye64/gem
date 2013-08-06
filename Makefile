@@ -1,6 +1,6 @@
 CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Lrunite/
 INCLUDE_DIRS = -Iinclude/ -Irunite/include/
-OUT = server
+OUT = gem
 LIBS = -lrunite -lev -lz -lpthread -lgmp
 SUBDIRS = init util net crypto jaggrab game game/packet game/packet/routine game/packet/builder
 

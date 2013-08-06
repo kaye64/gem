@@ -93,7 +93,7 @@ void world_gc(world_t* world)
 					}
 				}
 			}
-x		}
+		}
 	}
 }
 
@@ -123,7 +123,7 @@ void sector_free(world_sector_t* sector)
 void sector_register_player(world_t* world, world_sector_t* sector, player_t* player)
 {
 	/* register the player */
-	list_push_back(&sector->players, &player->world_node);
+	list_push_back(&sector->players, &player->node);
 }
 
 /**
@@ -132,7 +132,7 @@ void sector_register_player(world_t* world, world_sector_t* sector, player_t* pl
 void sector_unregister_player(world_t* world, world_sector_t* sector, player_t* player)
 {
 	/* Unregister the player from the sector list */
-	list_erase(&sector->players, &player->world_node);
+	list_erase(&sector->players, &player->node);
 }
 
 object_proto_t world_proto = {
