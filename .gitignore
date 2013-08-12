@@ -33,3 +33,6 @@ tramp
 # Org-mode
 .org-id-locations
 *_archive
+
+### Python ###
+__pycache__

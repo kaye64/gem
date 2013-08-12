@@ -1,8 +1,9 @@
 CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Lrunite/
-INCLUDE_DIRS = -Iinclude/ -Irunite/include/
+INCLUDE_DIRS = -Iinclude/ -Irunite/include/ -I/usr/include/python3.3m/
 OUT = gem
-LIBS = -lrunite -lev -lz -lpthread -lgmp
-SUBDIRS = init util net crypto jaggrab game game/packet game/packet/routine game/packet/builder
+LIB_DIRS = -L
+LIBS = -lrunite -lev -lz -lpthread -lgmp -lpython3.3m
+SUBDIRS = init util net crypto jaggrab script script/api game game/packet game/packet/routine game/packet/builder
 
 OBJECTS :=
 

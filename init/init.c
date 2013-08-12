@@ -13,6 +13,7 @@
 #include <game/dispatcher.h>
 #include <game/game_service.h>
 #include <game/update_service.h>
+#include <script/engine.h>
 #include <crypto/rsa.h>
 
 #include <assert.h>
@@ -54,6 +55,12 @@ int main(int argc, char **argv)
 	/* load our rsa private key */
 	object_init(rsa, &instance.rsa);
 	rsa_load_key(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
+
+	/* init the scripting engine */
+	if (!script_init()) {
+		ERROR("Unable to start scripting engine");
+		return 1;
+	}
 
 	/* open the cache */
 	instance.cache = cache_open_dir(instance.cache, inst_args.cache_dir);
@@ -178,6 +185,7 @@ void cleanup(bool forceful) {
 	object_free(instance.game_service);
 	object_free(instance.update_service);
 	object_free(instance.jag_server);
+	script_free();
 	cache_free(instance.cache);
 	object_free(&instance.rsa);
 
