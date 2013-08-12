@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	rsa_load_key(&instance.rsa, RSA_MODULUS, RSA_PUBLIC_EXPONENT, RSA_PRIVATE_EXPONENT);
 
 	/* init the scripting engine */
-	if (!script_init()) {
+	if (!script_init(inst_args.content_dir)) {
 		ERROR("Unable to start scripting engine");
 		return 1;
 	}

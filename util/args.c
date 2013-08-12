@@ -16,7 +16,8 @@ static struct option program_options[] = {
 	{"version", no_argument, 0, 'v'},
 	{"help", no_argument, 0, 'h'},
 	{"bind", required_argument, 0, 'b'},
-	{"cache", required_argument, 0, 'c'}
+	{"cache", required_argument, 0, 'c'},
+	{"content", required_argument, 0, 'C'}
 };
 
 /**
@@ -30,10 +31,11 @@ void parse_args(int argc, char **argv)
 	inst_args.verbose_on = 1;
 	strcpy(inst_args.bind_addr, "0.0.0.0");
 	strcpy(inst_args.cache_dir, "../cache");
+	strcpy(inst_args.content_dir, "./content/");
 
 	while (c >= 0) {
 		int option_index = 0;
-		c = getopt_long(argc, argv, "vhb:c:", program_options, &option_index);
+		c = getopt_long(argc, argv, "vhb:c:C:", program_options, &option_index);
 		if (c < 0) {
 			break;
 		}
@@ -47,6 +49,9 @@ void parse_args(int argc, char **argv)
 			break;
 		case 'c':
 			strcpy(inst_args.cache_dir, optarg);
+			break;
+		case 'C':
+			strcpy(inst_args.content_dir, optarg);
 			break;
 		}
 	}

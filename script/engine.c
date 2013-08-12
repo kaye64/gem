@@ -14,10 +14,12 @@
 
 #define LOG_TAG "script"
 
+static PyObject* core_module;
+
 /**
  * Initializes the scripting engine with the given script root directory
  */
-bool script_init()
+bool script_init(const char* content_dir)
 {
 	/* setup the api modules */
 	PyImport_AppendInittab("gem", &gem_init_module);
@@ -25,25 +27,31 @@ bool script_init()
 	/* init python */
 	Py_Initialize();
 
-	/* import the startup module */
-	PySys_SetPath(L"./content/");
-	PyObject* startup_module = PyImport_ImportModule("startup");
-	if (startup_module == NULL) {
-		ERROR("Unable to import startup module");
-		PyErr_Print();
-		return false;
+	/* import the core module */
+	wchar_t content_dir_wide[100];
+	swprintf(content_dir_wide, 100, L"%hs", content_dir);
+	PySys_SetPath(content_dir_wide);
+	core_module = PyImport_ImportModule("core");
+	if (core_module == NULL) {
+		ERROR("Unable to import core module");
+		goto error;
 	}
 
 	/* run startup() */
-	PyObject* startup_func = PyObject_GetAttrString(startup_module, "startup");
+	PyObject* startup_func = PyObject_GetAttrString(core_module, "startup");
 	if (!startup_func || !PyCallable_Check(startup_func)) {
 		ERROR("Unable to find/call startup function");
-		PyErr_Print();
-		return false;
+		goto error;
 	}
 	PyObject_CallObject(startup_func, NULL);
-	Py_DECREF(startup_func);
 
+	goto exit;
+error:
+	PyErr_Print();
+	return false;
+
+exit:
+	Py_XDECREF(startup_func);
 	return true;
 }
 
@@ -52,5 +60,16 @@ bool script_init()
  */
 void script_free()
 {
+	/* run shutdown() */
+	PyObject* shutdown_func = PyObject_GetAttrString(core_module, "shutdown");
+	if (!shutdown_func || !PyCallable_Check(shutdown_func)) {
+		ERROR("Unable to find/call shutdown function");
+		PyErr_Print();
+		goto exit;
+	}
+	PyObject_CallObject(shutdown_func, NULL);
+	Py_DECREF(shutdown_func);
+
+exit:
 	Py_Finalize();
 }
