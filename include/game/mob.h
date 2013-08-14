@@ -37,8 +37,8 @@ struct mob {
 	uint16_t update_flags;
 	entity_t entity;
 	region_t region;
-	waypoint_queue_t waypoint_queue;
-	bool running;
+	waypoint_queue_t waypoint_queue; /* todo: expose via api */
+	bool running; /* todo: expose via api */
 	int direction;
 	int last_direction;
 	chat_message_t* chat_message;
@@ -47,8 +47,8 @@ struct mob {
 extern object_proto_t mob_proto;
 
 void mob_warp_to(mob_t* mob, location_t position);
-void mob_update_path(mob_t* mob);
-void mob_set_chat_message(mob_t* mob, chat_message_t* message);
+void mob_update_path(mob_t* mob); 
+void mob_set_chat_message(mob_t* mob, chat_message_t* message); /* todo: expose via api */
 
 location_t mob_position(mob_t* mob);
 
