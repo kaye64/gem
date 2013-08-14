@@ -1,0 +1,113 @@
+#include <script/hook.h>
+
+#include <script/api/player.h>
+#include <util/list.h>
+#include <util/log.h>
+#include <util/container_of.h>
+
+#define LOG_TAG "hook"
+
+typedef struct hook_entry hook_entry_t;
+struct hook_entry {
+	list_node_t node;
+	int hook;
+	PyObject* callback;
+};
+
+typedef struct hook hook_t;
+struct hook {
+	int hook;
+	char const_name[32];
+	PyObject*(*build_func)(void*);
+};
+
+/* The list of hook callbacks. Nodes are hook_entry_t */
+static list_t hook_lookup;
+/* The lookup table of all event hooks */
+static hook_t dispatch_lookup[] = {
+	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
+	{ .hook = -1, .const_name = "", .build_func = NULL }
+};
+
+/**
+ * Initialize the hook system
+ */
+void hook_init()
+{
+	object_init(list, &hook_lookup);
+}
+
+/**
+ * Clean up after the hook system
+ */
+void hook_free()
+{
+	/* free up our hook table */
+	hook_entry_t* entry = NULL;
+	list_for_each(&hook_lookup) {
+		list_for_get(entry);
+		Py_DECREF(entry->callback);
+		free(entry);
+	}
+	object_free(&hook_lookup);
+}
+
+/**
+ * Create all of the gem.HOOK_* constants
+ */
+void hook_create_constants(PyObject* module)
+{
+	int i = 0;
+	hook_t* dispatch = &dispatch_lookup[i];
+	while (dispatch->hook != -1) {
+		PyModule_AddIntConstant(module, dispatch->const_name, dispatch->hook);
+		dispatch = &dispatch_lookup[++i];
+	}
+}
+
+/**
+ * Register a new API hook callback
+ */
+void hook_register(int hook, PyObject* callback)
+{
+	if (!callback || !PyCallable_Check(callback)) {
+		ERROR("Unable to register hook");
+		PyErr_Print();
+		return;
+	}
+	hook_entry_t* hook_entry = (hook_entry_t*)malloc(sizeof(hook_entry_t));
+	hook_entry->hook = hook;
+	hook_entry->callback = callback;
+	Py_INCREF(hook_entry->callback);
+	list_push_back(&hook_lookup, &hook_entry->node);
+}
+
+/**
+ * Dispatches a hook to each of the registered callers
+ */
+void hook_notify(int hook, void* args)
+{
+	/* find the build func and get the arguments */
+	int i = 0;
+	PyObject* py_args = NULL;
+	hook_t* dispatch = &dispatch_lookup[i];
+	while (dispatch->hook != -1) {
+		if (dispatch->hook == hook) {
+			py_args = dispatch->build_func(args);
+			break;
+		}
+		dispatch = &dispatch_lookup[++i];
+	}
+	
+	/* call each registered hook */
+	hook_entry_t* entry = NULL;
+	list_for_each(&hook_lookup) {
+		list_for_get(entry);
+		if (entry->hook == hook) {
+			if (!PyObject_CallObject(entry->callback, py_args)) {
+				ERROR("hook call failed");
+				PyErr_Print();
+			}
+		}
+	}
+}

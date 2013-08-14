@@ -7,6 +7,8 @@
 
 #include <math.h>
 
+#include <script/hook.h>
+#include <script/api/player.h>
 #include <game/packet/builders.h>
 #include <game/game_login.h>
 #include <game/world.h>
@@ -175,8 +177,7 @@ void player_login(game_service_t* game_service, player_t* player)
 	player->tab_interfaces[13] = 6299;
 
 //	player_enqueue_packet(player, packet_build_login_window(player));	
-
-	INFO("Player login: %s, index: %d", player->username, player->mob.entity.index);
+	hook_notify(SCRIPT_HOOK_PLAYER_LOGIN, (void*)player);
 }
 
 /**

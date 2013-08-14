@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix script/,engine.o)
+OBJECTS += $(addprefix script/,engine.o hook.o)

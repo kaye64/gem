@@ -8,6 +8,7 @@
 
 #include <script/engine.h>
 
+#include <script/hook.h>
 #include <script/api/gem.h>
 #include <script/api/log.h>
 #include <util/log.h>
@@ -26,6 +27,9 @@ bool script_init(const char* content_dir)
 
 	/* init python */
 	Py_Initialize();
+
+	/* init our subsystems */
+	hook_init();
 
 	/* import the core module */
 	wchar_t content_dir_wide[100];
@@ -71,5 +75,6 @@ void script_free()
 	Py_DECREF(shutdown_func);
 
 exit:
+	hook_free();
 	Py_Finalize();
 }

@@ -1,4 +1,4 @@
-CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Lrunite/
+CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Lrunite/
 INCLUDE_DIRS = -Iinclude/ -Irunite/include/ -I/usr/include/python3.3m/
 OUT = gem
 LIB_DIRS = -L
