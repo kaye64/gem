@@ -5,8 +5,34 @@
  */
 #include <script/api/player.h>
 
+#include <structmember.h>
+
 #include <script/api/mob.h>
 #include <game/player.h>
+
+/**
+ * Sets an interface in one of the player's tabs
+ * player.set_tab_interface(tab, interface)
+ */
+static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;
+	int tab_id;
+	int interface_id;
+	if (!PyArg_ParseTuple(args, "ii", &tab_id, &interface_id)) {
+		return NULL;
+	}
+
+	if (tab_id > 13) {
+		return NULL;
+	}
+
+	player->tab_interfaces[tab_id] = interface_id;
+	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 
 /**
  * Builds the argument tuple for the player login callback
@@ -19,13 +45,20 @@ PyObject* build_player_login_args(void* args)
 }
 
 static PyMethodDef player_methods[] = {
+	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
     {NULL, NULL, 0, NULL}
+};
+
+static PyMemberDef player_members[] = {
+    {"username", T_OBJECT_EX, offsetof(api_player_t, username), READONLY, "player username"},
+    {"rights", T_INT, offsetof(api_player_t, rights), READONLY, "player rights"},
+    {NULL, 0, 0, 0, NULL}
 };
 
 static PyTypeObject player_type = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"gem.Player",                 /* tp_name */
-    sizeof(api_player_t),         /* tp_basicsize */
+	"gem.Player",              /* tp_name */
+    sizeof(api_player_t),      /* tp_basicsize */
     0,                         /* tp_itemsize */
     0,                         /* tp_dealloc */
 	0,                         /* tp_print */
@@ -44,7 +77,7 @@ static PyTypeObject player_type = {
     0,                         /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | 
 	Py_TPFLAGS_BASETYPE,       /* tp_flags */
-    "Player object",              /* tp_doc */
+    "Player object",           /* tp_doc */
     0,                         /* tp_traverse */
     0,                         /* tp_clear */
     0,                         /* tp_richcompare */
@@ -52,7 +85,7 @@ static PyTypeObject player_type = {
     0,                         /* tp_iter */
 	0,                         /* tp_iternext */
 	player_methods,            /* tp_methods */
-    0,                         /* tp_members */
+    player_members,            /* tp_members */
 };
 
 /**
@@ -87,4 +120,6 @@ void api_player_init(api_player_t* api_player, player_t* player)
 {
 	api_player->player = player;
 	api_mob_init(&api_player->mob, mob_for_player(player));
+	api_player->username = PyUnicode_FromString(player->username);
+	api_player->rights = player->rights;
 }

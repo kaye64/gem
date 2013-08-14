@@ -159,23 +159,6 @@ void player_login(game_service_t* game_service, player_t* player)
 
 	player_enqueue_packet(player, packet_build_player_init(player));
 
-	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
-	/* these should be set from the scripting language when it arrives */
-	player->tab_interfaces[0] = 2423;
-	player->tab_interfaces[1] = 3917;
-	player->tab_interfaces[2] = 638;
-	player->tab_interfaces[3] = 3213;
-	player->tab_interfaces[4] = 1644;
-	player->tab_interfaces[5] = 5608;
-	player->tab_interfaces[6] = 1151;
-	player->tab_interfaces[7] = -1;
-	player->tab_interfaces[8] = 5065;
-	player->tab_interfaces[9] = 5715;
-	player->tab_interfaces[10] = 2449;
-	player->tab_interfaces[11] = 4445;
-	player->tab_interfaces[12] = 147; 
-	player->tab_interfaces[13] = 6299;
-
 //	player_enqueue_packet(player, packet_build_login_window(player));	
 	hook_notify(SCRIPT_HOOK_PLAYER_LOGIN, (void*)player);
 }

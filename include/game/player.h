@@ -27,14 +27,14 @@ struct player {
 	/* client state */
 	uint32_t client_uid;
 	uint32_t index;
-	char username[32]; /* todo: expose via api */
+	char username[32];
 	char password[32]; // We should just validate on login and remove this from memory
 	bool high_memory;
-	int rights; /* todo: expose via api */
+	int rights;
 	int login_stage;
 	mob_t mob;
-	entity_tracker_t known_players; /* todo: expose via api */
-	int tab_interfaces[14]; /* todo: expose via api */
+	entity_tracker_t known_players;
+	int tab_interfaces[14];
 	uint8_t update_flags;
 	/* cryption */
 	uint64_t server_isaac_seed;

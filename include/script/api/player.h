@@ -11,6 +11,8 @@ typedef struct api_player api_player_t;
 struct api_player {
 	api_mob_t mob;
 	player_t* player;
+	PyObject* username;
+	int rights;
 };
 
 PyObject* build_player_login_args(void* args);
