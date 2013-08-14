@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix script/api/,gem.o log.o entity.o mob.o player.o)
+OBJECTS += $(addprefix script/api/,gem.o log.o location.o entity.o mob.o player.o)

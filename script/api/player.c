@@ -1,3 +1,8 @@
+/**
+ * player.c
+ *
+ * Defines the gem.Player API type
+ */
 #include <script/api/player.h>
 
 #include <script/api/mob.h>

@@ -1,3 +1,8 @@
+/**
+ * mob.c
+ *
+ * Defines the gem.Mob API type
+ */
 #include <script/api/mob.h>
 
 #include <script/api/entity.h>

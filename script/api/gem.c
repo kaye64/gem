@@ -63,6 +63,7 @@ PyObject* gem_init_module()
 	PyModule_AddObject(module, "log", log_module);
 
 	/* create the entity, mob, and player types */
+	api_location_init_type(module);
 	api_entity_init_type(module);
 	api_mob_init_type(module);
 	api_player_init_type(module);

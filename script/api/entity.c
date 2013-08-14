@@ -1,3 +1,8 @@
+/**
+ * entity.c
+ *
+ * Defines the gem.Entity API type
+ */
 #include <script/api/entity.h>
 
 #include <structmember.h>
@@ -10,6 +15,7 @@ static PyMethodDef entity_methods[] = {
 
 static PyMemberDef entity_members[] = {
     {"index", T_INT, offsetof(api_entity_t, index), READONLY, "entity index"},
+	{"location", T_OBJECT_EX, offsetof(api_entity_t, location), 0, "player location"},
     {NULL, 0, 0, 0, NULL}
 };
 
@@ -76,5 +82,6 @@ PyObject* api_entity_create(entity_t* entity)
 void api_entity_init(api_entity_t* api_entity, entity_t* entity)
 {
 	api_entity->entity = entity;
-	api_entity->index = entity->index;
+	api_entity->index = entity->index;	
+	api_entity->location = api_location_create(entity->position);
 }

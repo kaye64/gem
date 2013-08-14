@@ -3,12 +3,15 @@
 
 #include <Python.h>
 
+#include <script/api/location.h>
+
 typedef struct entity entity_t;
 typedef struct api_entity api_entity_t;
 struct api_entity {
 	PyObject_HEAD
 	entity_t* entity;
 	int index;
+	PyObject* location;
 };
 
 extern PyTypeObject entity_type;
