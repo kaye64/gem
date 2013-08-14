@@ -4,6 +4,8 @@
 #include <Python.h>
 
 #define SCRIPT_HOOK_PLAYER_LOGIN 0
+#define SCRIPT_HOOK_STARTUP 1
+#define SCRIPT_HOOK_SHUTDOWN 2
 
 void hook_init();
 void hook_free();

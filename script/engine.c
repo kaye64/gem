@@ -41,13 +41,13 @@ bool script_init(const char* content_dir)
 		goto error;
 	}
 
-	/* run startup() */
-	PyObject* startup_func = PyObject_GetAttrString(core_module, "startup");
-	if (!startup_func || !PyCallable_Check(startup_func)) {
+	/* run register_hooks() */
+	PyObject* reg_hook_func = PyObject_GetAttrString(core_module, "register_hooks");
+	if (!reg_hook_func || !PyCallable_Check(reg_hook_func)) {
 		ERROR("Unable to find/call startup function");
 		goto error;
 	}
-	PyObject_CallObject(startup_func, NULL);
+	PyObject_CallObject(reg_hook_func, NULL);
 
 	goto exit;
 error:
@@ -55,7 +55,7 @@ error:
 	return false;
 
 exit:
-	Py_XDECREF(startup_func);
+	Py_XDECREF(reg_hook_func);
 	return true;
 }
 
@@ -64,17 +64,6 @@ exit:
  */
 void script_free()
 {
-	/* run shutdown() */
-	PyObject* shutdown_func = PyObject_GetAttrString(core_module, "shutdown");
-	if (!shutdown_func || !PyCallable_Check(shutdown_func)) {
-		ERROR("Unable to find/call shutdown function");
-		PyErr_Print();
-		goto exit;
-	}
-	PyObject_CallObject(shutdown_func, NULL);
-	Py_DECREF(shutdown_func);
-
-exit:
 	hook_free();
 	Py_Finalize();
 }

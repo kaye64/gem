@@ -26,6 +26,8 @@ static list_t hook_lookup;
 /* The lookup table of all event hooks */
 static hook_t dispatch_lookup[] = {
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
+	{ .hook = SCRIPT_HOOK_STARTUP, .const_name = "HOOK_STARTUP", .build_func = NULL },
+	{ .hook = SCRIPT_HOOK_SHUTDOWN, .const_name = "HOOK_SHUTDOWN", .build_func = NULL },
 	{ .hook = -1, .const_name = "", .build_func = NULL }
 };
 
@@ -93,6 +95,10 @@ void hook_notify(int hook, void* args)
 	hook_t* dispatch = &dispatch_lookup[i];
 	while (dispatch->hook != -1) {
 		if (dispatch->hook == hook) {
+			if (dispatch->build_func == NULL) {
+				/* no arguments */
+				break;
+			}
 			py_args = dispatch->build_func(args);
 			break;
 		}

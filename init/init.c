@@ -14,6 +14,7 @@
 #include <game/game_service.h>
 #include <game/update_service.h>
 #include <script/engine.h>
+#include <script/hook.h>
 #include <crypto/rsa.h>
 
 #include <assert.h>
@@ -90,6 +91,8 @@ int main(int argc, char **argv)
 	/* create the main game threads */
 	pthread_create(&instance.io_thread, NULL, (void*)io_thread, (void*)NULL);
 	pthread_create(&instance.engine_thread, NULL, (void*)engine_thread, (void*)NULL);
+
+	hook_notify(SCRIPT_HOOK_STARTUP, NULL);
 
 	pthread_join(instance.io_thread, NULL);
 	pthread_join(instance.engine_thread, NULL);
@@ -169,6 +172,7 @@ void cleanup(bool forceful) {
 	 * in the services which allows them to cleanly shut down. */
 	if (!forceful) {
 		INFO("Cleaning up for shutdown");
+		hook_notify(SCRIPT_HOOK_SHUTDOWN, NULL);
 		server_stop(&instance.jag_server->io_server);
 		server_stop(&instance.world_dispatcher->server);
 		ev_timer_stop(instance.engine_loop, &instance.engine_tick);
