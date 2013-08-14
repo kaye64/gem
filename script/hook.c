@@ -25,9 +25,9 @@ struct hook {
 static list_t hook_lookup;
 /* The lookup table of all event hooks */
 static hook_t dispatch_lookup[] = {
-	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
 	{ .hook = SCRIPT_HOOK_STARTUP, .const_name = "HOOK_STARTUP", .build_func = NULL },
 	{ .hook = SCRIPT_HOOK_SHUTDOWN, .const_name = "HOOK_SHUTDOWN", .build_func = NULL },
+	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
 	{ .hook = -1, .const_name = "", .build_func = NULL }
 };
 
