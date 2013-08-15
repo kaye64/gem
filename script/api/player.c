@@ -59,6 +59,17 @@ PyObject* build_player_login_args(void* args)
 	return Py_BuildValue("(O)", player_object);
 }
 
+/**
+ * Builds the argument tuple for the player button click callback
+ */
+PyObject* build_button_click_args(void* _args)
+{
+	button_click_args_t* args = (button_click_args_t*)_args;
+	player_t* player = args->player;
+	PyObject* player_object = api_player_create(args->player);
+	return Py_BuildValue("(Oi)", player_object, args->button);
+}
+
 static PyMethodDef player_methods[] = {
 	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},

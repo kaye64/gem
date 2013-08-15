@@ -7,6 +7,7 @@
 
 typedef struct player player_t;
 typedef struct api_player api_player_t;
+typedef struct button_click_args button_click_args_t;
 
 struct api_player {
 	api_mob_t mob;
@@ -15,7 +16,13 @@ struct api_player {
 	int rights;
 };
 
+struct button_click_args {
+	player_t* player;
+	int button;
+};
+
 PyObject* build_player_login_args(void* args);
+PyObject* build_button_click_args(void* args);
 
 void api_player_init_type(PyObject* module);
 PyObject* api_player_create(player_t* player);

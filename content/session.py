@@ -1,5 +1,4 @@
 import gem
-from gem import log
 
 tab_interfaces = [ 2423, 3917, 638, 3213, 1644, 5608, 1151, -1, 5065, 5715, 2449, 4445, 147, 6299 ]
 

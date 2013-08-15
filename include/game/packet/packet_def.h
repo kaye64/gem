@@ -202,7 +202,7 @@ typedef struct packet_def packet_def_t;
 #define PKT_SV_UNKNOWN182 182
 #define PKT_SV_UNKNOWN183 183
 #define PKT_SV_UNKNOWN184 184
-#define PKT_SV_UNKNOWN185 185
+#define PKT_SV_BUTTON_CLICK 185
 #define PKT_SV_UNKNOWN186 186
 #define PKT_SV_UNKNOWN187 187
 #define PKT_SV_UNKNOWN188 188

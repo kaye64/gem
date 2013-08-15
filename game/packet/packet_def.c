@@ -454,7 +454,7 @@ packet_def_t packet_table_in[] = {
 	{ .opcode = PKT_SV_UNKNOWN182, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_SV_UNKNOWN183, .type = PACKET_LEN_FIXED, .len = 3},
 	{ .opcode = PKT_SV_UNKNOWN184, .type = PACKET_LEN_FIXED, .len = 0},
-	{ .opcode = PKT_SV_UNKNOWN185, .type = PACKET_LEN_FIXED, .len = 2},
+	{ .opcode = PKT_SV_BUTTON_CLICK, .type = PACKET_LEN_FIXED, .len = 2},
 	{ .opcode = PKT_SV_UNKNOWN186, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_SV_UNKNOWN187, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_SV_UNKNOWN188, .type = PACKET_LEN_FIXED, .len = 8},
