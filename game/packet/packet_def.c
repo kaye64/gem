@@ -261,7 +261,7 @@ packet_def_t packet_table_out[] = {
 	{ .opcode = PKT_CL_UNKNOWN250, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN251, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN252, .type = PACKET_LEN_FIXED, .len = 0},
-	{ .opcode = PKT_CL_UNKNOWN253, .type = PACKET_LEN_8, .len = 0},
+	{ .opcode = PKT_CL_PLAYER_MESSAGE, .type = PACKET_LEN_8, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN254, .type = PACKET_LEN_FIXED, .len = 6},
 	{ .opcode = PKT_CL_UNKNOWN255, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN256, .type = PACKET_LEN_FIXED, .len = 0},

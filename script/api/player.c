@@ -8,6 +8,7 @@
 #include <structmember.h>
 
 #include <script/api/mob.h>
+#include <game/packet/builders.h>
 #include <game/player.h>
 
 /**
@@ -34,6 +35,20 @@ static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
 	return Py_None;
 }
 
+static PyObject* api_player_send_message(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;	
+	char* message;
+	if (!PyArg_ParseTuple(args, "s", &message)) {
+		return NULL;
+	}
+
+	player_enqueue_packet(player, packet_build_player_message(message));
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 /**
  * Builds the argument tuple for the player login callback
  */
@@ -46,6 +61,7 @@ PyObject* build_player_login_args(void* args)
 
 static PyMethodDef player_methods[] = {
 	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
+	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
     {NULL, NULL, 0, NULL}
 };
 
