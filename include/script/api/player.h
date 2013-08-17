@@ -22,6 +22,7 @@ struct button_click_args {
 };
 
 PyObject* build_player_login_args(void* args);
+PyObject* build_player_logout_args(void* args);
 PyObject* build_button_click_args(void* args);
 
 void api_player_init_type(PyObject* module);

@@ -35,6 +35,9 @@ static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
 	return Py_None;
 }
 
+/**
+ * Sends a game message to the player
+ */
 static PyObject* api_player_send_message(PyObject* self, PyObject* args)
 {
 	player_t* player = ((api_player_t*)self)->player;	
@@ -50,9 +53,33 @@ static PyObject* api_player_send_message(PyObject* self, PyObject* args)
 }
 
 /**
+ * Logs the player out
+ */
+static PyObject* api_player_logout(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;
+
+	player_force_logout(player);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+/**
  * Builds the argument tuple for the player login callback
  */
 PyObject* build_player_login_args(void* args)
+{
+	player_t* player = (player_t*)args;
+	PyObject* player_object = api_player_create(player);
+	return Py_BuildValue("(O)", player_object);
+}
+
+
+/**
+ * Builds the argument tuple for the player logout callback
+ */
+PyObject* build_player_logout_args(void* args)
 {
 	player_t* player = (player_t*)args;
 	PyObject* player_object = api_player_create(player);
@@ -73,6 +100,7 @@ PyObject* build_button_click_args(void* _args)
 static PyMethodDef player_methods[] = {
 	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
+	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},
     {NULL, NULL, 0, NULL}
 };
 

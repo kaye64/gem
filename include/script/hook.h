@@ -6,7 +6,8 @@
 #define SCRIPT_HOOK_STARTUP 0
 #define SCRIPT_HOOK_SHUTDOWN 1
 #define SCRIPT_HOOK_PLAYER_LOGIN 2
-#define SCRIPT_HOOK_BUTTON_CLICK 3
+#define SCRIPT_HOOK_PLAYER_LOGOUT 3
+#define SCRIPT_HOOK_BUTTON_CLICK 4
 
 void hook_init();
 void hook_free();

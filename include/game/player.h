@@ -16,6 +16,7 @@
 #define PLAYER_RIGHTS_SUPER 3
 
 #define PLAYER_FLAG_TAB_UPDATE (1 << 0) /* signals that a tab interface needs to be updated */
+#define PLAYER_FLAG_LOGOUT (1 << 1) /* signals that the player should be logged out */
 
 typedef struct world world_t;
 typedef struct game_service game_service_t;
@@ -63,5 +64,6 @@ void player_login(game_service_t* game_service, player_t* player);
 void player_logout(game_service_t* game_service, player_t* player);
 
 void player_set_tab_interface(player_t* player, int tab_id, int interface_id);
+void player_force_logout(player_t* player);
 
 #endif /* _GAME_CLIENT_H_ */

@@ -9,3 +9,6 @@ def player_login(player):
     for tab, interface in enumerate(tab_interfaces):
         player.set_tab_interface(tab, interface)
 
+
+def player_logout(player):
+    gem.log.info("session", "Player logout: " + player.username + " (index " + str(player.index) + ")")

@@ -253,6 +253,11 @@ void player_sync(game_service_t* game_service)
 					player_enqueue_packet(player, packet_build_tab_update(player, i));
 				}
 			}
+
+			// Check if we need to log the player out
+			if (player->update_flags & PLAYER_FLAG_LOGOUT) {
+				player_enqueue_packet(player, packet_build_player_logout(player));
+			}
 		}
 
 	  	if (player->login_stage == STAGE_EXITING) {

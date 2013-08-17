@@ -117,7 +117,7 @@ packet_def_t packet_table_out[] = {
 	{ .opcode = PKT_CL_UNKNOWN106, .type = PACKET_LEN_FIXED, .len = 1},
 	{ .opcode = PKT_CL_UNKNOWN107, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN108, .type = PACKET_LEN_FIXED, .len = 0},
-	{ .opcode = PKT_CL_UNKNOWN109, .type = PACKET_LEN_FIXED, .len = 0},
+	{ .opcode = PKT_CL_PLAYER_LOGOUT, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN110, .type = PACKET_LEN_FIXED, .len = 1},
 	{ .opcode = PKT_CL_UNKNOWN111, .type = PACKET_LEN_FIXED, .len = 0},
 	{ .opcode = PKT_CL_UNKNOWN112, .type = PACKET_LEN_FIXED, .len = 0},

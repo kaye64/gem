@@ -159,7 +159,6 @@ void player_login(game_service_t* game_service, player_t* player)
 
 	player_enqueue_packet(player, packet_build_player_init(player));
 
-//	player_enqueue_packet(player, packet_build_login_window(player));	
 	hook_notify(SCRIPT_HOOK_PLAYER_LOGIN, (void*)player);
 }
 
@@ -170,9 +169,9 @@ void player_logout(game_service_t* game_service, player_t* player)
 {
 	world_t* world = &game_service->world;
 	world_sector_t* sector = world_get_sector(world, player->mob.entity.known_sector);
+	hook_notify(SCRIPT_HOOK_PLAYER_LOGOUT, (void*)player);
 	sector_unregister_player(world, sector, player);
 	entity_list_remove(&game_service->player_list, &player->mob.entity);
-	INFO("Player logout: %s", player->username);
 }
 
 /**
@@ -182,6 +181,14 @@ void player_set_tab_interface(player_t* player, int tab_id, int interface_id)
 {
 	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
 	player->tab_interfaces[tab_id] = interface_id;
+}
+
+/**
+ * Forces a player logout on the next cycle
+ */
+void player_force_logout(player_t* player)
+{
+	player->update_flags |= PLAYER_FLAG_LOGOUT;
 }
 
 /**
