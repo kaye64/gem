@@ -3,7 +3,7 @@ INCLUDE_DIRS = -Iinclude/ -Irunite/include/ -I/usr/include/python3.3m/
 OUT = gem
 LIB_DIRS = -L
 LIBS = -lrunite -lev -lz -lpthread -lgmp -lpython3.3m
-SUBDIRS = init util net crypto jaggrab script script/api game game/packet game/packet/routine game/packet/builder
+SUBDIRS = src/init src/util src/net src/crypto src/jaggrab src/script src/game
 
 OBJECTS :=
 
