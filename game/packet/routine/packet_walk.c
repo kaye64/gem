@@ -40,5 +40,5 @@ void packet_walk(player_t* player, packet_t* packet)
 	/* This byte is set to 1 when the player holds control,
 	   however on my system (linux 3.9, openjdk 1.7) it doesn't seem to be recognized.
 	   Is this a bug in the player? */
-	player->mob.running = codec_get8(&packet->payload) == 1;
+	player->mob.running = (player->mob.running || codec_get8(&packet->payload) == 1);
 }

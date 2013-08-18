@@ -36,7 +36,27 @@ static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
 }
 
 /**
+ * Sets a player's run status
+ * player.set_running(running)
+ */
+static PyObject* api_player_set_running(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;	
+	mob_t* mob = mob_for_player(player);
+	bool running;
+	if (!PyArg_ParseTuple(args, "b", &running)) {
+		return NULL;
+	}
+
+	mob->running = running;
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+/**
  * Sends a game message to the player
+ * player.send_message(message)
  */
 static PyObject* api_player_send_message(PyObject* self, PyObject* args)
 {
@@ -54,6 +74,7 @@ static PyObject* api_player_send_message(PyObject* self, PyObject* args)
 
 /**
  * Logs the player out
+ * player.logout()
  */
 static PyObject* api_player_logout(PyObject* self, PyObject* args)
 {
@@ -101,6 +122,7 @@ static PyMethodDef player_methods[] = {
 	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
 	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},
+	{"set_running", api_player_set_running, METH_VARARGS, "Sets the player's run status"},
     {NULL, NULL, 0, NULL}
 };
 
