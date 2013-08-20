@@ -18,7 +18,8 @@
 #ifndef _DISPATCHER_H_
 #define _DISPATCHER_H_
 
-#include <util/object.h>
+#include <runite/util/object.h>
+
 #include <net/server.h>
 #include <game/service.h>
 

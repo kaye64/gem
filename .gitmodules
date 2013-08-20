@@ -1,0 +1,3 @@
+[submodule "runite"]
+	path = runite
+	url = git@github.com:kaye64/runite.git

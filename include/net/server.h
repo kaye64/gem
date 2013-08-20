@@ -21,10 +21,10 @@
 #include <ev.h>
 #include <netinet/in.h>
 #include <stdbool.h>
+#include <runite/util/object.h>
+#include <runite/util/list.h>
 
 #include <util/config.h>
-#include <util/object.h>
-#include <util/list.h>
 #include <net/buffer.h>
 
 #define HANDSHAKE_PENDING 0

@@ -1,1 +1,1 @@
-OBJECTS += $(addprefix src/net/,server.o buffer.o codec.o)
+OBJECTS += $(addprefix src/net/,server.o buffer.o)

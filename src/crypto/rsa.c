@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <runite/util/codec.h>
 
 #include <util/log.h>
 
@@ -98,6 +99,35 @@ void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, 
 	mpz_clear(message);
 #endif
 }
+
+/**
+ * Encrypt an rsa block from 0 to the current caret
+ *  - rsa: The RSA keypair to encrypt with
+ */
+void rsa_block_encrypt(rsa_t* rsa, codec_t* codec)
+{
+	int in_len = codec->caret;
+	int out_len = DEFAULT_BUFFER_SIZE;
+	unsigned char message[in_len];
+	memcpy(message, codec->data, in_len);
+	rsa_encrypt(rsa, message, in_len, &codec->data[1], &out_len);
+	codec->data[0] = out_len;
+	codec->caret = out_len+1;
+}
+
+/**
+ * Decrypt an rsa block from the current caret
+ *  - rsa: The RSA keypair to decrypt with
+ */
+void rsa_block_decrypt(rsa_t* rsa, codec_t* codec)
+{
+	int enc_len = codec->data[codec->caret];
+	int out_len = DEFAULT_BUFFER_SIZE-codec->caret;
+	unsigned char message_enc[enc_len];
+	memcpy(message_enc, &codec->data[codec->caret+1], enc_len);
+	rsa_decrypt(rsa, message_enc, enc_len, &codec->data[codec->caret], &out_len);
+}
+
 
 object_proto_t rsa_proto = {
 	.init = (object_init_t)rsa_init,

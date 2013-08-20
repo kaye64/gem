@@ -22,7 +22,7 @@
  */
 #include <game/waypoint_queue.h>
 
-#include <util/container_of.h>
+#include <runite/util/container_of.h>
 
 int interpolate_coord(int i, int y);
 

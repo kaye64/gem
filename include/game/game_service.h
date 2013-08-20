@@ -20,15 +20,16 @@
 
 #include <stdbool.h>
 
-#include <util/list.h>
-#include <util/queue.h>
-#include <util/object.h>
+#include <runite/util/list.h>
+#include <runite/util/queue.h>
+#include <runite/util/object.h>
+#include <runite/util/codec.h>
+
 #include <net/server.h>
 #include <game/service.h>
 #include <runite/cache.h>
 #include <crypto/isaac.h>
 #include <crypto/rsa.h>
-#include <net/codec.h>
 #include <game/packet/packet.h>
 #include <game/player.h>
 #include <game/world.h>

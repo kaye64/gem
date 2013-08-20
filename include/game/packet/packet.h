@@ -18,9 +18,10 @@
 #ifndef _PACKET_H_
 #define _PACKET_H_
 
-#include <net/codec.h>
+#include <runite/util/codec.h>
+#include <runite/util/list.h>
+
 #include <game/packet/packet_def.h>
-#include <util/list.h>
 
 struct packet {
 	packet_def_t def;

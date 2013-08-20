@@ -18,8 +18,9 @@
 #ifndef _ENTITY_LIST_H_
 #define _ENTITY_LIST_H_
 
-#include <util/object.h>
-#include <util/list.h>
+#include <runite/util/object.h>
+#include <runite/util/list.h>
+
 #include <util/bitmap.h>
 #include <game/entity.h>
 

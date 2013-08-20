@@ -81,7 +81,8 @@ int main(int argc, char **argv)
 	}
 
 	/* open the cache */
-	instance.cache = cache_open_dir(instance.cache, inst_args.cache_dir);
+	instance.cache = object_new(cache);
+	cache_open_fs_dir(instance.cache, inst_args.cache_dir);
 	if (instance.cache == NULL) {
 		ERROR("Unable to find cache");
 		return 1;
@@ -207,7 +208,7 @@ void cleanup(bool forceful) {
 	object_free(instance.update_service);
 	object_free(instance.jag_server);
 	script_free();
-	cache_free(instance.cache);
+	object_free(instance.cache);
 	object_free(&instance.rsa);
 
 	exit(EXIT_SUCCESS);

@@ -20,8 +20,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <runite/util/object.h>
 
-#include <util/object.h>
 #include <game/location.h>
 #include <game/waypoint_queue.h>
 #include <game/entity.h>

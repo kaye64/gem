@@ -18,7 +18,8 @@
 #ifndef _PACKET_CHAT_H_
 #define _PACKET_CHAT_H_
 
-#include <util/object.h>
+#include <runite/util/object.h>
+
 #include <game/packet/packet.h>
 #include <game/game_service.h>
 

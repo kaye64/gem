@@ -130,7 +130,6 @@ PyObject* build_player_logout_args(void* args)
 PyObject* build_button_click_args(void* _args)
 {
 	button_click_args_t* args = (button_click_args_t*)_args;
-	player_t* player = args->player;
 	PyObject* player_object = api_player_create(args->player);
 	return Py_BuildValue("(Oi)", player_object, args->button);
 }

@@ -18,8 +18,9 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 
-#include <util/object.h>
-#include <util/list.h>
+#include <runite/util/object.h>
+#include <runite/util/list.h>
+
 #include <game/location.h>
 
 /* The cache contains 60x162 map chunks, each containing 8 sectors */

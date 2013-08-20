@@ -18,8 +18,9 @@
 #ifndef _WAYPOINT_QUEUE_H_
 #define _WAYPOINT_QUEUE_H_
 
-#include <util/object.h>
-#include <util/queue.h>
+#include <runite/util/object.h>
+#include <runite/util/queue.h>
+
 #include <game/location.h>
 
 typedef struct waypoint waypoint_t;

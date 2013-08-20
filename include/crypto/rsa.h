@@ -20,10 +20,10 @@
 
 #include <stdbool.h>
 #include <gmp.h>
-
-#include <util/object.h>
+#include <runite/util/object.h>
 
 typedef struct rsa rsa_t;
+typedef struct codec codec_t;
 
 struct rsa {
 	object_t object;
@@ -37,5 +37,8 @@ extern object_proto_t rsa_proto;
 void rsa_load_key(rsa_t* rsa, const char* modulus, const char* public_exp, const char* private_exp);
 void rsa_encrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len);
 void rsa_decrypt(rsa_t* rsa, unsigned char* in, int in_len, unsigned char* out, int* out_len);
+
+void rsa_block_encrypt(rsa_t* rsa, codec_t* codec);
+void rsa_block_decrypt(rsa_t* rsa, codec_t* codec);
 
 #endif /* _RSA_H_ */

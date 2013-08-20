@@ -21,12 +21,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include <util/stack.h>
-
-#include <util/object.h>
+#include <runite/util/stack.h>
+#include <runite/util/object.h>
 
 typedef struct buffer buffer_t;
+typedef struct codec codec_t;
 
 /* A circular buffer designed for use in network IO. */
 struct buffer {
@@ -46,6 +45,9 @@ size_t buffer_read_avail(buffer_t* buffer);
 size_t buffer_write_avail(buffer_t* buffer);
 size_t buffer_read(buffer_t* buffer, unsigned char* buf, size_t len);
 size_t buffer_write(buffer_t* buffer, const unsigned char* buf, size_t len);
+
+bool codec_buffer_write(codec_t* codec, buffer_t* buffer);
+bool codec_buffer_read(codec_t* codec, buffer_t* buffer, size_t len);
 
 void buffer_print(buffer_t* buffer);
 

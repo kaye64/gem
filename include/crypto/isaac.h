@@ -20,8 +20,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-#include <util/object.h>
+#include <runite/util/object.h>
 
 typedef struct isaac isaac_t;
 

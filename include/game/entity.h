@@ -19,8 +19,8 @@
 #define _ENTITY_H_
 
 #include <stdint.h>
+#include <runite/util/object.h>
 
-#include <util/object.h>
 #include <game/location.h>
 
 typedef struct entity entity_t;

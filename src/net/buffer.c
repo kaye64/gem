@@ -25,9 +25,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <runite/util/math.h>
+#include <runite/util/codec.h>
 
 #include <util/config.h>
-#include <util/math.h>
 
 /**
  * Initializes a new buffer
@@ -106,6 +107,41 @@ size_t buffer_write(buffer_t* buffer, const unsigned char* buf, size_t len)
 	}
 	buffer->read_avail += to_write;
 	return to_write;
+}
+
+/**
+ * Writes the entire contents (and only the entire contents)
+ * of a codec to a buffer_t
+ * returns: Whether the operation was a success
+ */
+bool codec_buffer_write(codec_t* codec, buffer_t* buffer)
+{
+	buffer_pushp(buffer);
+	if (buffer_write(buffer, codec->data, codec_len(codec)) < codec_len(codec)) {
+		buffer_popp(buffer);
+		return false;
+	}
+	buffer_dropp(buffer);
+	return true;
+}
+
+/**
+ * Reads a given amount from a buffer_t into a codec
+ * returns: Whether the operation was a success
+ */
+bool codec_buffer_read(codec_t* codec, buffer_t* buffer, size_t len)
+{
+	if (codec->caret+len > DEFAULT_BUFFER_SIZE) {
+		return false;
+	}
+
+	buffer_pushp(buffer);
+	if (buffer_read(buffer, codec->data+codec->caret, len) < len) {
+		buffer_popp(buffer);
+		return false;
+	}
+	buffer_dropp(buffer);
+	return true;
 }
 
 /**

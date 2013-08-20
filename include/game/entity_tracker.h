@@ -19,9 +19,9 @@
 #define _ENTITY_TRACKER_H_
 
 #include <stdbool.h>
+#include <runite/util/object.h>
+#include <runite/util/list.h>
 
-#include <util/object.h>
-#include <util/list.h>
 #include <game/entity.h>
 #include <game/entity_list.h>
 

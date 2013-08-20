@@ -18,7 +18,7 @@
 #ifndef _CHAT_MESSAGE_H_
 #define _CHAT_MESSAGE_H_
 
-#include <util/object.h>
+#include <runite/util/object.h>
 
 typedef struct chat_message chat_message_t;
 

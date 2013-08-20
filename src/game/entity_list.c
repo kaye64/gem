@@ -22,8 +22,9 @@
  */
 #include <game/entity_list.h>
 
+#include <runite/util/container_of.h>
+
 #include <util/log.h>
-#include <util/container_of.h>
 
 #define LOG_TAG "entity_list"
 

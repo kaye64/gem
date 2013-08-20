@@ -20,11 +20,12 @@
 
 #include <stdbool.h>
 
-#include <util/object.h>
-#include <util/queue.h>
+#include <runite/util/object.h>
+#include <runite/util/queue.h>
+#include <runite/cache.h>
+
 #include <net/server.h>
 #include <game/service.h>
-#include <runite/cache.h>
 
 #define PRIORITY_URGENT 2
 #define PRIORITY_PRELOAD 1
@@ -47,10 +48,9 @@ struct update_request {
 	uint8_t cache_id;
 	uint16_t file_id;
 	uint8_t priority;
-	size_t file_size;
 	uint8_t next_chunk;
-	unsigned char* payload;
 	list_node_t list_node;
+	cache_file_t* file;
 } __attribute__((packed));
 
 struct update_response {

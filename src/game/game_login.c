@@ -109,7 +109,7 @@ int game_process_login(game_service_t* game_service, client_t* client, player_t*
 
 	if (player->login_stage == STAGE_SECURE_BLOCK) {
 		// Decrypt the secure login block
-		codec_block_decrypt(&player->codec, game_service->rsa);
+		rsa_block_decrypt(game_service->rsa, &player->codec);
 		if (codec_get8(&player->codec) != 10) {
 			WARN("Corrupt secure login block");
 			return LOGIN_REJECTED;

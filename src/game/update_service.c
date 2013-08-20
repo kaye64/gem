@@ -24,15 +24,16 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <runite/util/math.h>
+#include <runite/util/container_of.h>
+#include <runite/util/codec.h>
 
-#include <util/math.h>
 #include <util/log.h>
-#include <util/container_of.h>
 #include <game/dispatcher.h>
-#include <net/codec.h>
-#include <runite/util/byte_order.h>
 
 #define LOG_TAG "update"
+
+static cache_file_t null_file = { .file_size = 0, .data = NULL };
 
 void* update_service_accept(service_client_t* service_client);
 int update_service_handshake(service_client_t* service_client);
@@ -171,27 +172,26 @@ void update_service_write(service_client_t* service_client)
 
 		// Resolve the file
 		request->next_chunk = 0;
-		request->file_size = cache_query_size(cache, request->cache_id, request->file_id);
-		request->payload = (unsigned char*)malloc(request->file_size);
-		if (!cache_get(cache, request->cache_id, request->file_id, request->payload)) {
+		request->file = cache_get_file(cache, request->cache_id, request->file_id);
+		if (request->file == NULL) {
 			WARN("unable to serve request for %d:%d. dropping", request->cache_id, request->file_id);
-			free(request->payload);
 			/* Just serve a null file */
-			request->file_size = 0;
-			request->payload = (unsigned char*)malloc(1);
+			request->file = &null_file;
 		}
 
 		update_client->current_request = request;
 	}
 
+	cache_file_t* cache_file = request->file;
+
 	// Construct the chunk
 	update_response_t chunk;
 	chunk.cache_id = request->cache_id-1;
 	chunk.file_id = request->file_id;
-	chunk.file_size = request->file_size;
+	chunk.file_size = cache_file->file_size;
 	chunk.chunk_num = request->next_chunk;
 	int ofs = request->next_chunk*500;
-	int chunk_size = min(500, request->file_size-ofs);
+	int chunk_size = min(500, cache_file->file_size-ofs);
 
 	codec_t codec;
 	object_init(codec, &codec);
@@ -199,7 +199,7 @@ void update_service_write(service_client_t* service_client)
 	codec_put16(&codec, chunk.file_id);
 	codec_put16(&codec, chunk.file_size);
 	codec_put8(&codec, chunk.chunk_num);
-	codec_putn(&codec, request->payload+ofs, chunk_size);
+	codec_putn(&codec, cache_file->data+ofs, chunk_size);
 
 	if (!codec_buffer_write(&codec, &client->write_buffer)) {
 		return;
@@ -209,13 +209,11 @@ void update_service_write(service_client_t* service_client)
 
 	request->next_chunk++;
 
-	if ((uint16_t)(request->next_chunk*500) >= request->file_size) {
+	if ((uint16_t)(request->next_chunk*500) >= cache_file->file_size) {
 		// Last chunk of the file, clean up
-		free(request->payload);
 		free(update_client->current_request);
 		update_client->current_request = (update_request_t*)NULL;
-		request->payload = (unsigned char*)NULL;
-		request->next_chunk = 0;
+		request->file = NULL;
 	}
 }
 
@@ -228,7 +226,6 @@ void update_service_drop(service_client_t* service_client)
 	while (!queue_empty(&update_client->request_queue)) {
 		list_node_t* list_node = queue_pop(&update_client->request_queue);
 		update_request_t* request = container_of(list_node, update_request_t, list_node);
-		free(request->payload);
 		free(request);
 	}
 	object_free(&update_client->request_queue);

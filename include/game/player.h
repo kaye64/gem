@@ -18,11 +18,12 @@
 #ifndef _GAME_CLIENT_H_
 #define _GAME_CLIENT_H_
 
-#include <util/object.h>
-#include <util/list.h>
-#include <util/queue.h>
+#include <runite/util/object.h>
+#include <runite/util/list.h>
+#include <runite/util/queue.h>
+#include <runite/util/codec.h>
+
 #include <game/entity_tracker.h>
-#include <net/codec.h>
 #include <game/mob.h>
 #include <game/packet/packet.h>
 #include <crypto/isaac.h>

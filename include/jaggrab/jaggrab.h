@@ -20,10 +20,10 @@
 
 #include <regex.h>
 #include <stdbool.h>
-
-#include <util/object.h>
-#include <net/server.h>
+#include <runite/util/object.h>
 #include <runite/cache.h>
+
+#include <net/server.h>
 
 typedef struct archive_server archive_server_t;
 typedef struct archive_client archive_client_t;
@@ -33,16 +33,15 @@ struct archive_server {
 	server_t io_server;
 	cache_t* cache;
 	regex_t request_regexp;
-	unsigned char crc_table[80];
+	cache_file_t crc_table;
 };
 
 extern object_proto_t archive_server_proto;
 
 struct archive_client {
 	client_t io_client;
-	unsigned char* file_buffer;
 	int file_caret;
-	int file_size;
+	cache_file_t* file;
 };
 
 void jaggrab_config(archive_server_t* server, cache_t* cache, const char* addr);

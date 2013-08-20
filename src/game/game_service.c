@@ -23,9 +23,9 @@
 #include <game/game_service.h>
 
 #include <stdlib.h>
+#include <runite/util/container_of.h>
 
 #include <util/log.h>
-#include <util/container_of.h>
 #include <game/dispatcher.h>
 #include <game/game_login.h>
 #include <game/packet/packet_router.h>

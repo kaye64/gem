@@ -23,8 +23,8 @@
 #include <game/dispatcher.h>
 
 #include <stdlib.h>
+#include <runite/util/container_of.h>
 
-#include <util/container_of.h>
 #include <util/log.h>
 
 #define LOG_TAG "dispatcher"
