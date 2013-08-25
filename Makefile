@@ -9,17 +9,25 @@ OBJECTS :=
 
 include $(addsuffix /makefile.mk, $(SUBDIRS))
 
-all: $(OUT)
+all: runite toolbelt $(OUT)
 
-$(OUT): runite/librunite.a $(OBJECTS)
+$(OUT): runite $(OBJECTS)
 	gcc $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
-runite/librunite.a:
+runite/librunite.a: runite
+
+runite:
 	make -C runite/
+
+toolbelt:
+	make -C toolbelt/
 
 %.o: %.c
 	gcc -c $(CFLAGS) $(LIBS) $(INCLUDE_DIRS) -o $@ $^
 
 clean:
 	make -C runite/ clean
-	rm $(OUT) $(OBJECTS)
+	make -C toolbelt/ clean
+	-rm -f $(OUT) $(OBJECTS)
+
+.PHONY: all clean runite toolbelt
