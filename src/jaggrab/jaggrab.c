@@ -204,8 +204,8 @@ void jaggrab_write(client_t* client, server_t* server)
 	if (archive_client->file == NULL) {
 		return;
 	}
-	cache_file_t* cache_file = archive_client->file;
-	size_t to_write = cache_file->file_size - archive_client->file_caret;
+	file_t* cache_file = archive_client->file;
+	size_t to_write = cache_file->length - archive_client->file_caret;
 	to_write = min(to_write, buffer_write_avail(&client->write_buffer));
 	size_t written = buffer_write(&client->write_buffer, cache_file->data+archive_client->file_caret, to_write);
 	archive_client->file_caret += written;

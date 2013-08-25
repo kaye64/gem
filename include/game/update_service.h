@@ -50,7 +50,7 @@ struct update_request {
 	uint8_t priority;
 	uint8_t next_chunk;
 	list_node_t list_node;
-	cache_file_t* file;
+	file_t* file;
 } __attribute__((packed));
 
 struct update_response {

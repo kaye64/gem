@@ -33,7 +33,7 @@ struct archive_server {
 	server_t io_server;
 	cache_t* cache;
 	regex_t request_regexp;
-	cache_file_t crc_table;
+	file_t crc_table;
 };
 
 extern object_proto_t archive_server_proto;
@@ -41,7 +41,7 @@ extern object_proto_t archive_server_proto;
 struct archive_client {
 	client_t io_client;
 	int file_caret;
-	cache_file_t* file;
+	file_t* file;
 };
 
 void jaggrab_config(archive_server_t* server, cache_t* cache, const char* addr);

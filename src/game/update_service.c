@@ -33,7 +33,7 @@
 
 #define LOG_TAG "update"
 
-static cache_file_t null_file = { .file_size = 0, .data = NULL };
+static file_t null_file = { .length = 0, .data = NULL };
 
 void* update_service_accept(service_client_t* service_client);
 int update_service_handshake(service_client_t* service_client);
@@ -182,16 +182,16 @@ void update_service_write(service_client_t* service_client)
 		update_client->current_request = request;
 	}
 
-	cache_file_t* cache_file = request->file;
+	file_t* cache_file = request->file;
 
 	// Construct the chunk
 	update_response_t chunk;
 	chunk.cache_id = request->cache_id-1;
 	chunk.file_id = request->file_id;
-	chunk.file_size = cache_file->file_size;
+	chunk.file_size = cache_file->length;
 	chunk.chunk_num = request->next_chunk;
 	int ofs = request->next_chunk*500;
-	int chunk_size = min(500, cache_file->file_size-ofs);
+	int chunk_size = min(500, cache_file->length-ofs);
 
 	codec_t codec;
 	object_init(codec, &codec);
@@ -209,7 +209,7 @@ void update_service_write(service_client_t* service_client)
 
 	request->next_chunk++;
 
-	if ((uint16_t)(request->next_chunk*500) >= cache_file->file_size) {
+	if ((uint16_t)(request->next_chunk*500) >= cache_file->length) {
 		// Last chunk of the file, clean up
 		free(update_client->current_request);
 		update_client->current_request = (update_request_t*)NULL;
