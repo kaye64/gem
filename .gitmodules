@@ -3,4 +3,4 @@
 	url = git@github.com:kaye64/runite.git
 [submodule "toolbelt"]
 	path = toolbelt
-	url = git@github.com-kaye:kaye64/toolbelt.git
+	url = git@github.com:kaye64/toolbelt.git
