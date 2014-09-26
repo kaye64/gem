@@ -16,14 +16,17 @@
 import gem
 import session
 import interface
+import hook
 
-def register_hooks():
-    gem.log.info("core", "Registering API hooks..")
-    gem.register_hook(gem.HOOK_STARTUP, startup)
-    gem.register_hook(gem.HOOK_SHUTDOWN, shutdown)
-    gem.register_hook(gem.HOOK_PLAYER_LOGIN, session.player_login)
-    gem.register_hook(gem.HOOK_PLAYER_LOGOUT, session.player_logout)
-    gem.register_hook(gem.HOOK_BUTTON_CLICK, interface.interface_button)
+LOG_TAG = "core"
+
+def content_init():
+    gem.log.info(LOG_TAG, "Registering API hooks..")
+    hook.register(gem.HOOK_STARTUP, startup)
+    hook.register(gem.HOOK_SHUTDOWN, shutdown)
+    hook.register(gem.HOOK_PLAYER_LOGIN, session.player_login)
+    hook.register(gem.HOOK_PLAYER_LOGOUT, session.player_logout)
+    hook.register(gem.HOOK_BUTTON_CLICK, interface.interface_button)
 
 def startup():
     pass

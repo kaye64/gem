@@ -31,25 +31,7 @@
 
 #define LOG_TAG "api"
 
-/**
- * Defines the gem.register_hook api function
- */
-static PyObject* api_register_hook(PyObject* self, PyObject* args)
-{
-	int hook;
-	PyObject* callback;
-	if (!PyArg_ParseTuple(args, "iO", &hook, &callback)) {
-		return NULL;
-	}
-
-	hook_register(hook, callback);
-	
-	Py_INCREF(Py_None);
-	return Py_None;
-}
-
 static PyMethodDef gem_methods[] = {
-	{"register_hook", api_register_hook, METH_VARARGS, "Register an api hook"},
     {NULL, NULL, 0, NULL}
 };
 

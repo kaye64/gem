@@ -45,9 +45,6 @@ bool script_init(const char* content_dir)
 	/* init python */
 	Py_Initialize();
 
-	/* init our subsystems */
-	hook_init();
-
 	/* import the core module */
 	wchar_t content_dir_wide[100];
 	swprintf(content_dir_wide, 100, L"%hs", content_dir);
@@ -58,13 +55,16 @@ bool script_init(const char* content_dir)
 		goto error;
 	}
 
-	/* run register_hooks() */
-	PyObject* reg_hook_func = PyObject_GetAttrString(core_module, "register_hooks");
-	if (!reg_hook_func || !PyCallable_Check(reg_hook_func)) {
-		ERROR("Unable to find/call startup function");
+	/* init our subsystems */
+	hook_init();
+
+	/* run content_init() */
+	PyObject* init_func = PyObject_GetAttrString(core_module, "content_init");
+	if (!init_func || !PyCallable_Check(init_func)) {
+		ERROR("Unable to find core.content_init function");
 		goto error;
 	}
-	PyObject_CallObject(reg_hook_func, NULL);
+	PyObject_CallObject(init_func, NULL);
 
 	goto exit;
 error:
@@ -72,7 +72,7 @@ error:
 	return false;
 
 exit:
-	Py_XDECREF(reg_hook_func);
+	Py_XDECREF(init_func);
 	return true;
 }
 

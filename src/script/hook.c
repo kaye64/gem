@@ -22,8 +22,6 @@ struct hook {
 	PyObject*(*build_func)(void*);
 };
 
-/* The list of hook callbacks. Nodes are hook_entry_t */
-static list_t hook_lookup;
 /* The lookup table of all event hooks */
 static hook_t dispatch_lookup[] = {
 	{ .hook = SCRIPT_HOOK_STARTUP, .const_name = "HOOK_STARTUP", .build_func = NULL },
@@ -34,12 +32,24 @@ static hook_t dispatch_lookup[] = {
 	{ .hook = -1, .const_name = "", .build_func = NULL }
 };
 
+static PyObject* hook_module;
+static PyObject* hook_dispatch_func;
+
 /**
  * Initialize the hook system
  */
 void hook_init()
 {
-	object_init(list, &hook_lookup);
+	hook_module = PyImport_ImportModule("hook");
+	if (hook_module == NULL) {
+		ERROR("Unable to import hook module");
+		return;
+	}
+
+	hook_dispatch_func = PyObject_GetAttrString(hook_module, "dispatch");
+	if (!hook_dispatch_func || !PyCallable_Check(hook_dispatch_func)) {
+		ERROR("Unable to find hook.dispatch function");
+	}
 }
 
 /**
@@ -47,14 +57,7 @@ void hook_init()
  */
 void hook_free()
 {
-	/* free up our hook table */
-	hook_entry_t* entry = NULL;
-	list_for_each(&hook_lookup) {
-		list_for_get(entry);
-		Py_DECREF(entry->callback);
-		free(entry);
-	}
-	object_free(&hook_lookup);
+
 }
 
 /**
@@ -68,23 +71,6 @@ void hook_create_constants(PyObject* module)
 		PyModule_AddIntConstant(module, dispatch->const_name, dispatch->hook);
 		dispatch = &dispatch_lookup[++i];
 	}
-}
-
-/**
- * Register a new API hook callback
- */
-void hook_register(int hook, PyObject* callback)
-{
-	if (!callback || !PyCallable_Check(callback)) {
-		ERROR("Unable to register hook");
-		PyErr_Print();
-		return;
-	}
-	hook_entry_t* hook_entry = (hook_entry_t*)malloc(sizeof(hook_entry_t));
-	hook_entry->hook = hook;
-	hook_entry->callback = callback;
-	Py_INCREF(hook_entry->callback);
-	list_push_back(&hook_lookup, &hook_entry->node);
 }
 
 /**
@@ -107,16 +93,16 @@ void hook_notify(int hook, void* args)
 		}
 		dispatch = &dispatch_lookup[++i];
 	}
-	
-	/* call each registered hook */
-	hook_entry_t* entry = NULL;
-	list_for_each(&hook_lookup) {
-		list_for_get(entry);
-		if (entry->hook == hook) {
-			if (!PyObject_CallObject(entry->callback, py_args)) {
-				ERROR("hook call failed");
-				PyErr_Print();
-			}
-		}
+
+	/* dispatch hook to python's hook.dispatch */
+	static PyObject* empty_tuple;
+	if (!empty_tuple) {
+		empty_tuple = Py_BuildValue("()");
+	}
+
+	PyObject* hook_params = Py_BuildValue("(iO)", hook, (py_args ? py_args : empty_tuple));
+	if (!PyObject_CallObject(hook_dispatch_func, hook_params)) {
+		ERROR("hook dispatch failed");
+		PyErr_Print();
 	}
 }

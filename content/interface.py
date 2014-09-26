@@ -15,8 +15,10 @@
 
 import gem
 
+LOG_TAG = "interface"
+
 def interface_button(player, button):
-    gem.log.debug("interface", "clicked button " + str(button))
+    gem.log.debug(LOG_TAG, "clicked button " + str(button))
     if button == 2458: # Why does Python not have a switch statement? :-(
         player.logout()
     elif button == 152:
