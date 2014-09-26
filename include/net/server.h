@@ -18,7 +18,7 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
 
-#include <ev.h>
+#include <libev/ev.h>
 #include <netinet/in.h>
 #include <stdbool.h>
 #include <runite/util/object.h>
