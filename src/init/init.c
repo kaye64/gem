@@ -82,8 +82,8 @@ int main(int argc, char **argv)
 
 	/* open the cache */
 	instance.cache = object_new(cache);
-	cache_open_fs_dir(instance.cache, inst_args.cache_dir);
-	if (instance.cache == NULL) {
+	int ret = cache_open_fs_dir(instance.cache, inst_args.cache_dir);
+	if (ret == 1 || instance.cache == NULL) {
 		ERROR("Unable to find cache");
 		return 1;
 	}
