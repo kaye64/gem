@@ -45,7 +45,7 @@ static void player_init(player_t* player)
 	object_init(isaac, &player->isaac_in);
 	object_init(isaac, &player->isaac_out);
 	object_init(mob, &player->mob);
-	object_init(entity_tracker, &player->known_players);
+	object_init(entity_tracker, &player->state.known_players);
 }
 
 /**
@@ -53,7 +53,7 @@ static void player_init(player_t* player)
  */
 static void player_free(player_t* player)
 {
-	object_free(&player->known_players);
+	object_free(&player->state.known_players);
 	object_free(&player->mob);
 	object_free(&player->isaac_out);
 	object_free(&player->isaac_in);
@@ -108,7 +108,7 @@ void player_tick_before(world_t* world, player_t* player)
 		player_t* other_player = NULL;
 		list_for_each(&local_sector->players) {
 			list_for_get(other_player);
-			bool already_tracking = entity_tracker_is_tracking(&player->known_players, entity_for_player(other_player));
+			bool already_tracking = entity_tracker_is_tracking(&player->state.known_players, entity_for_player(other_player));
 			location_t our_location = mob_position(mob_for_player(player));
 			location_t other_location = mob_position(mob_for_player(other_player));
 			int delta_x = abs(other_location.x - our_location.x);
@@ -117,12 +117,12 @@ void player_tick_before(world_t* world, player_t* player)
 			if (other_player == player || already_tracking || !within_range) {
 				continue;
 			}
-			entity_tracker_add(&player->known_players, entity_for_player(other_player));
+			entity_tracker_add(&player->state.known_players, entity_for_player(other_player));
 		}
 	}
 
 	/* remove any players we're no longer observing */
-	entity_tracker_t* tracker = &player->known_players;
+	entity_tracker_t* tracker = &player->state.known_players;
 	tracked_entity_t* item = NULL;
 	list_for_each(&tracker->entities) {
 		list_for_get(item);
@@ -151,7 +151,7 @@ void player_tick_before(world_t* world, player_t* player)
 void player_tick_after(world_t* world, player_t* player)
 {
 	mob_set_chat_message(mob_for_player(player), NULL);
-	entity_tracker_tick(&player->known_players);
+	entity_tracker_tick(&player->state.known_players);
 }
 
 /**
@@ -196,8 +196,8 @@ void player_logout(game_service_t* game_service, player_t* player)
  */
 void player_set_tab_interface(player_t* player, int tab_id, int interface_id)
 {
-	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
-	player->tab_interfaces[tab_id] = interface_id;
+	player->state.update_flags |= STATE_TAB_UPDATE;
+	player->state.tab_interfaces[tab_id] = interface_id;
 }
 
 /**
@@ -205,7 +205,7 @@ void player_set_tab_interface(player_t* player, int tab_id, int interface_id)
  */
 void player_force_logout(player_t* player)
 {
-	player->update_flags |= PLAYER_FLAG_LOGOUT;
+	player->state.update_flags |= STATE_LOGOUT;
 }
 
 /**

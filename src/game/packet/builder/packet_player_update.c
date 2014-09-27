@@ -220,9 +220,9 @@ packet_t* packet_build_player_update(player_t* player)
 	build_movement_block(player, main_block, player->mob.update_flags & ~(MOB_FLAG_CHAT_UPDATE));
 	build_update_block(player, update_block, self_update_flags);
 
-	entity_tracker_t* tracker = &player->known_players;
+	entity_tracker_t* tracker = &player->state.known_players;
 	list_t* observed_players = &tracker->entities;
-	
+
 	uint8_t num_players = entity_tracker_count_known(tracker);
 
 	codec_put_bits(main_block, 8, num_players); // The number of other players to update

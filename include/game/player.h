@@ -33,17 +33,27 @@
 #define PLAYER_RIGHTS_ADMIN 2
 #define PLAYER_RIGHTS_SUPER 3
 
-#define PLAYER_FLAG_TAB_UPDATE (1 << 0) /* signals that a tab interface needs to be updated */
-#define PLAYER_FLAG_LOGOUT (1 << 1) /* signals that the player should be logged out */
-
 typedef struct world world_t;
 typedef struct game_service game_service_t;
 typedef struct player player_t;
+typedef struct client_state client_state_t;
 
+/* Client state update flags */
+#define STATE_TAB_UPDATE (1 << 0) /* signals that a tab interface needs to be updated */
+#define STATE_LOGOUT (1 << 1) /* signals that the player should be logged out */
+
+/* Used for syncing player state with the client */
+struct client_state {
+	uint8_t update_flags;
+	entity_tracker_t known_players;
+	int tab_interfaces[14];
+};
+
+/* The top level player object */
 struct player {
 	object_t object;
 	list_node_t node;
-	/* client state */
+	/* player config */
 	uint32_t client_uid;
 	uint32_t index;
 	char username[32];
@@ -51,10 +61,9 @@ struct player {
 	bool high_memory;
 	int rights;
 	int login_stage;
+	/* client state */
 	mob_t mob;
-	entity_tracker_t known_players;
-	int tab_interfaces[14];
-	uint8_t update_flags;
+	client_state_t state;
 	/* cryption */
 	uint64_t server_isaac_seed;
 	uint64_t client_isaac_seed;

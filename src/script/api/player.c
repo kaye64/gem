@@ -45,8 +45,8 @@ static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	player->tab_interfaces[tab_id] = interface_id;
-	player->update_flags |= PLAYER_FLAG_TAB_UPDATE;
+	player->state.tab_interfaces[tab_id] = interface_id;
+	player->state.update_flags |= STATE_TAB_UPDATE;
 
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -58,7 +58,7 @@ static PyObject* api_player_set_tab_interface(PyObject* self, PyObject* args)
  */
 static PyObject* api_player_set_running(PyObject* self, PyObject* args)
 {
-	player_t* player = ((api_player_t*)self)->player;	
+	player_t* player = ((api_player_t*)self)->player;
 	mob_t* mob = mob_for_player(player);
 	bool running;
 	if (!PyArg_ParseTuple(args, "b", &running)) {
@@ -77,7 +77,7 @@ static PyObject* api_player_set_running(PyObject* self, PyObject* args)
  */
 static PyObject* api_player_send_message(PyObject* self, PyObject* args)
 {
-	player_t* player = ((api_player_t*)self)->player;	
+	player_t* player = ((api_player_t*)self)->player;
 	char* message;
 	if (!PyArg_ParseTuple(args, "s", &message)) {
 		return NULL;
@@ -168,7 +168,7 @@ static PyTypeObject player_type = {
     0,                         /* tp_getattro */
     0,                         /* tp_setattro */
     0,                         /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | 
+    Py_TPFLAGS_DEFAULT |
 	Py_TPFLAGS_BASETYPE,       /* tp_flags */
     "Player object",           /* tp_doc */
     0,                         /* tp_traverse */
