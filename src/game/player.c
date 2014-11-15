@@ -71,10 +71,17 @@ void player_tick_before(world_t* world, player_t* player)
 	region_t current_region = mob->region;
 
 	/* Update the player's path */
+	int position_updated = 0;
 	if (mob->running) {
-		mob_update_path(mob);
+		position_updated = mob_update_path(mob);
 	}
-	mob_update_path(mob);
+	position_updated = mob_update_path(mob) || position_updated;
+
+	/* Trigger script position update hook */
+	if (position_updated) {
+		player_position_args_t args = { .player = player, .warped = 0 };
+		hook_notify(SCRIPT_HOOK_PLAYER_POSITION, (void*)&args);
+	}
 
 	/* Rebase the region on the player's location */
 	location_t position = mob_position(mob);
@@ -189,6 +196,17 @@ void player_logout(game_service_t* game_service, player_t* player)
 	hook_notify(SCRIPT_HOOK_PLAYER_LOGOUT, (void*)player);
 	sector_unregister_player(world, sector, player);
 	entity_list_remove(&game_service->player_list, &player->mob.entity);
+}
+
+/**
+ * Warps a player to a position
+ */
+void player_warp_to(player_t* player, location_t position) {
+	mob_t* mob = mob_for_player(player);
+	mob_warp_to(mob, position);
+
+	player_position_args_t args = { .player = player, .warped = 1 };
+	hook_notify(SCRIPT_HOOK_PLAYER_POSITION, (void*)&args);
 }
 
 /**

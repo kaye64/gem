@@ -64,6 +64,7 @@ struct player {
 	/* client state */
 	mob_t mob;
 	client_state_t state;
+	void* attachment;
 	/* cryption */
 	uint64_t server_isaac_seed;
 	uint64_t client_isaac_seed;
@@ -90,6 +91,7 @@ void player_enqueue_packet(player_t* player, packet_t* packet);
 void player_login(game_service_t* game_service, player_t* player);
 void player_logout(game_service_t* game_service, player_t* player);
 
+void player_warp_to(player_t* player, location_t position);
 void player_set_tab_interface(player_t* player, int tab_id, int interface_id);
 void player_force_logout(player_t* player);
 

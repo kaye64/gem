@@ -71,17 +71,17 @@ void mob_warp_to(mob_t* mob, location_t position)
 /**
  * Advances a mob's walk queue by one step. Call twice in one cycle for running
  */
-void mob_update_path(mob_t* mob)
+int mob_update_path(mob_t* mob)
 {
 	location_t position = mob_position(mob);
 	location_t next_step = waypoint_queue_tick(&mob->waypoint_queue, position);
 	if (next_step.x == -1 && next_step.y == -1) {
-		return;
+		return 0;
 	}
 	int delta_x = position.x - next_step.x;
 	int delta_y = position.y - next_step.y;
 	if (abs(delta_x) > 1 || abs(delta_y) > 1) {
-		return;
+		return 0;
 	}
 	mob->last_direction = mob->direction;
 	mob->direction = mob_dir_map[delta_x+1][delta_y+1];
@@ -92,6 +92,7 @@ void mob_update_path(mob_t* mob)
 	} else {
 		mob->update_flags |= MOB_FLAG_WALK_UPDATE;
 	}
+	return 1;
 }
 
 /**

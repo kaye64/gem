@@ -29,11 +29,20 @@ static hook_t dispatch_lookup[] = {
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGOUT, .const_name = "HOOK_PLAYER_LOGOUT", .build_func = build_player_logout_args },
 	{ .hook = SCRIPT_HOOK_BUTTON_CLICK, .const_name = "HOOK_BUTTON_CLICK", .build_func = build_button_click_args },
+	{ .hook = SCRIPT_HOOK_PLAYER_POSITION, .const_name = "HOOK_PLAYER_POSITION", .build_func = build_player_position_args },
 	{ .hook = -1, .const_name = "", .build_func = NULL }
 };
 
 static PyObject* hook_module;
 static PyObject* hook_dispatch_func;
+static PyObject* hook_dispatch_exc_func;
+
+#define py_lookup_func(dest, object, func) {				\
+		dest = PyObject_GetAttrString(object, func);		\
+		if (!dest || !PyCallable_Check(dest)) {				\
+			ERROR("Unable to find " #func " function"); \
+		}													\
+	}
 
 /**
  * Initialize the hook system
@@ -46,10 +55,8 @@ void hook_init()
 		return;
 	}
 
-	hook_dispatch_func = PyObject_GetAttrString(hook_module, "dispatch");
-	if (!hook_dispatch_func || !PyCallable_Check(hook_dispatch_func)) {
-		ERROR("Unable to find hook.dispatch function");
-	}
+	py_lookup_func(hook_dispatch_func, hook_module, "dispatch");
+	py_lookup_func(hook_dispatch_exc_func, hook_module, "dispatch_exclusive");
 }
 
 /**
@@ -74,11 +81,9 @@ void hook_create_constants(PyObject* module)
 }
 
 /**
- * Dispatches a hook to each of the registered callers
+ * Looks up the hook build func and builds the py arguments
  */
-void hook_notify(int hook, void* args)
-{
-	/* find the build func and get the arguments */
+static PyObject* hook_build_args(int hook, void* args) {
 	int i = 0;
 	PyObject* py_args = NULL;
 	hook_t* dispatch = &dispatch_lookup[i];
@@ -93,6 +98,16 @@ void hook_notify(int hook, void* args)
 		}
 		dispatch = &dispatch_lookup[++i];
 	}
+	return py_args;
+}
+
+/**
+ * Dispatches a hook with multiple recievers
+ */
+void hook_notify(int hook, void* args)
+{
+	/* find the build func and get the arguments */
+	PyObject* py_args = hook_build_args(hook, args);
 
 	/* dispatch hook to python's hook.dispatch */
 	static PyObject* empty_tuple;
@@ -105,4 +120,27 @@ void hook_notify(int hook, void* args)
 		ERROR("hook dispatch failed");
 		PyErr_Print();
 	}
+}
+
+/**
+ * Dispatches a hook with a single reciever and returns its value
+ */
+void* hook_call(int hook, void* args)
+{
+	/* find the build func and get the arguments */
+	PyObject* py_args = hook_build_args(hook, args);
+
+	/* dispatch hook to python's hook.dispatch_exclusive */
+	static PyObject* empty_tuple;
+	if (!empty_tuple) {
+		empty_tuple = Py_BuildValue("()");
+	}
+
+	PyObject* retval;
+	PyObject* hook_params = Py_BuildValue("(iO)", hook, (py_args ? py_args : empty_tuple));
+	if (!(retval = PyObject_CallObject(hook_dispatch_exc_func, hook_params))) {
+		ERROR("hook dispatch failed");
+		PyErr_Print();
+	}
+	return (void*)retval;
 }

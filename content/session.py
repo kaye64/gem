@@ -14,13 +14,20 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem
+import player
 
 LOG_TAG = "session"
 
 tab_interfaces = [ 2423, 3917, 638, 3213, 1644, 5608, 1151, -1, 5065, 5715, 2449, 4445, 147, 6299 ]
 
+def player_authenticate(username, password):
+    profile = Profile(username, password)
+    return profile
+
 def player_login(player):
     gem.log.info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
+    gem.log.info(LOG_TAG, "{} players online".format(len(players)));
+
     player.send_message("Welcome to Gielinor")
     # Set the player's tab interfaces
     for tab, interface in enumerate(tab_interfaces):

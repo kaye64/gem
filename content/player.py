@@ -15,23 +15,27 @@
 
 import gem
 import session
-import player
-import interface
-import hook
 
-LOG_TAG = "core"
+from enum import Enum
 
-def content_init():
-    gem.log.info(LOG_TAG, "Registering API hooks..")
-    hook.register(gem.HOOK_STARTUP, startup)
-    hook.register(gem.HOOK_SHUTDOWN, shutdown)
-    hook.register(gem.HOOK_PLAYER_LOGIN, session.player_login)
-    hook.register(gem.HOOK_PLAYER_LOGOUT, session.player_logout)
-    hook.register(gem.HOOK_PLAYER_POSITION, player.player_position_update)
-    hook.register(gem.HOOK_BUTTON_CLICK, interface.interface_button)
+LOG_TAG = "player"
 
-def startup():
-    pass
+class Rights(Enum):
+    PLAYER = 0
+    MODERATOR = 1
+    ADMIN = 2
+    SUPERADMIN = 3
 
-def shutdown():
-    pass
+class Profile(object):
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.rights = Rights.SUPERADMIN
+        self.location = gem.location(3200, 3200, 0)
+
+    def position_update(self, location, warped):
+        self.location = location
+
+def player_position_update(player, location, warped):
+    profile = player.get_profile()
+    profile.position_update(location, warped)

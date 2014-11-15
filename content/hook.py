@@ -19,8 +19,28 @@ LOG_TAG = "hook"
 hooks = {}
 
 def register(hook, callback):
+    if hook in hooks:
+        if isinstance(hooks[hook], list):
+            hooks[hook] = hooks[hook] + [callback]
+        else:
+            gem.log.error(LOG_TAG, "Hooks for ({}) is not a list. Tried to register nonexclusive hook to exclusive slot?")
+    else:
+        hooks[hook] = [callback]
+
+def register_exclusive(hook, callback):
     hooks[hook] = callback
 
 def dispatch(hook, args):
     if hook in hooks:
-        hooks[hook](*args)
+        if isinstance(hooks[hook], list):
+            for hook_func in hooks[hook]:
+                hook_func(*args)
+        else:
+            gem.log.error(LOG_TAG, "Tried to call nonexclusive hook on singly registered slot")
+
+def dispatch_exclusive(hook, args):
+    if hook in hooks:
+        if isinstance(hooks[hook], list):
+            gem.log.error(LOG_TAG, "Tried to call exclusive hook on multiply registered slot")
+        else:
+            hooks[hook](*args)

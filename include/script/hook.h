@@ -25,11 +25,13 @@
 #define SCRIPT_HOOK_PLAYER_LOGIN 2
 #define SCRIPT_HOOK_PLAYER_LOGOUT 3
 #define SCRIPT_HOOK_BUTTON_CLICK 4
+#define SCRIPT_HOOK_PLAYER_POSITION 5
 
 void hook_init();
 void hook_free();
 
 void hook_create_constants(PyObject* module);
 void hook_notify(int hook, void* args);
+void hook_call(int hook, void* args);
 
 #endif /* _SCRIPT_HOOK_H_ */

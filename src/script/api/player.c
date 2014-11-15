@@ -29,6 +29,15 @@
 #include <game/player.h>
 
 /**
+ * Retrieves the profile object stored in player->attachment
+ */
+static PyObject* api_player_get_profile(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;
+	return (PyObject*)player->attachment;
+}
+
+/**
  * Sets an interface in one of the player's tabs
  * player.set_tab_interface(tab, interface)
  */
@@ -113,7 +122,6 @@ PyObject* build_player_login_args(void* args)
 	return Py_BuildValue("(O)", player_object);
 }
 
-
 /**
  * Builds the argument tuple for the player logout callback
  */
@@ -134,7 +142,21 @@ PyObject* build_button_click_args(void* _args)
 	return Py_BuildValue("(Oi)", player_object, args->button);
 }
 
+/**
+ * Builds the argument tuple for the player position update callback
+ */
+PyObject* build_player_position_args(void* _args)
+{
+	player_position_args_t* args = (player_position_args_t*)_args;
+	player_t* player = args->player;
+	PyObject* player_object = api_player_create(player);
+	location_t location = mob_position(mob_for_player(player));
+	PyObject* location_object = api_location_create(location);
+	return Py_BuildValue("(OOO)", player_object, location_object, (args->warped ? Py_True : Py_False));
+}
+
 static PyMethodDef player_methods[] = {
+	{"get_profile", api_player_get_profile, METH_VARARGS, "Retrieves the associated profile object"},
 	{"set_tab_interface", api_player_set_tab_interface, METH_VARARGS, "Update a player's tab interface"},
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
 	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},

@@ -46,9 +46,12 @@ bool script_init(const char* content_dir)
 	Py_Initialize();
 
 	/* import the core module */
-	wchar_t content_dir_wide[100];
-	swprintf(content_dir_wide, 100, L"%hs", content_dir);
-	PySys_SetPath(content_dir_wide);
+	/* add content dir to path */
+	PyRun_SimpleString("import sys\n");
+	char insert[64];
+	sprintf(insert, "sys.path.insert(0, \"%s\")\n", content_dir);
+	PyRun_SimpleString(&insert);
+
 	core_module = PyImport_ImportModule("core");
 	if (core_module == NULL) {
 		ERROR("Unable to import core module");

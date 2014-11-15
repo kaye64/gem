@@ -25,6 +25,7 @@
 typedef struct player player_t;
 typedef struct api_player api_player_t;
 typedef struct button_click_args button_click_args_t;
+typedef struct player_position_args player_position_args_t;
 
 struct api_player {
 	api_mob_t mob;
@@ -38,9 +39,15 @@ struct button_click_args {
 	int button;
 };
 
+struct player_position_args {
+	player_t* player;
+	int warped;
+};
+
 PyObject* build_player_login_args(void* args);
 PyObject* build_player_logout_args(void* args);
 PyObject* build_button_click_args(void* args);
+PyObject* build_player_position_args(void* _args);
 
 void api_player_init_type(PyObject* module);
 PyObject* api_player_create(player_t* player);
