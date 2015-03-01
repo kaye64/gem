@@ -1,8 +1,8 @@
 CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Lrunite/
-INCLUDE_DIRS = -Iinclude/ -Irunite/include/ -I/usr/include/python3.3m/
+INCLUDE_DIRS = -Iinclude/ -Irunite/include/ $(shell python3-config --includes)
 OUT = gem
 LIB_DIRS = -L
-LIBS = -lrunite -lev -lz -lpthread -lgmp -lpython3.3m
+LIBS = -lrunite -lev -lz -lpthread -lgmp $(shell python3-config --libs)
 SUBDIRS = src/init src/util src/net src/crypto src/jaggrab src/script src/game
 
 OBJECTS :=
