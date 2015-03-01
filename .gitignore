@@ -1,6 +1,9 @@
 # Ignore our output binary
 gem
 
+### Vagrant ###
+.vagrant/
+
 ### C ###
 # Object files
 *.o
