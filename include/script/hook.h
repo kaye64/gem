@@ -32,6 +32,6 @@ void hook_free();
 
 void hook_create_constants(PyObject* module);
 void hook_notify(int hook, void* args);
-void hook_call(int hook, void* args);
+void* hook_call(int hook, void* args);
 
 #endif /* _SCRIPT_HOOK_H_ */
