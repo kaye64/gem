@@ -66,9 +66,10 @@ void engine_thread();
 
 int main(int argc, char **argv)
 {
-	INFO("Geilinor Emulator v%d.%d.%d (gem)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	sig_install(cleanup);
 	parse_args(argc, argv);
+
+	INFO("Geilinor Emulator v%d.%d.%d (gem)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
 	/* load our rsa private key */
 	object_init(rsa, &instance.rsa);

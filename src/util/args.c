@@ -24,6 +24,7 @@
 
 #include <getopt.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <version.h>
@@ -33,9 +34,12 @@ static struct option program_options[] = {
 	{"version", no_argument, 0, 'v'},
 	{"help", no_argument, 0, 'h'},
 	{"bind", required_argument, 0, 'b'},
-	{"cache", required_argument, 0, 'c'},
-	{"content", required_argument, 0, 'C'}
+	{"data", required_argument, 0, 'd'},
+	{"content", required_argument, 0, 'c'}
 };
+
+void print_usage();
+void print_version();
 
 /**
  * Parses command line arguments into inst_args
@@ -58,18 +62,46 @@ void parse_args(int argc, char **argv)
 		}
 		switch (c) {
 		case 'v':
+			print_version();
+			exit(EXIT_SUCCESS);
 			break;
 		case 'h':
+			print_usage();
+			exit(EXIT_FAILURE);
 			break;
 		case 'b':
 			strcpy(inst_args.bind_addr, optarg);
 			break;
-		case 'c':
+		case 'd':
 			strcpy(inst_args.cache_dir, optarg);
 			break;
-		case 'C':
+		case 'c':
 			strcpy(inst_args.content_dir, optarg);
 			break;
 		}
 	}
+}
+
+/**
+ * Print version information
+ */
+void print_version()
+{
+	printf("Geilinor Emulator v%d.%d.%d (gem)\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+}
+
+/**
+ * Print help text
+ */
+void print_usage()
+{
+	print_version();
+	printf("Usage: gem [OPTION]\n\n"
+		   "Optional arguments:\n"
+		   "  -b, --bind <address>\t\tspecify the bind address\n"
+		   "  -d, --data <directory>\tspecify the game data directory\n"
+		   "  -c, --content <directory>\tspecify the content (python script) directory\n"
+		   "      --verbose\t\t\tturn on verbose logging\n\n"
+		   "  -v, --version\t\toutput version information and exit\n"
+		   "  -h, --help\t\tdisplay this help and exit\n");
 }
