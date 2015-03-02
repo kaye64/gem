@@ -113,6 +113,16 @@ static PyObject* api_player_logout(PyObject* self, PyObject* args)
 }
 
 /**
+ * Builds the argument tuple for the player authentication callback
+ */
+PyObject* build_player_auth_args(void* args)
+{
+	player_t* player = (player_t*)args;
+	PyObject* player_object = api_player_create(player);
+	return Py_BuildValue("(O)", player_object);
+}
+
+/**
  * Builds the argument tuple for the player login callback
  */
 PyObject* build_player_login_args(void* args)

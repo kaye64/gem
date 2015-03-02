@@ -26,6 +26,7 @@ struct hook {
 static hook_t dispatch_lookup[] = {
 	{ .hook = SCRIPT_HOOK_STARTUP, .const_name = "HOOK_STARTUP", .build_func = NULL },
 	{ .hook = SCRIPT_HOOK_SHUTDOWN, .const_name = "HOOK_SHUTDOWN", .build_func = NULL },
+	{ .hook = SCRIPT_HOOK_PLAYER_AUTHENTICATE, .const_name = "HOOK_PLAYER_AUTHENTICATE", .build_func = build_player_auth_args },
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGIN, .const_name = "HOOK_PLAYER_LOGIN", .build_func = build_player_login_args },
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGOUT, .const_name = "HOOK_PLAYER_LOGOUT", .build_func = build_player_logout_args },
 	{ .hook = SCRIPT_HOOK_BUTTON_CLICK, .const_name = "HOOK_BUTTON_CLICK", .build_func = build_button_click_args },
@@ -117,7 +118,7 @@ void hook_notify(int hook, void* args)
 
 	PyObject* hook_params = Py_BuildValue("(iO)", hook, (py_args ? py_args : empty_tuple));
 	if (!PyObject_CallObject(hook_dispatch_func, hook_params)) {
-		ERROR("hook dispatch failed");
+		ERROR("hook notify failed: %i", hook);
 		PyErr_Print();
 	}
 }
@@ -139,8 +140,9 @@ void* hook_call(int hook, void* args)
 	PyObject* retval;
 	PyObject* hook_params = Py_BuildValue("(iO)", hook, (py_args ? py_args : empty_tuple));
 	if (!(retval = PyObject_CallObject(hook_dispatch_exc_func, hook_params))) {
-		ERROR("hook dispatch failed");
+		ERROR("hook call failed: %i", hook);
 		PyErr_Print();
 	}
+	Py_XINCREF(retval);
 	return (void*)retval;
 }

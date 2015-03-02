@@ -25,6 +25,7 @@ def content_init():
     gem.log.info(LOG_TAG, "Registering API hooks..")
     hook.register(gem.HOOK_STARTUP, startup)
     hook.register(gem.HOOK_SHUTDOWN, shutdown)
+    hook.register_exclusive(gem.HOOK_PLAYER_AUTHENTICATE, session.player_authenticate)
     hook.register(gem.HOOK_PLAYER_LOGIN, session.player_login)
     hook.register(gem.HOOK_PLAYER_LOGOUT, session.player_logout)
     hook.register(gem.HOOK_PLAYER_POSITION, player.player_position_update)

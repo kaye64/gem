@@ -27,11 +27,11 @@ class Rights(Enum):
     SUPERADMIN = 3
 
 class Profile(object):
-    def __init__(self, username, password):
+    def __init__(self, username):
         self.username = username
-        self.password = password
+        self.password = ""
         self.rights = Rights.SUPERADMIN
-        self.location = gem.location(3200, 3200, 0)
+        self.location = gem.Location(3200, 3200, 0)
 
     def position_update(self, location, warped):
         self.location = location

@@ -26,6 +26,7 @@
 #define SCRIPT_HOOK_PLAYER_LOGOUT 3
 #define SCRIPT_HOOK_BUTTON_CLICK 4
 #define SCRIPT_HOOK_PLAYER_POSITION 5
+#define SCRIPT_HOOK_PLAYER_AUTHENTICATE 6
 
 void hook_init();
 void hook_free();

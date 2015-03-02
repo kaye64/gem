@@ -21,6 +21,7 @@
  * Defines the player login process
  */
 #include <game/game_login.h>
+#include <script/hook.h>
 
 #include <util/log.h>
 
@@ -150,10 +151,17 @@ int game_process_login(game_service_t* game_service, client_t* client, player_t*
  */
 int player_load(game_service_t* game_service, player_t* player)
 {
+	PyObject* attachment = hook_call(SCRIPT_HOOK_PLAYER_AUTHENTICATE, (void*)player);
+	if (attachment == (void*)NULL) {
+		return LOGIN_REJECTED;
+	}
+
+	player->attachment = attachment;
 
 	player->rights = PLAYER_RIGHTS_SUPER;
 	location_t new_location = absolute_coord(3200, 3200, 0);
 	player_warp_to(player, new_location);
 	player->mob.update_flags |= MOB_FLAG_APPEARANCE_UPDATE;
+
 	return LOGIN_OKAY;
 }

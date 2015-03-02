@@ -44,6 +44,7 @@ struct player_position_args {
 	int warped;
 };
 
+PyObject* build_player_auth_args(void* args);
 PyObject* build_player_login_args(void* args);
 PyObject* build_player_logout_args(void* args);
 PyObject* build_button_click_args(void* args);

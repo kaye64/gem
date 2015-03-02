@@ -43,4 +43,4 @@ def dispatch_exclusive(hook, args):
         if isinstance(hooks[hook], list):
             gem.log.error(LOG_TAG, "Tried to call exclusive hook on multiply registered slot")
         else:
-            hooks[hook](*args)
+            return hooks[hook](*args)
