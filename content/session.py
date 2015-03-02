@@ -19,12 +19,14 @@ import player
 LOG_TAG = "session"
 
 tab_interfaces = [ 2423, 3917, 638, 3213, 1644, 5608, 1151, -1, 5065, 5715, 2449, 4445, 147, 6299 ]
+players = {}
 
 def player_authenticate(p):
     profile = player.Profile(p.username)
     return profile
 
 def player_login(player):
+    players[player.index] = player
     gem.log.info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
     gem.log.info(LOG_TAG, "{} players online".format(len(players)));
 
@@ -35,4 +37,5 @@ def player_login(player):
 
 
 def player_logout(player):
+    del players[player.index]
     gem.log.info(LOG_TAG, "Player logout: " + player.username + " (index " + str(player.index) + ")")
