@@ -31,6 +31,7 @@ static hook_t dispatch_lookup[] = {
 	{ .hook = SCRIPT_HOOK_PLAYER_LOGOUT, .const_name = "HOOK_PLAYER_LOGOUT", .build_func = build_player_logout_args },
 	{ .hook = SCRIPT_HOOK_BUTTON_CLICK, .const_name = "HOOK_BUTTON_CLICK", .build_func = build_button_click_args },
 	{ .hook = SCRIPT_HOOK_PLAYER_POSITION, .const_name = "HOOK_PLAYER_POSITION", .build_func = build_player_position_args },
+	{ .hook = SCRIPT_HOOK_PLAYER_LOAD, .const_name = "HOOK_PLAYER_LOAD", .build_func = build_player_load_args },
 	{ .hook = -1, .const_name = "", .build_func = NULL }
 };
 
@@ -143,6 +144,5 @@ void* hook_call(int hook, void* args)
 		ERROR("hook call failed: %i", hook);
 		PyErr_Print();
 	}
-	Py_XINCREF(retval);
 	return (void*)retval;
 }

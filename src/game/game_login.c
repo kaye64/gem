@@ -158,9 +158,12 @@ int player_load(game_service_t* game_service, player_t* player)
 
 	player->attachment = attachment;
 
-	player->rights = PLAYER_RIGHTS_SUPER;
-	location_t new_location = absolute_coord(3200, 3200, 0);
-	player_warp_to(player, new_location);
+	PyObject* load_success = hook_call(SCRIPT_HOOK_PLAYER_LOAD, (void*)player);
+	if (!PyObject_IsTrue(load_success)) {
+		return LOGIN_REJECTED;
+	}
+
+	// TODO: This should be a side-effect of loading the player's appearance
 	player->mob.update_flags |= MOB_FLAG_APPEARANCE_UPDATE;
 
 	return LOGIN_OKAY;

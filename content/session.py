@@ -25,6 +25,14 @@ def player_authenticate(p):
     profile = player.Profile(p.username)
     return profile
 
+def player_load_profile(p):
+    profile = p.get_profile()
+
+    p.rights = profile.rights.value # todo: smarter enum assigns
+    p.warp_to(profile.location)
+
+    return True
+
 def player_login(player):
     players[player.index] = player
     gem.log.info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
@@ -34,7 +42,6 @@ def player_login(player):
     # Set the player's tab interfaces
     for tab, interface in enumerate(tab_interfaces):
         player.set_tab_interface(tab, interface)
-
 
 def player_logout(player):
     del players[player.index]

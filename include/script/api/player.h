@@ -19,7 +19,9 @@
 #define _API_PLAYER_H_
 
 #include <Python.h>
+#include <stddef.h>
 
+#include <script/reflect.h>
 #include <script/api/mob.h>
 
 typedef struct player player_t;
@@ -30,8 +32,6 @@ typedef struct player_position_args player_position_args_t;
 struct api_player {
 	api_mob_t mob;
 	player_t* player;
-	PyObject* username;
-	int rights;
 };
 
 struct button_click_args {
@@ -45,6 +45,7 @@ struct player_position_args {
 };
 
 PyObject* build_player_auth_args(void* args);
+PyObject* build_player_load_args(void* args);
 PyObject* build_player_login_args(void* args);
 PyObject* build_player_logout_args(void* args);
 PyObject* build_button_click_args(void* args);

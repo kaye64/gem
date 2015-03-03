@@ -27,6 +27,7 @@
 #define SCRIPT_HOOK_BUTTON_CLICK 4
 #define SCRIPT_HOOK_PLAYER_POSITION 5
 #define SCRIPT_HOOK_PLAYER_AUTHENTICATE 6
+#define SCRIPT_HOOK_PLAYER_LOAD 7
 
 void hook_init();
 void hook_free();

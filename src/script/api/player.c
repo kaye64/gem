@@ -28,13 +28,27 @@
 #include <game/packet/builders.h>
 #include <game/player.h>
 
+ref_table_entry_t api_player_ref_table[] = {
+	reflect_pyint_field("uid", player_t, client_uid),
+	reflect_pyint_field("rights", player_t, rights),
+	reflect_pyint_field("index", player_t, index),
+	reflect_pystring_field("username", player_t, username),
+	reflect_pystring_field("password", player_t, password),
+	reflect_terminator,
+};
+
+PyObject* api_player_getattro(api_player_t* self, PyObject* name);
+int api_player_setattro(api_player_t* self, PyObject* attr_name, PyObject* value);
+
 /**
  * Retrieves the profile object stored in player->attachment
  */
 static PyObject* api_player_get_profile(PyObject* self, PyObject* args)
 {
 	player_t* player = ((api_player_t*)self)->player;
-	return (PyObject*)player->attachment;
+	PyObject* profile = (PyObject*)player->attachment;
+	Py_INCREF(profile);
+	return profile;
 }
 
 /**
@@ -81,6 +95,21 @@ static PyObject* api_player_set_running(PyObject* self, PyObject* args)
 }
 
 /**
+ * Warps a player to a specified location
+ * player.warp_to(location)
+ */
+static PyObject* api_player_warp_to(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;
+	api_location_t* location = (api_player_t*) args;
+	if (!PyArg_ParseTuple(args, "O", &location)) {
+		return NULL;
+	}
+	player_warp_to(player, location->location);
+	return Py_None;
+}
+
+/**
  * Sends a game message to the player
  * player.send_message(message)
  */
@@ -116,6 +145,16 @@ static PyObject* api_player_logout(PyObject* self, PyObject* args)
  * Builds the argument tuple for the player authentication callback
  */
 PyObject* build_player_auth_args(void* args)
+{
+	player_t* player = (player_t*)args;
+	PyObject* player_object = api_player_create(player);
+	return Py_BuildValue("(O)", player_object);
+}
+
+/**
+ * Builds the argument tuple for the player load callback
+ */
+PyObject* build_player_load_args(void* args)
 {
 	player_t* player = (player_t*)args;
 	PyObject* player_object = api_player_create(player);
@@ -171,12 +210,11 @@ static PyMethodDef player_methods[] = {
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
 	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},
 	{"set_running", api_player_set_running, METH_VARARGS, "Sets the player's run status"},
+	{"warp_to", api_player_warp_to, METH_VARARGS, "Warps the player to a given location"},
     {NULL, NULL, 0, NULL}
 };
 
 static PyMemberDef player_members[] = {
-    {"username", T_OBJECT_EX, offsetof(api_player_t, username), READONLY, "player username"},
-    {"rights", T_INT, offsetof(api_player_t, rights), READONLY, "player rights"},
     {NULL, 0, 0, 0, NULL}
 };
 
@@ -197,8 +235,8 @@ static PyTypeObject player_type = {
     0,                         /* tp_hash  */
     0,                         /* tp_call */
     0,                         /* tp_str */
-    0,                         /* tp_getattro */
-    0,                         /* tp_setattro */
+    api_player_getattro,       /* tp_getattro */
+    api_player_setattro,       /* tp_setattro */
     0,                         /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT |
 	Py_TPFLAGS_BASETYPE,       /* tp_flags */
@@ -245,6 +283,37 @@ void api_player_init(api_player_t* api_player, player_t* player)
 {
 	api_player->player = player;
 	api_mob_init(&api_player->mob, mob_for_player(player));
-	api_player->username = PyUnicode_FromString(player->username);
-	api_player->rights = player->rights;
+}
+
+/**
+ * tp_getattro function for player object
+ */
+PyObject* api_player_getattro(api_player_t* self, PyObject* attr_name)
+{
+	char* identifier = PyUnicode_AsUTF8(attr_name);
+	PyObject* result = reflect_get(self->player, &api_player_ref_table[0], identifier);
+	if (result != NULL) {
+		return result;
+	}
+
+	result = PyObject_GenericGetAttr((PyObject*) self, attr_name);
+	if (result != NULL) {
+		return result;
+	}
+
+	return NULL;
+}
+
+/**
+ * tp_setattro function for player object
+ */
+int api_player_setattro(api_player_t* self, PyObject* attr_name, PyObject* value)
+{
+	char* identifier = PyUnicode_AsUTF8(attr_name);
+	int result = reflect_set(self->player, &api_player_ref_table[0], identifier, value);
+	if (result >= 0) {
+		return result;
+	}
+
+	return PyObject_GenericSetAttr((PyObject*) self, attr_name, value);
 }
