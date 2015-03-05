@@ -28,17 +28,21 @@
 #include <game/packet/builders.h>
 #include <game/player.h>
 
+static PyObject* api_player_getattro(api_player_t* self, PyObject* name);
+static int api_player_setattro(api_player_t* self, PyObject* attr_name, PyObject* value);
+static PyObject* api_player_get_location(player_t* player, void* offset);
+static int api_player_set_location(player_t* player, api_location_t* args, void* offset);
+
 ref_table_entry_t api_player_ref_table[] = {
 	reflect_pyint_field("uid", player_t, client_uid),
 	reflect_pyint_field("rights", player_t, rights),
 	reflect_pyint_field("index", player_t, index),
 	reflect_pystring_field("username", player_t, username),
 	reflect_pystring_field("password", player_t, password),
+	reflect_field("location", &api_player_get_location, &api_player_set_location, NULL),
 	reflect_terminator,
 };
 
-PyObject* api_player_getattro(api_player_t* self, PyObject* name);
-int api_player_setattro(api_player_t* self, PyObject* attr_name, PyObject* value);
 
 /**
  * Retrieves the profile object stored in player->attachment
@@ -95,18 +99,25 @@ static PyObject* api_player_set_running(PyObject* self, PyObject* args)
 }
 
 /**
- * Warps a player to a specified location
- * player.warp_to(location)
+ * Returns the player's location
  */
-static PyObject* api_player_warp_to(PyObject* self, PyObject* args)
+static PyObject* api_player_get_location(player_t* player, void* offset)
 {
-	player_t* player = ((api_player_t*)self)->player;
-	api_location_t* location = (api_player_t*) args;
-	if (!PyArg_ParseTuple(args, "O", &location)) {
-		return NULL;
-	}
-	player_warp_to(player, location->location);
-	return Py_None;
+	location_t location = mob_position(mob_for_player(player));
+	api_location_t* py_location = api_location_create(location);
+	Py_INCREF(py_location);
+	return py_location;
+}
+
+/**
+ * Warps a player to a specified location
+ * player.location = gem.Location(3200, 3200, 0)
+ */
+static int api_player_set_location(player_t* player, api_location_t* args, void* offset)
+{
+	location_t location = args->location;
+	player_warp_to(player, location);
+	return 0;
 }
 
 /**
@@ -210,7 +221,6 @@ static PyMethodDef player_methods[] = {
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
 	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},
 	{"set_running", api_player_set_running, METH_VARARGS, "Sets the player's run status"},
-	{"warp_to", api_player_warp_to, METH_VARARGS, "Warps the player to a given location"},
     {NULL, NULL, 0, NULL}
 };
 

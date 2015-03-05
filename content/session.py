@@ -29,14 +29,14 @@ def player_load_profile(p):
     profile = p.get_profile()
 
     p.rights = profile.rights.value # todo: smarter enum assigns
-    p.warp_to(profile.location)
+    p.location = profile.location
 
     return True
 
 def player_login(player):
     players[player.index] = player
     gem.log.info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
-    gem.log.info(LOG_TAG, "{} players online".format(len(players)));
+    gem.log.info(LOG_TAG, "{} players online".format(len(players)))
 
     player.send_message("Welcome to Gielinor")
     # Set the player's tab interfaces

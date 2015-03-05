@@ -42,28 +42,26 @@ int reflect_set_pyint(void* self, PyObject* value, void* offset);
 PyObject* reflect_get_pystring(void* self, void* offset);
 int reflect_set_pystring(void* self, PyObject* value, void* offset);
 
-#define reflect_pyint_field(ident, type, field)		\
-	{										   	\
-		.identifier = ident,				\
-		.get_func = &reflect_get_pyint,	\
-		.set_func = &reflect_set_pyint,	\
-		.extra = offsetof(type, field),		\
-	}											\
+#define reflect_field(ident, get, set, userdata)	\
+	{												\
+		.identifier = ident,						\
+		.get_func = (ref_table_get_t*)get,			\
+		.set_func = (ref_table_set_t*)set,			\
+		.extra = (void*)userdata,					\
+	}
 
-#define reflect_pystring_field(ident, type, field)		\
-	{										   	\
-		.identifier = ident,				\
-		.get_func = &reflect_get_pystring,	\
-		.set_func = &reflect_set_pystring,	\
-		.extra = offsetof(type, field),		\
-	}											\
+#define reflect_pyint_field(ident, type, field)	\
+	reflect_field(ident, &reflect_get_pyint, &reflect_set_pyint, offsetof(type, field))
 
-#define reflect_terminator	\
-	{					   	\
-		.identifier = NULL,	\
-		.get_func = NULL,	\
-		.set_func = NULL,	\
-		.extra = 0,			\
-	}						\
+#define reflect_pystring_field(ident, type, field) \
+	reflect_field(ident, &reflect_get_pystring, &reflect_set_pystring, offsetof(type, field))
+
+#define reflect_terminator		\
+	{					   		\
+		.identifier = NULL,		\
+		.get_func = NULL,		\
+		.set_func = NULL,		\
+		.extra = (void*)NULL,	\
+	}							\
 
 #endif /* _SCRIPT_REFLECT_H_ */

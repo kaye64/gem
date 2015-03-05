@@ -143,6 +143,7 @@ void* hook_call(int hook, void* args)
 	if (!(retval = PyObject_CallObject(hook_dispatch_exc_func, hook_params))) {
 		ERROR("hook call failed: %i", hook);
 		PyErr_Print();
+		return NULL;
 	}
 	return (void*)retval;
 }

@@ -31,7 +31,6 @@ void* reflect_get(void* self, ref_table_entry_t* table, const char* identifier)
 	ref_table_entry_t* entry = (ref_table_entry_t*)table;
 	ref_table_get_t* get_func = NULL;
 	void* extra;
-
 	while (entry->identifier != NULL) {
 		if (strcmp(entry->identifier, identifier) == 0) {
 			get_func = entry->get_func;
@@ -56,7 +55,6 @@ int reflect_set(void* self, ref_table_entry_t* table, const char* identifier, vo
 	ref_table_entry_t* entry = (ref_table_entry_t*)table;
 	ref_table_set_t* set_func = NULL;
 	void* extra;
-
 	while (entry->identifier != NULL) {
 		if (strcmp(entry->identifier, identifier) == 0) {
 			set_func = entry->set_func;
@@ -83,6 +81,7 @@ int reflect_set(void* self, ref_table_entry_t* table, const char* identifier, vo
 PyObject* reflect_get_pyint(void* self, void* offset)
 {
 	PyObject* result = PyLong_FromLong(*reflect_get_offset(self, int, offset));
+	Py_INCREF(result);
 	return result;
 }
 
@@ -101,7 +100,9 @@ int reflect_set_pyint(void* self, PyObject* value, void* offset)
  */
 PyObject* reflect_get_pystring(void* self, void* offset)
 {
-	PyObject* result = PyUnicode_FromString((const char*)reflect_get_offset(self, char, offset));
+	const char* native_value = (const char*)reflect_get_offset(self, char, offset);
+	PyObject* result = PyUnicode_FromString(native_value);
+	Py_INCREF(result);
 	return result;
 }
 

@@ -159,7 +159,7 @@ int player_load(game_service_t* game_service, player_t* player)
 	player->attachment = attachment;
 
 	PyObject* load_success = hook_call(SCRIPT_HOOK_PLAYER_LOAD, (void*)player);
-	if (!PyObject_IsTrue(load_success)) {
+	if (load_success == NULL || !PyObject_IsTrue(load_success)) {
 		return LOGIN_REJECTED;
 	}
 
