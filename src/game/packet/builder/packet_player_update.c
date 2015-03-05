@@ -24,10 +24,10 @@
 
 #include <util/jstring_encode.h>
 
-#define CL_FLAG_APPEARANCE_UPDATE (1 << 4)
+#define CL_FLAG_IDENTITY_UPDATE (1 << 4)
 #define CL_FLAG_CHAT_UPDATE (1 << 7)
 
-static codec_t* build_appearance_block(player_t* player);
+static codec_t* build_identity_block(player_t* player);
 
 /**
  * Translates our server sided flags into the format the client wants
@@ -35,8 +35,8 @@ static codec_t* build_appearance_block(player_t* player);
 static uint16_t translate_update_flags(uint16_t flags)
 {
 	uint16_t new_flags = 0;
-	if (flags & MOB_FLAG_APPEARANCE_UPDATE) {
-		new_flags |= CL_FLAG_APPEARANCE_UPDATE;
+	if (flags & MOB_FLAG_IDENTITY_UPDATE) {
+		new_flags |= CL_FLAG_IDENTITY_UPDATE;
 	}
 	if (flags & MOB_FLAG_CHAT_UPDATE) {
 		new_flags |= CL_FLAG_CHAT_UPDATE;
@@ -109,23 +109,23 @@ static void build_update_block(player_t* player, codec_t* codec, uint16_t update
 		}
 	}
 
-	if (update_flags & CL_FLAG_APPEARANCE_UPDATE) {
-		codec_t* appearance_block = build_appearance_block(player);
-		codec_put8f(codec, codec_len(appearance_block), CODEC_NEGATIVE);
-		codec_concat(codec, appearance_block);
-		object_free(appearance_block);
+	if (update_flags & CL_FLAG_IDENTITY_UPDATE) {
+		codec_t* identity_block = build_identity_block(player);
+		codec_put8f(codec, codec_len(identity_block), CODEC_NEGATIVE);
+		codec_concat(codec, identity_block);
+		object_free(identity_block);
 	}
 }
 
 /**
  * Builds an appearance update block for a given player
  */
-static codec_t* build_appearance_block(player_t* player)
+static codec_t* build_identity_block(player_t* player)
 {
-	codec_t* appearance_block = object_new(codec);
+	codec_t* identity_block = object_new(codec);
 
-	codec_put8(appearance_block, 0); // gender
-	codec_put8(appearance_block, 0); // head icon
+	codec_put8(identity_block, 0); // gender
+	codec_put8(identity_block, 0); // head icon
 
 	/**
 	 * If a value here is offset by 512, the value is treated
@@ -142,43 +142,43 @@ static codec_t* build_appearance_block(player_t* player)
 	 * is sent as a single byte, the client will probably crash.
 	 */
 
-	codec_put8(appearance_block, 0); // head
-	codec_put8(appearance_block, 0); // cape
-	codec_put8(appearance_block, 0); // neck
-	codec_put8(appearance_block, 0); // right hand
-	codec_put16(appearance_block, 256 + 19); // torso
-	codec_put8(appearance_block, 0); // left hand
-	codec_put16(appearance_block, 256 + 29); // arms
-	codec_put16(appearance_block, 256 + 39); // legs
-	codec_put16(appearance_block, 256 + 3); // head
-	codec_put16(appearance_block, 256 + 35); // hands
-	codec_put16(appearance_block, 256 + 44); // feet
-	codec_put16(appearance_block, 256 + 10); // beard
+	codec_put8(identity_block, 0); // head
+	codec_put8(identity_block, 0); // cape
+	codec_put8(identity_block, 0); // neck
+	codec_put8(identity_block, 0); // right hand
+	codec_put16(identity_block, 256 + 19); // torso
+	codec_put8(identity_block, 0); // left hand
+	codec_put16(identity_block, 256 + 29); // arms
+	codec_put16(identity_block, 256 + 39); // legs
+	codec_put16(identity_block, 256 + 3); // head
+	codec_put16(identity_block, 256 + 35); // hands
+	codec_put16(identity_block, 256 + 44); // feet
+	codec_put16(identity_block, 256 + 10); // beard
 
 	/**
 	 * These colors have no relation to any other color indices.
 	 * This value is just translated to an actual color in a lookup table,
 	 * so there are a set number of colors for each body part.
 	 */
-	codec_put8(appearance_block, 7); // hair color
-	codec_put8(appearance_block, 8); // torso color
-	codec_put8(appearance_block, 9); // leg color
-	codec_put8(appearance_block, 5); // feet color
-	codec_put8(appearance_block, 0); // skin color
+	codec_put8(identity_block, 7); // hair color
+	codec_put8(identity_block, 8); // torso color
+	codec_put8(identity_block, 9); // leg color
+	codec_put8(identity_block, 5); // feet color
+	codec_put8(identity_block, 0); // skin color
 
 	/* animations */
-	codec_put16(appearance_block, 0x328);
-	codec_put16(appearance_block, 0x337);
-	codec_put16(appearance_block, 0x333);
-	codec_put16(appearance_block, 0x334);
-	codec_put16(appearance_block, 0x335);
-	codec_put16(appearance_block, 0x336);
-	codec_put16(appearance_block, 0x338);
+	codec_put16(identity_block, 0x328);
+	codec_put16(identity_block, 0x337);
+	codec_put16(identity_block, 0x333);
+	codec_put16(identity_block, 0x334);
+	codec_put16(identity_block, 0x335);
+	codec_put16(identity_block, 0x336);
+	codec_put16(identity_block, 0x338);
 
-	codec_put64(appearance_block, jstring_encode(player->username));
-	codec_put8(appearance_block, 3); // combat level
-	codec_put16(appearance_block, 0);
-	return appearance_block;
+	codec_put64(identity_block, jstring_encode(player->username));
+	codec_put8(identity_block, 3); // combat level
+	codec_put16(identity_block, 0);
+	return identity_block;
 }
 
 /**
@@ -186,7 +186,7 @@ static codec_t* build_appearance_block(player_t* player)
  */
 static void add_new_player(player_t* this_player, player_t* new_player, codec_t* main_codec, codec_t* update_codec)
 {
-	uint16_t update_flags = translate_update_flags(new_player->mob.update_flags | MOB_FLAG_APPEARANCE_UPDATE); // force an appearence update for new players
+	uint16_t update_flags = translate_update_flags(new_player->mob.update_flags | MOB_FLAG_IDENTITY_UPDATE); // force an appearence update for new players
 	codec_put_bits(main_codec, 11, new_player->mob.entity.index);
 	codec_put_bits(main_codec, 1, 1); // append update block
 	build_update_block(new_player, update_codec, update_flags);
