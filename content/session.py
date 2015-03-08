@@ -14,6 +14,7 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem
+import swig.Log
 import player
 
 LOG_TAG = "session"
@@ -36,8 +37,8 @@ def player_load_profile(p):
 
 def player_login(player):
     players[player.index] = player
-    gem.log.info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
-    gem.log.info(LOG_TAG, "{} players online".format(len(players)))
+    swig.Log.Info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
+    swig.Log.Info(LOG_TAG, "{} players online".format(len(players)))
 
     player.send_message("Welcome to Gielinor")
     # Set the player's tab interfaces
@@ -46,4 +47,4 @@ def player_login(player):
 
 def player_logout(player):
     del players[player.index]
-    gem.log.info(LOG_TAG, "Player logout: " + player.username + " (index " + str(player.index) + ")")
+    swig.Log.Info(LOG_TAG, "Player logout: " + player.username + " (index " + str(player.index) + ")")

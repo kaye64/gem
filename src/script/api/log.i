@@ -15,11 +15,39 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-#ifndef _API_LOG_H_
-#define _API_LOG_H_
+%module Log
 
-#include <Python.h>
+%{
+#include <util/log.h>
+%}
 
-PyObject* log_init_module();
+%rename("%(camelcase)s") "";
 
-#endif /* _API_LOG_H_ */
+%{
+	void error(const char* tag, const char* message)
+	{
+		log_error(tag, message);
+	}
+
+	void warn(const char* tag, const char* message)
+	{
+		log_warn(tag, message);
+	}
+
+
+	void info(const char* tag, const char* message)
+	{
+		log_info(tag, message);
+	}
+
+
+	void debug(const char* tag, const char* message)
+	{
+		log_debug(tag, message);
+	}
+%}
+
+void error(const char* tag, const char* message);
+void warn(const char* tag, const char* message);
+void info(const char* tag, const char* message);
+void debug(const char* tag, const char* message);

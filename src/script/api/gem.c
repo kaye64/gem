@@ -23,7 +23,6 @@
 
 #include <script/hook.h>
 #include <script/api/gem.h>
-#include <script/api/log.h>
 #include <script/api/entity.h>
 #include <script/api/mob.h>
 #include <script/api/player.h>
@@ -56,10 +55,6 @@ PyObject* gem_init_module()
 	PyObject* module = PyModule_Create(&gem_moduledef);
 	PyObject_SetAttrString(module, "__path__", module_name);
 	hook_create_constants(module);
-
-	/* create the log module */
-	PyObject* log_module = log_init_module();
-	PyModule_AddObject(module, "log", log_module);
 
 	/* create the entity, mob, and player types */
 	api_entity_init_type(module);

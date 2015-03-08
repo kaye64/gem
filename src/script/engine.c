@@ -27,7 +27,6 @@
 
 #include <script/hook.h>
 #include <script/api/gem.h>
-#include <script/api/log.h>
 #include <util/log.h>
 
 #define LOG_TAG "script"
@@ -35,6 +34,7 @@
 static PyObject* core_module;
 
 PyObject* PyInit__Location(void);
+PyObject* PyInit__Log(void);
 
 /**
  * Initializes the scripting engine with the given script root directory
@@ -44,6 +44,7 @@ bool script_init(const char* content_dir)
 	/* setup the api modules */
 	PyImport_AppendInittab("gem", &gem_init_module);
 	PyImport_AppendInittab("_Location", &PyInit__Location);
+	PyImport_AppendInittab("_Log", &PyInit__Log);
 
 	/* init python */
 	Py_Initialize();

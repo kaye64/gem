@@ -14,11 +14,12 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem
+import swig.Log
 
 LOG_TAG = "interface"
 
 def interface_button(player, button):
-    gem.log.debug(LOG_TAG, "clicked button " + str(button))
+    swig.Log.Debug(LOG_TAG, "clicked button " + str(button))
     if button == 2458: # Why does Python not have a switch statement? :-(
         player.logout()
     elif button == 152:

@@ -14,6 +14,7 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem
+import swig.Log
 import session
 import player
 import interface
@@ -22,7 +23,7 @@ import hook
 LOG_TAG = "core"
 
 def content_init():
-    gem.log.info(LOG_TAG, "Registering API hooks..")
+    swig.Log.Info(LOG_TAG, "Registering API hooks..")
     hook.register(gem.HOOK_STARTUP, startup)
     hook.register(gem.HOOK_SHUTDOWN, shutdown)
     hook.register_exclusive(gem.HOOK_PLAYER_AUTHENTICATE, session.player_authenticate)
