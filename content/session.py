@@ -30,6 +30,7 @@ def player_load_profile(p):
 
     p.rights = profile.rights.value # todo: smarter enum assigns
     p.location = profile.location
+    p.flush_identity()
 
     return True
 

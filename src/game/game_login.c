@@ -163,8 +163,5 @@ int player_load(game_service_t* game_service, player_t* player)
 		return LOGIN_REJECTED;
 	}
 
-	// TODO: This should be a side-effect of loading the player's appearance
-	player->mob.update_flags |= MOB_FLAG_IDENTITY_UPDATE;
-
 	return LOGIN_OKAY;
 }

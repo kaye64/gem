@@ -56,6 +56,19 @@ static PyObject* api_player_get_profile(PyObject* self, PyObject* args)
 }
 
 /**
+ * Flushes the stored player identity to the client
+ * Sets the identity update flag on the mob
+ */
+static PyObject* api_player_flush_identity(PyObject* self, PyObject* args)
+{
+	player_t* player = ((api_player_t*)self)->player;
+	player->mob.update_flags |= MOB_FLAG_IDENTITY_UPDATE;
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+/**
  * Sets an interface in one of the player's tabs
  * player.set_tab_interface(tab, interface)
  */
@@ -221,6 +234,7 @@ static PyMethodDef player_methods[] = {
 	{"send_message", api_player_send_message, METH_VARARGS, "Send a game message to a player"},
 	{"logout", api_player_logout, METH_VARARGS, "Logs the player out"},
 	{"set_running", api_player_set_running, METH_VARARGS, "Sets the player's run status"},
+	{"flush_identity", api_player_flush_identity, METH_VARARGS, "Flushes the player's identity to the client"},
     {NULL, NULL, 0, NULL}
 };
 
