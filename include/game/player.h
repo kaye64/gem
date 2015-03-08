@@ -37,6 +37,7 @@ typedef struct world world_t;
 typedef struct game_service game_service_t;
 typedef struct player player_t;
 typedef struct client_state client_state_t;
+typedef struct identity identity_t;
 
 /* Client state update flags */
 #define STATE_TAB_UPDATE (1 << 0) /* signals that a tab interface needs to be updated */
@@ -47,6 +48,38 @@ struct client_state {
 	uint8_t update_flags;
 	entity_tracker_t known_players;
 	int tab_interfaces[14];
+};
+
+#define APPEARANCE_HEAD 0
+#define APPEARANCE_CAPE 1
+#define APPEARANCE_NECK 2
+#define APPEARANCE_RIGHT_HAND 3
+#define APPEARANCE_TORSO 4
+#define APPEARANCE_LEFT_HAND 5
+#define APPEARANCE_ARMS 6
+#define APPEARANCE_LEGS 7
+#define APPEARANCE_HEAD_2 8 //???
+#define APPEARANCE_HANDS 9
+#define APPEARANCE_FEET 10
+#define APPEARANCE_BEARD 11
+
+#define APPEARANCE_COLOR_HAIR 0
+#define APPEARANCE_COLOR_TORSO 1
+#define APPEARANCE_COLOR_LEG 2
+#define APPEARANCE_COLOR_FEET 3
+#define APPEARANCE_COLOR_SKIN 4
+
+struct identity {
+	char username[32];
+	char password[32];
+	int combat_level;
+	struct {
+		int gender;
+		int head_icon;
+		int parts[12];
+		int colors[5];
+	} appearance;
+	int animation[7];
 };
 
 /* The top level player object */
@@ -64,6 +97,7 @@ struct player {
 	/* client state */
 	mob_t mob;
 	client_state_t state;
+	identity_t identity;
 	void* attachment;
 	/* cryption */
 	uint64_t server_isaac_seed;
