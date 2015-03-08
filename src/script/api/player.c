@@ -31,7 +31,7 @@
 static PyObject* api_player_getattro(api_player_t* self, PyObject* name);
 static int api_player_setattro(api_player_t* self, PyObject* attr_name, PyObject* value);
 static PyObject* api_player_get_location(player_t* player, void* offset);
-static int api_player_set_location(player_t* player, api_location_t* args, void* offset);
+static int api_player_set_location(player_t* player, PyObject* args, void* offset);
 
 ref_table_entry_t api_player_ref_table[] = {
 	reflect_pyint_field("uid", player_t, client_uid),
@@ -117,7 +117,7 @@ static PyObject* api_player_set_running(PyObject* self, PyObject* args)
 static PyObject* api_player_get_location(player_t* player, void* offset)
 {
 	location_t location = mob_position(mob_for_player(player));
-	api_location_t* py_location = api_location_create(location);
+	PyObject* py_location = location_wrap_from_location(location);
 	Py_INCREF(py_location);
 	return py_location;
 }
@@ -126,9 +126,9 @@ static PyObject* api_player_get_location(player_t* player, void* offset)
  * Warps a player to a specified location
  * player.location = gem.Location(3200, 3200, 0)
  */
-static int api_player_set_location(player_t* player, api_location_t* args, void* offset)
+static int api_player_set_location(player_t* player, PyObject* args, void* offset)
 {
-	location_t location = args->location;
+	location_t location = location_from_location_wrap(args);
 	player_warp_to(player, location);
 	return 0;
 }
@@ -224,7 +224,7 @@ PyObject* build_player_position_args(void* _args)
 	player_t* player = args->player;
 	PyObject* player_object = api_player_create(player);
 	location_t location = mob_position(mob_for_player(player));
-	PyObject* location_object = api_location_create(location);
+	PyObject* location_object = location_wrap_from_location(location);
 	return Py_BuildValue("(OOO)", player_object, location_object, (args->warped ? Py_True : Py_False));
 }
 

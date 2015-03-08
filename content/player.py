@@ -14,6 +14,7 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem
+import swig.Location
 import session
 
 from enum import Enum
@@ -31,7 +32,7 @@ class Profile(object):
         self.username = username
         self.password = ""
         self.rights = Rights.SUPERADMIN
-        self.location = gem.Location(3200, 3200, 0)
+        self.location = swig.Location.Absolute(3200, 3200, 0)
 
     def position_update(self, location, warped):
         self.location = location

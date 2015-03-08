@@ -34,6 +34,8 @@
 
 static PyObject* core_module;
 
+PyObject* PyInit__Location(void);
+
 /**
  * Initializes the scripting engine with the given script root directory
  */
@@ -41,6 +43,7 @@ bool script_init(const char* content_dir)
 {
 	/* setup the api modules */
 	PyImport_AppendInittab("gem", &gem_init_module);
+	PyImport_AppendInittab("_Location", &PyInit__Location);
 
 	/* init python */
 	Py_Initialize();

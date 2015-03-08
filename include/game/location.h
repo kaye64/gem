@@ -18,6 +18,8 @@
 #ifndef _LOCATION_H_
 #define _LOCATION_H_
 
+#include <Python.h>
+
 #define AREA_GRANULARITY 8
 #define REGION_GRANULARITY 13
 
@@ -47,11 +49,28 @@ typedef struct region region_t;
  * A location contains the world absolute coordinates, and the sector
  * those coordinates belong to.
  */
+#ifdef SWIG
+%rename(Absolute) location;
+#endif /* SWIG */
 struct location {
 	int x;
 	int y;
 	int z;
 	sector_t sector;
+#ifdef SWIG
+	%extend {
+		location(int x, int y, int z) {
+			location_t loc = absolute_coord(x, y, z);
+			location_t* v;
+			v = (location_t *) malloc(sizeof(location_t));
+			memcpy(v, &loc, sizeof(location_t));
+			return v;
+		}
+		~location() {
+			free($self);
+		}
+	};
+#endif /* SWIG */
 };
 typedef struct location location_t;
 
@@ -72,5 +91,8 @@ location_t to_absolute_coord(region_local_t local);
 sector_t sector(int x, int y, int z);
 region_t center_region_on(location_t loc);
 region_local_t local_coord(location_t loc, region_t region);
+
+PyObject* location_wrap_from_location(location_t loc);
+location_t location_from_location_wrap(PyObject* loc);
 
 #endif /* _LOCATION_H_ */

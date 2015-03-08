@@ -15,29 +15,31 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-#ifndef _API_LOCATION_H_
-#define _API_LOCATION_H_
+%module Location
 
-#include <Python.h>
-
+%{
 #include <game/location.h>
+%}
 
-typedef struct api_location api_location_t;
-struct api_location {
-	PyObject_HEAD
-	location_t location;
-	int absolute_x;
-	int absolute_y;
-	int absolute_z;
-	int sector_x;
-	int sector_y;
-	int sector_z;
-};
 
-extern PyTypeObject location_type;
+%rename("%(camelcase)s") "";
 
-void api_location_init_type(PyObject* module);
-PyObject* api_location_create(location_t location);
-void api_location_init(api_location_t* api_location, location_t location);
+%include "game/location.h"
 
-#endif /* _API_LOCATION_H_ */
+%{
+	PyObject* location_wrap_from_location(location_t loc) {
+		PyObject* result = SWIG_NewPointerObj(SWIG_as_voidptr(&loc), SWIGTYPE_p_location, SWIG_POINTER_NEW | 0 );
+		return result;
+	}
+
+	location_t location_from_location_wrap(PyObject* loc) {
+		location_t native_obj;
+		void* p;
+		int res = SWIG_ConvertPtr(loc, &p, SWIGTYPE_p_location, 0 );
+		if (!SWIG_IsOK(res)) {
+			printf("Couldnt convert location\n");
+		}
+		native_obj = *((location_t*)p);
+		return native_obj;
+	}
+%}
