@@ -19,6 +19,7 @@
 
 %{
 #include <game/location.h>
+#include <util/log.h>
 %}
 
 
@@ -27,17 +28,18 @@
 %include "game/location.h"
 
 %{
-	PyObject* location_wrap_from_location(location_t loc) {
+	PyObject* api_location_in(location_t loc) {
 		PyObject* result = SWIG_NewPointerObj(SWIG_as_voidptr(&loc), SWIGTYPE_p_location, SWIG_POINTER_NEW | 0 );
 		return result;
 	}
 
-	location_t location_from_location_wrap(PyObject* loc) {
+	location_t api_location_out(PyObject* loc) {
 		location_t native_obj;
 		void* p;
 		int res = SWIG_ConvertPtr(loc, &p, SWIGTYPE_p_location, 0 );
 		if (!SWIG_IsOK(res)) {
-			printf("Couldnt convert location\n");
+			log_error("SWIG", "Can't convert api location");
+			return native_obj;
 		}
 		native_obj = *((location_t*)p);
 		return native_obj;

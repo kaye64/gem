@@ -100,5 +100,5 @@ void api_entity_init(api_entity_t* api_entity, entity_t* entity)
 {
 	api_entity->entity = entity;
 	api_entity->index = entity->index;
-	api_entity->location = location_wrap_from_location(entity->position);
+	api_entity->location = api_location_in(entity->position);
 }

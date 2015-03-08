@@ -117,7 +117,7 @@ static PyObject* api_player_set_running(PyObject* self, PyObject* args)
 static PyObject* api_player_get_location(player_t* player, void* offset)
 {
 	location_t location = mob_position(mob_for_player(player));
-	PyObject* py_location = location_wrap_from_location(location);
+	PyObject* py_location = api_location_in(location);
 	Py_INCREF(py_location);
 	return py_location;
 }
@@ -128,7 +128,7 @@ static PyObject* api_player_get_location(player_t* player, void* offset)
  */
 static int api_player_set_location(player_t* player, PyObject* args, void* offset)
 {
-	location_t location = location_from_location_wrap(args);
+	location_t location = api_location_out(args);
 	player_warp_to(player, location);
 	return 0;
 }
@@ -224,7 +224,7 @@ PyObject* build_player_position_args(void* _args)
 	player_t* player = args->player;
 	PyObject* player_object = api_player_create(player);
 	location_t location = mob_position(mob_for_player(player));
-	PyObject* location_object = location_wrap_from_location(location);
+	PyObject* location_object = api_location_in(location);
 	return Py_BuildValue("(OOO)", player_object, location_object, (args->warped ? Py_True : Py_False));
 }
 

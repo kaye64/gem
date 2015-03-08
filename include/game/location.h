@@ -92,7 +92,7 @@ sector_t sector(int x, int y, int z);
 region_t center_region_on(location_t loc);
 region_local_t local_coord(location_t loc, region_t region);
 
-PyObject* location_wrap_from_location(location_t loc);
-location_t location_from_location_wrap(PyObject* loc);
+PyObject* api_location_in(location_t loc);
+location_t api_location_out(PyObject* loc);
 
 #endif /* _LOCATION_H_ */
