@@ -51,6 +51,7 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     sudo yum -y install git gcc gdb zlib-devel bzip2-devel \
-						libev-devel gmp-devel python3-devel
+						libev-devel gmp-devel python3-devel \
+						swig
   SHELL
 end
