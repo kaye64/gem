@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-import swig.Log
+import gem.Log
 
 LOG_TAG = "hook"
 hooks = {}
@@ -23,7 +23,7 @@ def register(hook, callback):
         if isinstance(hooks[hook], list):
             hooks[hook] = hooks[hook] + [callback]
         else:
-            swig.Log.Error(LOG_TAG, "Hooks for ({}) is not a list. Tried to register nonexclusive hook to exclusive slot?")
+            gem.Log.Error(LOG_TAG, "Hooks for ({}) is not a list. Tried to register nonexclusive hook to exclusive slot?")
     else:
         hooks[hook] = [callback]
 
@@ -36,11 +36,11 @@ def dispatch(hook, args):
             for hook_func in hooks[hook]:
                 hook_func(*args)
         else:
-            swig.Log.Error(LOG_TAG, "Tried to call nonexclusive hook on singly registered slot")
+            gem.Log.Error(LOG_TAG, "Tried to call nonexclusive hook on singly registered slot")
 
 def dispatch_exclusive(hook, args):
     if hook in hooks:
         if isinstance(hooks[hook], list):
-            swig.Log.Error(LOG_TAG, "Tried to call exclusive hook on multiply registered slot")
+            gem.Log.Error(LOG_TAG, "Tried to call exclusive hook on multiply registered slot")
         else:
             return hooks[hook](*args)

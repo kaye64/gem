@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-import swig.Location
+import gem.Location
 import session
 
 from enum import Enum
@@ -31,7 +31,7 @@ class Profile(object):
         self.username = username
         self.password = ""
         self.rights = Rights.SUPERADMIN
-        self.location = swig.Location.Absolute(3200, 3200, 0)
+        self.location = gem.Location.Absolute(3200, 3200, 0)
 
     def position_update(self, location, warped):
         self.location = location

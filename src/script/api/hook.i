@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="swig") Hook
+%module(package="gem") Hook
 
 %{
 #include <script/hook.h>

@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="swig") Location
+%module(package="gem") Location
 
 %{
 #include <game/location.h>

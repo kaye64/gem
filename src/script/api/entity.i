@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="swig") Entity
+%module(package="gem") Entity
 
 %{
 #include <game/entity.h>
