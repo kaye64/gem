@@ -15,6 +15,7 @@
 
 import gem
 import swig.Log
+import swig.Hook
 import session
 import player
 import interface
@@ -24,14 +25,14 @@ LOG_TAG = "core"
 
 def content_init():
     swig.Log.Info(LOG_TAG, "Registering API hooks..")
-    hook.register(gem.HOOK_STARTUP, startup)
-    hook.register(gem.HOOK_SHUTDOWN, shutdown)
-    hook.register_exclusive(gem.HOOK_PLAYER_AUTHENTICATE, session.player_authenticate)
-    hook.register_exclusive(gem.HOOK_PLAYER_LOAD, session.player_load_profile)
-    hook.register(gem.HOOK_PLAYER_LOGIN, session.player_login)
-    hook.register(gem.HOOK_PLAYER_LOGOUT, session.player_logout)
-    hook.register(gem.HOOK_PLAYER_POSITION, player.player_position_update)
-    hook.register(gem.HOOK_BUTTON_CLICK, interface.interface_button)
+    hook.register(swig.Hook.STARTUP, startup)
+    hook.register(swig.Hook.SHUTDOWN, shutdown)
+    hook.register_exclusive(swig.Hook.PLAYER_AUTHENTICATE, session.player_authenticate)
+    hook.register_exclusive(swig.Hook.PLAYER_LOAD, session.player_load_profile)
+    hook.register(swig.Hook.PLAYER_LOGIN, session.player_login)
+    hook.register(swig.Hook.PLAYER_LOGOUT, session.player_logout)
+    hook.register(swig.Hook.PLAYER_POSITION, player.player_position_update)
+    hook.register(swig.Hook.BUTTON_CLICK, interface.interface_button)
 
 def startup():
     pass
