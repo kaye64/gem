@@ -124,8 +124,10 @@ static codec_t* build_identity_block(player_t* player)
 {
 	codec_t* identity_block = object_new(codec);
 
-	codec_put8(identity_block, 0); // gender
-	codec_put8(identity_block, 0); // head icon
+	identity_t* iden = &player->identity;
+
+	codec_put8(identity_block, iden->appearance.gender); // gender
+	codec_put8(identity_block, iden->appearance.head_icon); // head icon
 
 	/**
 	 * If a value here is offset by 512, the value is treated
@@ -142,42 +144,42 @@ static codec_t* build_identity_block(player_t* player)
 	 * is sent as a single byte, the client will probably crash.
 	 */
 
-	codec_put8(identity_block, 0); // head
-	codec_put8(identity_block, 0); // cape
-	codec_put8(identity_block, 0); // neck
-	codec_put8(identity_block, 0); // right hand
-	codec_put16(identity_block, 256 + 19); // torso
-	codec_put8(identity_block, 0); // left hand
-	codec_put16(identity_block, 256 + 29); // arms
-	codec_put16(identity_block, 256 + 39); // legs
-	codec_put16(identity_block, 256 + 3); // head
-	codec_put16(identity_block, 256 + 35); // hands
-	codec_put16(identity_block, 256 + 44); // feet
-	codec_put16(identity_block, 256 + 10); // beard
+	codec_put8(identity_block, iden->appearance.model_head); // head
+	codec_put8(identity_block, iden->appearance.model_cape); // cape
+	codec_put8(identity_block, iden->appearance.model_neck); // neck
+	codec_put8(identity_block, iden->appearance.model_equip_right); // right hand
+	codec_put16(identity_block, 256 + iden->appearance.model_torso); // torso
+	codec_put8(identity_block, iden->appearance.model_equip_left); // left hand
+	codec_put16(identity_block, 256 + iden->appearance.model_arms); // arms
+	codec_put16(identity_block, 256 + iden->appearance.model_legs); // legs
+	codec_put16(identity_block, 256 + iden->appearance.model_head2); // head
+	codec_put16(identity_block, 256 + iden->appearance.model_hands); // hands
+	codec_put16(identity_block, 256 + iden->appearance.model_feet); // feet
+	codec_put16(identity_block, 256 + iden->appearance.model_beard); // beard
 
 	/**
 	 * These colors have no relation to any other color indices.
 	 * This value is just translated to an actual color in a lookup table,
 	 * so there are a set number of colors for each body part.
 	 */
-	codec_put8(identity_block, 7); // hair color
-	codec_put8(identity_block, 8); // torso color
-	codec_put8(identity_block, 9); // leg color
-	codec_put8(identity_block, 5); // feet color
-	codec_put8(identity_block, 0); // skin color
+	codec_put8(identity_block, iden->appearance.color_hair); // hair color
+	codec_put8(identity_block, iden->appearance.color_torso); // torso color
+	codec_put8(identity_block, iden->appearance.color_leg); // leg color
+	codec_put8(identity_block, iden->appearance.color_feet); // feet color
+	codec_put8(identity_block, iden->appearance.color_skin); // skin color
 
 	/* animations */
-	codec_put16(identity_block, 0x328);
-	codec_put16(identity_block, 0x337);
-	codec_put16(identity_block, 0x333);
-	codec_put16(identity_block, 0x334);
-	codec_put16(identity_block, 0x335);
-	codec_put16(identity_block, 0x336);
-	codec_put16(identity_block, 0x338);
+	codec_put16(identity_block, iden->anim_idle);
+	codec_put16(identity_block, iden->anim_spot_rotate);
+	codec_put16(identity_block, iden->anim_walk);
+	codec_put16(identity_block, iden->anim_rotate_180);
+	codec_put16(identity_block, iden->anim_rotate_ccw);
+	codec_put16(identity_block, iden->anim_rotate_cw);
+	codec_put16(identity_block, iden->anim_run);
 
 	codec_put64(identity_block, jstring_encode(player->username));
-	codec_put8(identity_block, 3); // combat level
-	codec_put16(identity_block, 0);
+	codec_put8(identity_block, iden->combat_level);
+	codec_put16(identity_block, 0); // skill level (for minigames)
 	return identity_block;
 }
 

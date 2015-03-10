@@ -78,10 +78,32 @@ struct identity {
 	struct {
 		int gender;
 		int head_icon;
-		int parts[12];
-		int colors[5];
+		/* models */
+		int model_head;
+		int model_head2;
+		int model_cape;
+		int model_neck;
+		int model_equip_right;
+		int model_equip_left;
+		int model_torso;
+		int model_arms;
+		int model_legs;
+		int model_hands;
+		int model_feet;
+		int model_beard;
+		int color_hair;
+		int color_torso;
+		int color_leg;
+		int color_feet;
+		int color_skin;
 	} appearance;
-	int animation[7];
+	int anim_idle;
+	int anim_spot_rotate;
+	int anim_walk;
+	int anim_rotate_180;
+	int anim_rotate_ccw;
+	int anim_rotate_cw;
+	int anim_run;
 };
 
 /* The top level player object */

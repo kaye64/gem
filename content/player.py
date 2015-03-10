@@ -14,6 +14,7 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 import gem.Location
+import gem.Entity
 import session
 
 from enum import Enum
@@ -26,16 +27,41 @@ class Rights(Enum):
     ADMIN = 2
     SUPERADMIN = 3
 
+class Appearance(object):
+    # Default player appearance
+    gender = 0
+    head_icon = 0
+    model_head = 0
+    model_head2 = 3
+    model_cape = 0
+    model_neck = 0
+    model_equip_left = 0
+    model_equip_right = 0
+    model_torso = 19
+    model_arms = 29
+    model_legs = 39
+    model_hands = 35
+    model_feet = 44
+    model_beard = 10
+    color_hair = 7
+    color_torso = 8
+    color_leg = 9
+    color_feet = 5
+    color_skin = 0
+
+    def __init__(self):
+        pass
+
 class Profile(object):
+    username = ""
+    password = ""
+    rights = Rights.PLAYER
+    location = gem.Location.Absolute(3200, 3200, 0)
+    appearance = Appearance()
+
     def __init__(self, username):
         self.username = username
-        self.password = ""
-        self.rights = Rights.SUPERADMIN
-        self.location = gem.Location.Absolute(3200, 3200, 0)
-
-    def position_update(self, location, warped):
-        self.location = location
 
 def player_position_update(player, location, warped):
     profile = player.profile
-    profile.position_update(location, warped)
+    profile.location = location

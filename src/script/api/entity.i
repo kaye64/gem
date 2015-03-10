@@ -27,6 +27,7 @@
 typedef struct player player;
 typedef struct mob mob;
 typedef struct entity entity;
+typedef struct identity identity;
 %}
 
 %include "pyabc.i"
@@ -53,6 +54,42 @@ typedef struct {
 	bool running;
 } mob;
 
+%rename(Identity, %$isclass) identity;
+typedef struct {
+	char username[32];
+	char password[32];
+	int combat_level;
+	struct {
+		int gender;
+		int head_icon;
+		/* models */
+		int model_head;
+		int model_head2;
+		int model_cape;
+		int model_neck;
+		int model_equip_right;
+		int model_equip_left;
+		int model_torso;
+		int model_arms;
+		int model_legs;
+		int model_hands;
+		int model_feet;
+		int model_beard;
+		int color_hair;
+		int color_torso;
+		int color_leg;
+		int color_feet;
+		int color_skin;
+	} appearance;
+	int anim_idle;
+	int anim_spot_rotate;
+	int anim_walk;
+	int anim_rotate_180;
+	int anim_rotate_ccw;
+	int anim_rotate_cw;
+	int anim_run;
+} identity;
+
 %rename(Player) player;
 %pythonabc(player, Mob);
 %types(player = mob) "return mob_for_player($from);";
@@ -64,6 +101,7 @@ typedef struct {
 	uint32_t index;
 	int rights;
 	bool high_memory;
+	identity identity;
 	%extend {
 		void set_tab_interface(int tab, int interface);
 		void force_logout();

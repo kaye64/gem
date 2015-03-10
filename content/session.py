@@ -32,6 +32,37 @@ def player_load_profile(p):
 
     p.rights = profile.rights.value # todo: smarter enum assigns
     p.warp_to(profile.location)
+
+    # load appearance
+    p.identity.username = profile.username
+
+    p.identity.anim_idle = 0x328
+    p.identity.anim_spot_rotate = 0x337
+    p.identity.anim_walk = 0x333
+    p.identity.anim_rotate_180 = 0x334
+    p.identity.anim_rotate_ccw = 0x335
+    p.identity.anim_rotate_cw = 0x336
+    p.identity.anim_run = 0x338
+
+    p.identity.appearance.gender = profile.appearance.gender
+    p.identity.appearance.head_icon = profile.appearance.head_icon
+    p.identity.appearance.model_head = profile.appearance.model_head
+    p.identity.appearance.model_head2 = profile.appearance.model_head2
+    p.identity.appearance.model_cape = profile.appearance.model_cape
+    p.identity.appearance.model_neck = profile.appearance.model_neck
+    p.identity.appearance.model_equip_left = profile.appearance.model_equip_left
+    p.identity.appearance.model_equip_right = profile.appearance.model_equip_right
+    p.identity.appearance.model_torso = profile.appearance.model_torso
+    p.identity.appearance.model_arms = profile.appearance.model_arms
+    p.identity.appearance.model_legs = profile.appearance.model_legs
+    p.identity.appearance.model_hands = profile.appearance.model_hands
+    p.identity.appearance.model_feet = profile.appearance.model_feet
+    p.identity.appearance.model_beard = profile.appearance.model_beard
+    p.identity.appearance.color_hair = profile.appearance.color_hair
+    p.identity.appearance.color_torso = profile.appearance.color_torso
+    p.identity.appearance.color_leg = profile.appearance.color_leg
+    p.identity.appearance.color_feet = profile.appearance.color_feet
+    p.identity.appearance.color_skin = profile.appearance.color_skin
     p.flush_identity()
 
     return True
