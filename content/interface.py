@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-import gem
 import swig.Log
 
 LOG_TAG = "interface"

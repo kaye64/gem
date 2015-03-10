@@ -26,7 +26,6 @@
 #include <script/engine.h>
 
 #include <script/hook.h>
-#include <script/api/gem.h>
 #include <util/log.h>
 
 #define LOG_TAG "script"
@@ -44,7 +43,6 @@ PyObject* PyInit__Hook(void);
 bool script_init(const char* content_dir)
 {
 	/* setup the api modules */
-	PyImport_AppendInittab("gem", &gem_init_module);
 	PyImport_AppendInittab("_Location", &PyInit__Location);
 	PyImport_AppendInittab("_Log", &PyInit__Log);
 	PyImport_AppendInittab("_Entity", &PyInit__Entity);
