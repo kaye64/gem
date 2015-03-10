@@ -15,6 +15,8 @@
 
 import gem
 import swig.Log
+import swig.Entity
+import swig.Location
 import player
 
 LOG_TAG = "session"
@@ -27,10 +29,10 @@ def player_authenticate(p):
     return profile
 
 def player_load_profile(p):
-    profile = p.get_profile()
+    profile = p.profile
 
     p.rights = profile.rights.value # todo: smarter enum assigns
-    p.location = profile.location
+    p.warp_to(profile.location)
     p.flush_identity()
 
     return True

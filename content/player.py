@@ -38,5 +38,5 @@ class Profile(object):
         self.location = location
 
 def player_position_update(player, location, warped):
-    profile = player.get_profile()
+    profile = player.profile
     profile.position_update(location, warped)

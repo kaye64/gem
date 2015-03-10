@@ -18,6 +18,8 @@
 #ifndef _GAME_CLIENT_H_
 #define _GAME_CLIENT_H_
 
+#include <Python.h>
+
 #include <runite/util/object.h>
 #include <runite/util/list.h>
 #include <runite/util/queue.h>
@@ -128,5 +130,9 @@ void player_logout(game_service_t* game_service, player_t* player);
 void player_warp_to(player_t* player, location_t position);
 void player_set_tab_interface(player_t* player, int tab_id, int interface_id);
 void player_force_logout(player_t* player);
+void player_send_message(player_t* player, const char* message);
+
+PyObject* api_player_in(player_t* player);
+player_t* api_player_out(PyObject* player);
 
 #endif /* _GAME_CLIENT_H_ */

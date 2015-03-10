@@ -21,8 +21,8 @@ LOG_TAG = "interface"
 def interface_button(player, button):
     swig.Log.Debug(LOG_TAG, "clicked button " + str(button))
     if button == 2458: # Why does Python not have a switch statement? :-(
-        player.logout()
+        player.force_logout()
     elif button == 152:
-        player.set_running(False)
+        player.running = False
     elif button == 153:
-        player.set_running(True)
+        player.running = True

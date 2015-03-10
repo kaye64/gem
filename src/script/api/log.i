@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module Log
+%module(package="swig") Log
 
 %{
 #include <util/log.h>

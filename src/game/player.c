@@ -226,6 +226,11 @@ void player_force_logout(player_t* player)
 	player->state.update_flags |= STATE_LOGOUT;
 }
 
+void player_send_message(player_t* player, const char* message)
+{
+	player_enqueue_packet(player, packet_build_player_message(message));
+}
+
 /**
  * Gets a player_t* for an entity_t*
  */

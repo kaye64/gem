@@ -15,15 +15,16 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module Location
+%module(package="swig") Location
 
 %{
 #include <game/location.h>
 #include <util/log.h>
 %}
 
-
-%rename("%(camelcase)s") "";
+%rename(Sector) sector;
+%rename(Region) region;
+%rename(RegionLocal) region_local;
 
 %include "game/location.h"
 

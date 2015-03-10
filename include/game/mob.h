@@ -65,7 +65,7 @@ extern object_proto_t mob_proto;
 
 void mob_warp_to(mob_t* mob, location_t position);
 int mob_update_path(mob_t* mob);
-void mob_set_chat_message(mob_t* mob, chat_message_t* message); /* todo: expose via api */
+void mob_set_chat_message(mob_t* mob, chat_message_t* message);
 
 location_t mob_position(mob_t* mob);
 
