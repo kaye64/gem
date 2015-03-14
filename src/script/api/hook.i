@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="gem") Hook
+%module(package="gem.api") Hook
 
 %{
 #include <script/hook.h>

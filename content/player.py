@@ -13,8 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-import gem.Location
-import gem.Entity
+from gem.api import *
 import session
 
 from enum import Enum
@@ -56,7 +55,7 @@ class Profile(object):
     username = ""
     password = ""
     rights = Rights.PLAYER
-    location = gem.Location.Absolute(3200, 3200, 0)
+    location = Location.Absolute(3200, 3200, 0)
     appearance = Appearance()
 
     def __init__(self, username):

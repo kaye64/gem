@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="gem") Log
+%module(package="gem.api") Log
 
 %{
 #include <util/log.h>

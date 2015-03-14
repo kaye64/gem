@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="gem") Entity
+%module(package="gem.api") Entity
 
 %{
 #include <game/entity.h>

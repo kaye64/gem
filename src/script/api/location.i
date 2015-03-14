@@ -15,7 +15,7 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-%module(package="gem") Location
+%module(package="gem.api") Location
 
 %{
 #include <game/location.h>
