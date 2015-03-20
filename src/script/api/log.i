@@ -60,9 +60,17 @@
 		format_tag(tag, script_tag);
 		log_debug(tag, message);
 	}
+
+	void session(const char* script_tag, const char* message)
+	{
+		char tag[32];
+		format_tag(tag, script_tag);
+		log_session(tag, message);
+	}
 %}
 
 void error(const char* script_tag, const char* message);
 void warn(const char* script_tag, const char* message);
 void info(const char* script_tag, const char* message);
 void debug(const char* script_tag, const char* message);
+void session(const char* script_tag, const char* message);

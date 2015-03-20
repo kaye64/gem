@@ -68,7 +68,7 @@ def player_load_profile(p):
 
 def player_login(player):
     players[player.index] = player
-    Log.Info(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
+    Log.Session(LOG_TAG, "Player login: " + player.username + " (index " + str(player.index) + ")")
     Log.Info(LOG_TAG, "{} players online".format(len(players)))
 
     player.send_message("Welcome to Gielinor")
@@ -78,4 +78,4 @@ def player_login(player):
 
 def player_logout(player):
     del players[player.index]
-    Log.Info(LOG_TAG, "Player logout: " + player.username + " (index " + str(player.index) + ")")
+    Log.Session(LOG_TAG, "Player logout: " + player.username + " (index " + str(player.index) + ")")

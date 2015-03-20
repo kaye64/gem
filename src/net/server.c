@@ -141,13 +141,13 @@ void accept_cb(struct ev_loop* loop, struct ev_io* accept_io, int revents)
 	client_t* client = server_client_init(server, fd, client_addr.sin_addr);
 	if (client == NULL) {
 		close(fd);
-		INFO("client dropped");
+		SESSION("client dropped");
 		return;
 	}
 
 	list_push_back(&server->client_list, &client->node);
 
-	INFO("accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
+	SESSION("accepted new client from %s:%d", inet_ntoa(client->addr), server->port);
 
 	ev_io_init(&client->io_read, client_io_avail, client->fd, EV_READ|EV_WRITE);
 	ev_io_start(loop, &client->io_read);
@@ -201,7 +201,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		// Check for client drop
 		if (read_avail == 0) {
 			server_client_drop(server, client);
-			INFO("client dropped");
+			SESSION("client dropped");
 			return;
 		}
 
@@ -243,7 +243,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 			// Check for client drop
 			if (sent == 0) {
 				server_client_drop(server, client);
-				INFO("client dropped");
+				SESSION("client dropped");
 				return;
 			}
 
@@ -257,7 +257,7 @@ void client_io_avail(struct ev_loop* loop, struct ev_io* io_read, int revents)
 		switch (client->handshake_stage) {
 		case HANDSHAKE_DENIED:
 			server_client_drop(server, client);
-			INFO("handshake failed. dropping");
+			SESSION("handshake failed. dropping");
 			break;
 		case HANDSHAKE_ACCEPTED:
 			// Notify client of any buffered data

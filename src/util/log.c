@@ -79,7 +79,7 @@ void log_info(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_RESET, "I", tag, COLOR_RESET, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_GREEN, "I", tag, COLOR_RESET, buffer);
 }
 
 /**
@@ -95,5 +95,21 @@ void log_debug(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_BLUE, "D", tag, COLOR_RESET, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_CYAN, "D", tag, COLOR_RESET, buffer);
+}
+
+/**
+ * Produces a log message prefixed with the 'S' tag
+ */
+void log_session(const char *tag, const char *fmt, ...)
+{
+	char buffer[512];
+	strcpy(buffer, "");
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(buffer, fmt, args);
+	va_end(args);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_BLUE, "S", tag, COLOR_RESET, buffer);
 }
