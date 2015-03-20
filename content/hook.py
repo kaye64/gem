@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-from gem.api import *
+from gem.api import Log
 
 LOG_TAG = "hook"
 hooks = {}
