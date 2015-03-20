@@ -24,7 +24,7 @@
 
 #include <string.h>
 
-#define LOG_FORMAT "%s%s/%s%s: %s\n"
+#define LOG_FORMAT "%s%s/%s%s: %s%s\n"
 
 #define COLOR_RED     "\033[1;31m"
 #define COLOR_GREEN   "\033[1;32m"
@@ -33,6 +33,22 @@
 #define COLOR_MAGENTA "\033[1;35m"
 #define COLOR_CYAN    "\033[1;36m"
 #define COLOR_RESET   "\033[0m"
+
+#define INDENT_DEPTH 14
+
+/**
+ * Generates aligned indentation for a given tag
+ */
+void indent_for_tag(char* indent, const char* tag)
+{
+	int tag_size = strlen(tag);
+	int num_tabs = (INDENT_DEPTH - tag_size); // - 1 since we always indent one tab
+	strcpy(indent, "");
+	while (num_tabs > 0) {
+		strcat(indent, " ");
+		num_tabs--;
+	}
+}
 
 /**
  * Produces a log message prefixed with the 'E' tag
@@ -47,7 +63,10 @@ void log_error(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_RED, "E", tag, COLOR_RESET, buffer);
+	char indent[32];
+	indent_for_tag(indent, tag);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_RED, "E", tag, COLOR_RESET, indent, buffer);
 }
 
 /**
@@ -63,7 +82,10 @@ void log_warn(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_YELLOW, "W", tag, COLOR_RESET, buffer);
+	char indent[32];
+	indent_for_tag(indent, tag);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_YELLOW, "W", tag, COLOR_RESET, indent, buffer);
 }
 
 /**
@@ -79,7 +101,10 @@ void log_info(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_GREEN, "I", tag, COLOR_RESET, buffer);
+	char indent[32];
+	indent_for_tag(indent, tag);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_GREEN, "I", tag, COLOR_RESET, indent, buffer);
 }
 
 /**
@@ -95,7 +120,10 @@ void log_debug(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_CYAN, "D", tag, COLOR_RESET, buffer);
+	char indent[32];
+	indent_for_tag(indent, tag);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_MAGENTA, "D", tag, COLOR_RESET, indent, buffer);
 }
 
 /**
@@ -111,5 +139,8 @@ void log_session(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, COLOR_BLUE, "S", tag, COLOR_RESET, buffer);
+	char indent[32];
+	indent_for_tag(indent, tag);
+
+	fprintf(stderr, LOG_FORMAT, COLOR_BLUE, "S", tag, COLOR_RESET, indent, buffer);
 }
