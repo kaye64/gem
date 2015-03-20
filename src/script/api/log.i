@@ -24,30 +24,45 @@
 %rename("%(camelcase)s") "";
 
 %{
-	void error(const char* tag, const char* message)
+	#define SCRIPT_LOG_TAG "script"
+
+	void format_tag(char* out_tag, const char* script_tag)
 	{
+		sprintf(out_tag, "%s/%s", SCRIPT_LOG_TAG, script_tag);
+	}
+
+	void error(const char* script_tag, const char* message)
+	{
+		char tag[32];
+		format_tag(tag, script_tag);
 		log_error(tag, message);
 	}
 
-	void warn(const char* tag, const char* message)
+	void warn(const char* script_tag, const char* message)
 	{
+		char tag[32];
+		format_tag(tag, script_tag);
 		log_warn(tag, message);
 	}
 
 
-	void info(const char* tag, const char* message)
+	void info(const char* script_tag, const char* message)
 	{
+		char tag[32];
+		format_tag(tag, script_tag);
 		log_info(tag, message);
 	}
 
 
-	void debug(const char* tag, const char* message)
+	void debug(const char* script_tag, const char* message)
 	{
+		char tag[32];
+		format_tag(tag, script_tag);
 		log_debug(tag, message);
 	}
 %}
 
-void error(const char* tag, const char* message);
-void warn(const char* tag, const char* message);
-void info(const char* tag, const char* message);
-void debug(const char* tag, const char* message);
+void error(const char* script_tag, const char* message);
+void warn(const char* script_tag, const char* message);
+void info(const char* script_tag, const char* message);
+void debug(const char* script_tag, const char* message);
