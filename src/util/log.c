@@ -24,7 +24,15 @@
 
 #include <string.h>
 
-#define LOG_FORMAT "%s/%s: %s\n"
+#define LOG_FORMAT "%s%s/%s%s: %s\n"
+
+#define COLOR_RED     "\033[1;31m"
+#define COLOR_GREEN   "\033[1;32m"
+#define COLOR_YELLOW  "\033[1;33m"
+#define COLOR_BLUE    "\033[1;34m"
+#define COLOR_MAGENTA "\033[1;35m"
+#define COLOR_CYAN    "\033[1;36m"
+#define COLOR_RESET   "\033[0m"
 
 /**
  * Produces a log message prefixed with the 'E' tag
@@ -39,7 +47,7 @@ void log_error(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, "E", tag, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_RED, "E", tag, COLOR_RESET, buffer);
 }
 
 /**
@@ -55,7 +63,7 @@ void log_warn(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, "W", tag, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_YELLOW, "W", tag, COLOR_RESET, buffer);
 }
 
 /**
@@ -71,7 +79,7 @@ void log_info(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, "I", tag, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_RESET, "I", tag, COLOR_RESET, buffer);
 }
 
 /**
@@ -87,5 +95,5 @@ void log_debug(const char *tag, const char *fmt, ...)
 	vsprintf(buffer, fmt, args);
 	va_end(args);
 
-	fprintf(stderr, LOG_FORMAT, "D", tag, buffer);
+	fprintf(stderr, LOG_FORMAT, COLOR_BLUE, "D", tag, COLOR_RESET, buffer);
 }
