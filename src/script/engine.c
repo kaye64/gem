@@ -72,7 +72,10 @@ bool script_init(const char* content_dir)
 		ERROR("Unable to find core.content_init function");
 		goto error;
 	}
-	PyObject_CallObject(init_func, NULL);
+	if (!PyObject_CallObject(init_func, NULL)) {
+		ERROR("Unable to call core.content_init function");
+		goto error;
+	}
 
 	goto exit;
 error:
