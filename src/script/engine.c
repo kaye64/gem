@@ -51,13 +51,12 @@ bool script_init(const char* content_dir)
 	/* init python */
 	Py_Initialize();
 
-	/* import the core module */
 	/* add content dir to path */
-	PyRun_SimpleString("import sys\n");
-	char insert[64];
-	sprintf(insert, "sys.path.insert(0, \"%s\")\n", content_dir);
-	PyRun_SimpleString(&insert);
+	PyObject *sys = PyImport_ImportModule("sys");
+	PyObject *path = PyObject_GetAttrString(sys, "path");
+	PyList_Append(path, PyUnicode_FromString(content_dir));
 
+	/* import the core module */
 	core_module = PyImport_ImportModule("core");
 	if (core_module == NULL) {
 		ERROR("Unable to import core module");
