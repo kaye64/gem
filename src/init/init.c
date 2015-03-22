@@ -30,6 +30,7 @@
 #include <game/dispatcher.h>
 #include <game/game_service.h>
 #include <game/update_service.h>
+#include <game/item_definition.h>
 #include <script/engine.h>
 #include <script/hook.h>
 #include <crypto/rsa.h>
@@ -88,6 +89,10 @@ int main(int argc, char **argv)
 		ERROR("Unable to find cache");
 		return 1;
 	}
+
+	/* load game data */
+	int num_items = item_def_load();
+	INFO("Loaded %i item definitions", num_items);
 
 	/* create the archive server */
 	instance.jag_server = object_new(archive_server);

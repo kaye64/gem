@@ -1,5 +1,5 @@
 CFLAGS = -g -std=gnu99 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Lrunite/
-INCLUDE_DIRS = -Iinclude/ -Irunite/include/ $(shell python3-config --includes)
+INCLUDE_DIRS = -Iswig_lib/ -Iinclude/ -Irunite/include/ $(shell python3-config --includes)
 OUT = gem
 LIB_DIRS = -L
 LIBS = -lrunite -lev -lz -lpthread -lgmp $(shell python3-config --libs)
