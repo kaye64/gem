@@ -144,15 +144,15 @@ static codec_t* build_identity_block(player_t* player)
 	 * is sent as a single byte, the client will probably crash.
 	 */
 
-	codec_put8(identity_block, iden->appearance.model_head); // head
-	codec_put8(identity_block, iden->appearance.model_cape); // cape
-	codec_put8(identity_block, iden->appearance.model_neck); // neck
-	codec_put8(identity_block, iden->appearance.model_equip_right); // right hand
+	codec_put8(identity_block, 0); // helm
+	codec_put8(identity_block, 0); // cape
+	codec_put8(identity_block, 0); // amulet
+	codec_put8(identity_block, 0); // right hand equip
 	codec_put16(identity_block, 256 + iden->appearance.model_torso); // torso
-	codec_put8(identity_block, iden->appearance.model_equip_left); // left hand
+	codec_put8(identity_block, 0); // left hand equip
 	codec_put16(identity_block, 256 + iden->appearance.model_arms); // arms
 	codec_put16(identity_block, 256 + iden->appearance.model_legs); // legs
-	codec_put16(identity_block, 256 + iden->appearance.model_head2); // head
+	codec_put16(identity_block, 256 + iden->appearance.model_head); // head
 	codec_put16(identity_block, 256 + iden->appearance.model_hands); // hands
 	codec_put16(identity_block, 256 + iden->appearance.model_feet); // feet
 	codec_put16(identity_block, 256 + iden->appearance.model_beard); // beard

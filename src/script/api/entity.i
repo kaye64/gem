@@ -56,22 +56,15 @@ typedef struct {
 
 %rename(Identity, %$isclass) identity;
 typedef struct {
-	char username[32];
-	char password[32];
 	int combat_level;
 	struct {
 		int gender;
 		int head_icon;
 		/* models */
-		int model_head;
-		int model_head2;
-		int model_cape;
-		int model_neck;
-		int model_equip_right;
-		int model_equip_left;
 		int model_torso;
 		int model_arms;
 		int model_legs;
+		int model_head;
 		int model_hands;
 		int model_feet;
 		int model_beard;

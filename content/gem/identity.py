@@ -13,12 +13,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
-from gem.api import Location
+class Appearance(object):
+    # Default player appearance
+    gender = 0
+    head_icon = 0
+    model_torso = 19
+    model_arms = 29
+    model_legs = 39
+    model_head = 3
+    model_hands = 35
+    model_feet = 44
+    model_beard = 10
+    color_hair = 7
+    color_torso = 8
+    color_leg = 9
+    color_feet = 5
+    color_skin = 0
 
-from enum import Enum
-
-LOG_TAG = "player"
-
-def player_position_update(player, location, warped):
-    profile = player.profile
-    profile.location = location
+    def __init__(self):
+        pass

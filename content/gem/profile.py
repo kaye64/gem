@@ -14,11 +14,22 @@
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
 
 from gem.api import Location
+from gem import identity
 
 from enum import Enum
 
-LOG_TAG = "player"
+class Rights(Enum):
+    PLAYER = 0
+    MODERATOR = 1
+    ADMIN = 2
+    SUPERADMIN = 3
 
-def player_position_update(player, location, warped):
-    profile = player.profile
-    profile.location = location
+class Profile(object):
+    username = ""
+    password = ""
+    rights = Rights.PLAYER
+    location = Location.Absolute(3200, 3200, 0)
+    appearance = identity.Appearance()
+
+    def __init__(self, username):
+        self.username = username

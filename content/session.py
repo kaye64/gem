@@ -15,6 +15,7 @@
 
 from gem.api import Entity
 from gem.api import Log
+import gem.profile
 import player
 
 LOG_TAG = "session"
@@ -23,7 +24,7 @@ tab_interfaces = [ 2423, 3917, 638, 3213, 1644, 5608, 1151, -1, 5065, 5715, 2449
 players = {}
 
 def player_authenticate(p):
-    profile = player.Profile(p.username)
+    profile = gem.profile.Profile(p.username)
     return profile
 
 def player_load_profile(p):
@@ -45,15 +46,10 @@ def player_load_profile(p):
 
     p.identity.appearance.gender = profile.appearance.gender
     p.identity.appearance.head_icon = profile.appearance.head_icon
-    p.identity.appearance.model_head = profile.appearance.model_head
-    p.identity.appearance.model_head2 = profile.appearance.model_head2
-    p.identity.appearance.model_cape = profile.appearance.model_cape
-    p.identity.appearance.model_neck = profile.appearance.model_neck
-    p.identity.appearance.model_equip_left = profile.appearance.model_equip_left
-    p.identity.appearance.model_equip_right = profile.appearance.model_equip_right
     p.identity.appearance.model_torso = profile.appearance.model_torso
     p.identity.appearance.model_arms = profile.appearance.model_arms
     p.identity.appearance.model_legs = profile.appearance.model_legs
+    p.identity.appearance.model_head = profile.appearance.model_head
     p.identity.appearance.model_hands = profile.appearance.model_hands
     p.identity.appearance.model_feet = profile.appearance.model_feet
     p.identity.appearance.model_beard = profile.appearance.model_beard

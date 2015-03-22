@@ -12,13 +12,3 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
-
-from gem.api import Location
-
-from enum import Enum
-
-LOG_TAG = "player"
-
-def player_position_update(player, location, warped):
-    profile = player.profile
-    profile.location = location
