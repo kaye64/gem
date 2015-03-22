@@ -36,6 +36,7 @@ PyObject* PyInit__Location(void);
 PyObject* PyInit__Log(void);
 PyObject* PyInit__Entity(void);
 PyObject* PyInit__Hook(void);
+PyObject* PyInit__Item(void);
 
 /**
  * Initializes the scripting engine with the given script root directory
@@ -47,6 +48,7 @@ bool script_init(const char* content_dir)
 	PyImport_AppendInittab("_Log", &PyInit__Log);
 	PyImport_AppendInittab("_Entity", &PyInit__Entity);
 	PyImport_AppendInittab("_Hook", &PyInit__Hook);
+	PyImport_AppendInittab("_Item", &PyInit__Item);
 
 	/* init python */
 	Py_Initialize();

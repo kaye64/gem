@@ -15,6 +15,7 @@
 
 from gem.api import Entity
 from gem.api import Log
+from gem.api import Item
 import gem.profile
 import player
 

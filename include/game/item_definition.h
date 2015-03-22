@@ -39,6 +39,7 @@ struct item_definition {
 	int equip_req_defence;
 	int equip_req_ranged;
 	int equip_req_magic;
+	int stackable;
 	SWIG_DEF(%mutable);
 };
 typedef struct item_definition item_definition_t;

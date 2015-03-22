@@ -16,34 +16,22 @@
  */
 
 /**
- * item_definition.c
+ * item.c
+ *
+ * Defines an item instance/stack
  */
-#include <game/item_definition.h>
+#include <game/item.h>
 
-#include <string.h>
-
-#include <util/log.h>
-
-#define LOG_TAG "item_definition"
-
-item_definition_t item_database[7000];
-
-int item_def_load()
+item_t item_create(item_definition_t definition)
 {
-	/* For now, create a dummy database */
-	for (int i = 0; i < 7000; i++) {
-		item_database[i].id = i;
-		item_database[i].equip_slot = 1;
-		strcpy(item_database[i].name, "Unknown item");
-	}
-	return 7000;
+	item_t item;
+	item.definition = definition;
+	item.stack_count = 1;
+	return item;
 }
 
-item_definition_t item_def_lookup(int id)
+item_t item_create_by_id(int id)
 {
-	if (id < 0 || id > 7000) {
-		ERROR("Tried to lookup item out of bounds: %i", id);
-		return item_database[0];
-	}
-	return item_database[id];
+	item_definition_t definition = item_def_lookup(id);
+	return item_create(definition);
 }

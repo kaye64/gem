@@ -15,35 +15,40 @@
  *  along with Gem.  If not, see <http://www.gnu.org/licenses/\>.
  */
 
-/**
- * item_definition.c
- */
+#ifndef _ITEM_H_
+#define _ITEM_H_
+
 #include <game/item_definition.h>
 
-#include <string.h>
+#ifdef SWIG
+#define SWIG_DEF(x) x;
+#else
+#define SWIG_DEF(x)
+#endif /* SWIG */
 
-#include <util/log.h>
+SWIG_DEF(%rename(Item) item);
+struct item {
+	item_definition_t definition;
+	int stack_count;
+#ifdef SWIG
+	%extend {
+		item(int id) {
+			item_t item = item_create_by_id(id);
+			item_t* dyn_item = (item_t*)malloc(sizeof(item_t));
+			memcpy(dyn_item, &item, sizeof(item_t));
+			return dyn_item;
+		}
+		~item() {
+			free($self);
+		}
+	};
+#endif /* SWIG */
+};
+typedef struct item item_t;
 
-#define LOG_TAG "item_definition"
+#ifndef SWIG
+item_t item_create(item_definition_t definition);
+item_t item_create_by_id(int id);
+#endif /* SWIG */
 
-item_definition_t item_database[7000];
-
-int item_def_load()
-{
-	/* For now, create a dummy database */
-	for (int i = 0; i < 7000; i++) {
-		item_database[i].id = i;
-		item_database[i].equip_slot = 1;
-		strcpy(item_database[i].name, "Unknown item");
-	}
-	return 7000;
-}
-
-item_definition_t item_def_lookup(int id)
-{
-	if (id < 0 || id > 7000) {
-		ERROR("Tried to lookup item out of bounds: %i", id);
-		return item_database[0];
-	}
-	return item_database[id];
-}
+#endif /* _ITEM_H_ */

@@ -19,6 +19,13 @@
 
 %{
 #include <game/item_definition.h>
+#include <game/item.h>
 %}
 
+%include "pyabc.i"
+
 %include "game/item_definition.h"
+
+%types(item = item_definition) "return &((item_t*)$from)->definition;";
+%pythonabc(item, Definition);
+%include "game/item.h"
