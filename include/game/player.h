@@ -26,6 +26,7 @@
 #include <runite/util/codec.h>
 
 #include <game/entity_tracker.h>
+#include <game/item_collection.h>
 #include <game/mob.h>
 #include <game/packet/packet.h>
 #include <crypto/isaac.h>
@@ -115,6 +116,7 @@ struct player {
 	mob_t mob;
 	client_state_t state;
 	identity_t identity;
+	item_collection_t inventory;
 	void* attachment;
 	/* cryption */
 	uint64_t server_isaac_seed;

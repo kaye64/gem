@@ -34,6 +34,7 @@ typedef struct identity identity;
 %include "stdint.i"
 
 %import "location.i"
+%import "item.i"
 
 %rename(Entity) entity;
 typedef struct {
@@ -95,6 +96,7 @@ typedef struct {
 	int rights;
 	bool high_memory;
 	identity identity;
+	item_collection_t inventory;
 	%extend {
 		void set_tab_interface(int tab, int interface);
 		void force_logout();

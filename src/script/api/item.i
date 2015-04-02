@@ -20,6 +20,9 @@
 %{
 #include <game/item_definition.h>
 #include <game/item.h>
+#include <game/item_collection.h>
+
+typedef struct item_collection item_collection;
 %}
 
 %include "pyabc.i"
@@ -29,3 +32,17 @@
 %types(item = item_definition) "return &((item_t*)$from)->definition;";
 %pythonabc(item, Definition);
 %include "game/item.h"
+
+%rename(Collection, %$isclass) item_collection;
+typedef struct {
+	int size;
+	%extend {
+		int insert(item_t item);
+		int insert_at(int index, item_t item);
+		int contains(item_definition_t definition);
+		item_t* find_first(item_definition_t definition);
+		int count(item_definition_t definition);
+		int remove(item_definition_t definition, int count);
+		item_t* get(int index);
+	}
+} item_collection;

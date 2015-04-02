@@ -46,6 +46,7 @@ static void player_init(player_t* player)
 	object_init(isaac, &player->isaac_out);
 	object_init(mob, &player->mob);
 	object_init(entity_tracker, &player->state.known_players);
+	object_init(item_collection, &player->inventory);
 }
 
 /**
@@ -53,6 +54,7 @@ static void player_init(player_t* player)
  */
 static void player_free(player_t* player)
 {
+	object_free(&player->inventory);
 	object_free(&player->state.known_players);
 	object_free(&player->mob);
 	object_free(&player->isaac_out);
